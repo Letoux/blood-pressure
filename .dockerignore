@@ -14,3 +14,5 @@ playwright-report
 blob-report
 docs
 e2e
+backups
+*.dump

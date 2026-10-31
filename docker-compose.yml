@@ -49,5 +49,33 @@ services:
       timeout: 5s
       retries: 10
 
+  # Dump quotidien de la base dans un dossier de l'hôte, avec rétention (docker/backup.sh).
+  # Dump immédiat : `docker compose exec backup sh /usr/local/bin/backup.sh once`.
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    entrypoint: ["sh", "/usr/local/bin/backup.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      BACKUP_TIME: ${BACKUP_TIME:-03:00}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      TZ: ${BACKUP_TZ:-Europe/Paris}
+    configs:
+      - source: backup-script
+        target: /usr/local/bin/backup.sh
+    volumes:
+      - ${BACKUP_DIR:-./backups}:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db-data:
+
+configs:
+  # Le compose des releases embarque ce script en ligne (src/scripts/release-compose.ts).
+  backup-script:
+    file: ./docker/backup.sh
