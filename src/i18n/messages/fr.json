@@ -398,5 +398,13 @@
     "skip": "Passer",
     "finish": "Enregistrer et terminer",
     "later": "Chaque étape se retrouve dans les Réglages."
+  },
+  "reminders": {
+    "morningTitle": "Mesures du matin",
+    "eveningTitle": "Mesures du soir",
+    "slotBody": "C’est l’heure de vos 3 mesures (jour {day} sur 3).",
+    "followUpBody": "Vos mesures ne sont pas encore saisies (jour {day} sur 3).",
+    "dayBeforeTitle": "Campagne demain",
+    "dayBeforeBody": "Votre campagne de mesures commence demain. Rappel du protocole : au repos, assis depuis 5 minutes, avant le petit-déjeuner et les médicaments."
   }
 }

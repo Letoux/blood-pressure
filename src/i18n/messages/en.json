@@ -398,5 +398,13 @@
     "skip": "Skip",
     "finish": "Save and finish",
     "later": "You can find every step again in Settings."
+  },
+  "reminders": {
+    "morningTitle": "Morning measurements",
+    "eveningTitle": "Evening measurements",
+    "slotBody": "Time for your 3 measurements (day {day} of 3).",
+    "followUpBody": "Your measurements haven’t been entered yet (day {day} of 3).",
+    "dayBeforeTitle": "Campaign tomorrow",
+    "dayBeforeBody": "Your measurement campaign starts tomorrow. Protocol reminder: rested, seated for 5 minutes, before breakfast and medication."
   }
 }

@@ -57,6 +57,13 @@
       "when": 1793486633766,
       "tag": "0007_onboarding_push",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793487053728,
+      "tag": "0008_reminders",
+      "breakpoints": true
     }
   ]
 }

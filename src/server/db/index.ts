@@ -8,3 +8,10 @@ export function getDb(): Db {
   connection ??= connectDb(serverEnv().DATABASE_URL);
   return connection.db;
 }
+
+/** Ferme la connexion partagée (arrêt du worker). */
+export async function closeDb(): Promise<void> {
+  const open = connection;
+  connection = undefined;
+  await open?.close();
+}

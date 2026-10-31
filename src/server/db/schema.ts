@@ -11,11 +11,12 @@ import {
   smallint,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { FREQUENCY_MONTHS } from "@/domain/campaign";
-import { REMINDER_DEFAULTS } from "@/domain/reminder";
+import { REMINDER_DEFAULTS, REMINDER_KINDS } from "@/domain/reminder";
 import { DEFAULT_GUIDELINE, GUIDELINE_IDS } from "@/domain/guideline";
 import { MOMENTS } from "@/domain/slot";
 import { LOCALES } from "@/i18n/locale";
@@ -182,6 +183,34 @@ export const pushSubscription = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index("push_subscription_user_id_idx").on(table.userId)],
+);
+
+/** Canaux d'envoi d'une notification : le Web Push, le mail plus tard (hors v1). */
+export const NOTIFICATION_CHANNELS = ["push"] as const;
+
+// Journal des rappels envoyés par le worker (`src/worker/reminders.ts`), un par rappel et par
+// canal (push aujourd'hui, mail plus tard). La contrainte d'unicité garantit qu'un rappel ne part
+// qu'une fois, même si deux passages du worker se chevauchent : la ligne est écrite avant l'envoi.
+// `date` : jour local du créneau, ou début de la campagne pour le rappel de la veille.
+export const notification = pgTable(
+  "notification",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    channel: text("channel", { enum: NOTIFICATION_CHANNELS }).notNull(),
+    kind: text("kind", { enum: REMINDER_KINDS }).notNull(),
+    date: date("date", { mode: "string" }).notNull(),
+    // `null` pour le rappel de la veille, qui ne concerne pas un créneau.
+    moment: text("moment", { enum: MOMENTS }),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique("notification_reminder_unique")
+      .on(table.userId, table.channel, table.kind, table.date, table.moment)
+      .nullsNotDistinct(),
+  ],
 );
 
 // --- Campagnes (voir `GLOSSARY.md`, ADR-0006) ---
