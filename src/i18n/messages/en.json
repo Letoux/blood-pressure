@@ -1,0 +1,73 @@
+{
+  "app": {
+    "name": "Blood pressure"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "entry": "Entry",
+    "stats": "Statistics",
+    "report": "Report",
+    "settings": "Settings",
+    "admin": "Admin"
+  },
+  "common": {
+    "signOut": "Sign out"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "This page will arrive in a future version."
+  },
+  "home": {
+    "greeting": "Hello {name}",
+    "signedInAs": "Signed in as {email}",
+    "manageUsers": "Manage users"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "tooManyAttempts": "Too many attempts. Try again in a minute.",
+    "invalidCredentials": "Incorrect email or password."
+  },
+  "admin": {
+    "title": "Admin",
+    "createUser": {
+      "title": "Create a user",
+      "email": "Email",
+      "name": "Name",
+      "password": "Initial password",
+      "submit": "Create",
+      "created": "User {email} created.",
+      "emailTaken": "This email is already in use.",
+      "failed": "Creating the user failed."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "name": "Display name",
+      "language": "Language",
+      "theme": "Theme",
+      "submit": "Save",
+      "saved": "Settings saved.",
+      "failed": "Saving the settings failed."
+    },
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "health": {
+    "title": "App health",
+    "ok": "OK",
+    "error": "Error"
+  }
+}

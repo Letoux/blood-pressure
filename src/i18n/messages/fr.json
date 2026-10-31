@@ -1,0 +1,73 @@
+{
+  "app": {
+    "name": "Tension"
+  },
+  "nav": {
+    "label": "Navigation principale",
+    "home": "Accueil",
+    "entry": "Saisie",
+    "stats": "Statistiques",
+    "report": "Compte rendu",
+    "settings": "Réglages",
+    "admin": "Administration"
+  },
+  "common": {
+    "signOut": "Se déconnecter"
+  },
+  "comingSoon": {
+    "title": "Bientôt",
+    "description": "Cette page arrive dans une prochaine version."
+  },
+  "home": {
+    "greeting": "Bonjour {name}",
+    "signedInAs": "Connecté en tant que {email}",
+    "manageUsers": "Gérer les utilisateurs"
+  },
+  "login": {
+    "title": "Connexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
+    "invalidCredentials": "Email ou mot de passe incorrect."
+  },
+  "admin": {
+    "title": "Administration",
+    "createUser": {
+      "title": "Créer un utilisateur",
+      "email": "Email",
+      "name": "Nom",
+      "password": "Mot de passe initial",
+      "submit": "Créer",
+      "created": "Utilisateur {email} créé.",
+      "emailTaken": "Cet email est déjà utilisé.",
+      "failed": "La création de l’utilisateur a échoué."
+    }
+  },
+  "settings": {
+    "title": "Réglages",
+    "profile": {
+      "title": "Profil",
+      "name": "Nom affiché",
+      "language": "Langue",
+      "theme": "Thème",
+      "submit": "Enregistrer",
+      "saved": "Réglages enregistrés.",
+      "failed": "L’enregistrement des réglages a échoué."
+    },
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "themes": {
+      "system": "Système",
+      "light": "Clair",
+      "dark": "Sombre"
+    }
+  },
+  "health": {
+    "title": "Santé de l’application",
+    "ok": "OK",
+    "error": "Erreur"
+  }
+}

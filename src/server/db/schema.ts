@@ -1,6 +1,8 @@
 // Schéma Drizzle. Après toute modification : `pnpm db:generate` pour créer la migration SQL
 // dans `drizzle/`, puis la committer. Les migrations s'appliquent au démarrage du conteneur `app`.
 import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { LOCALES } from "@/i18n/locale";
+import { DEFAULT_THEME, THEMES } from "@/lib/theme";
 
 // --- Authentification (better-auth, plugin admin) : ADR-0004, ADR-0009 ---
 // Noms de tables et de colonnes attendus par better-auth (`src/server/auth`).
@@ -73,3 +75,17 @@ export const verification = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+// --- Réglages de l'utilisateur ---
+// Une ligne par utilisateur, créée au premier enregistrement : sans ligne, les valeurs par
+// défaut s'appliquent. Le nom affiché reste `user.name`, celui de better-auth.
+
+export const userSettings = pgTable("user_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  // `null` : la langue du navigateur, sinon le français.
+  locale: text("locale", { enum: LOCALES }),
+  theme: text("theme", { enum: THEMES }).notNull().default(DEFAULT_THEME),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

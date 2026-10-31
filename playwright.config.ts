@@ -19,8 +19,8 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   projects: [
-    // Pensée mobile d'abord.
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    // Pensée mobile d'abord. Navigateur en français, sauf test qui choisit une autre langue.
+    { name: "mobile", use: { ...devices["Pixel 7"], locale: "fr-FR" } },
   ],
   webServer: {
     command: `pnpm db:migrate && ${serve}`,

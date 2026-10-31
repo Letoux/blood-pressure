@@ -1,17 +1,17 @@
-import { redirect } from "next/navigation";
-import { requireUser } from "@/server/auth/current-user";
-import { SignOutButton } from "../sign-out-button";
+import { getTranslations } from "next-intl/server";
+import { PageTitle } from "@/components/page-title";
+import { requireAdmin } from "@/server/auth/current-user";
 import { CreateUserForm } from "./create-user-form";
 
 export default async function AdminPage() {
-  const user = await requireUser();
-  if (user.role !== "admin") redirect("/");
+  // Le layout vérifie déjà le rôle ; la page le revérifie, car un layout ne protège pas seul.
+  await requireAdmin();
+  const t = await getTranslations("admin");
 
   return (
-    <main>
-      <h1>Administration</h1>
+    <>
+      <PageTitle>{t("title")}</PageTitle>
       <CreateUserForm />
-      <SignOutButton />
-    </main>
+    </>
   );
 }
