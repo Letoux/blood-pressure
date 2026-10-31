@@ -20,6 +20,7 @@ import { measurementsCreate } from "./measurements-create";
 import { measurementsDelete } from "./measurements-delete";
 import { measurementsList } from "./measurements-list";
 import { measurementsUpdate } from "./measurements-update";
+import { reportGet } from "./report-get";
 import { pushPublicKey } from "./push-public-key";
 import { pushSendTest } from "./push-send-test";
 import { pushSubscribe } from "./push-subscribe";
@@ -41,6 +42,9 @@ export const router = {
     overview: campaignsOverview,
     schedule: campaignsSchedule,
     delete: campaignsDelete,
+  },
+  report: {
+    get: reportGet,
   },
   settings: {
     get: settingsGet,

@@ -399,6 +399,40 @@
     "finish": "Save and finish",
     "later": "You can find every step again in Settings."
   },
+  "report": {
+    "period": {
+      "label": "Period",
+      "lastCampaign": "Last campaign",
+      "oneYear": "1 year",
+      "fiveYears": "5 years",
+      "all": "All"
+    },
+    "print": "Print / PDF",
+    "range": "From {from} to {to}",
+    "summary": {
+      "title": "Period summary",
+      "empty": "No finished campaign in this period.",
+      "count": "{count, plural, one {# campaign} other {# campaigns}}, {complete, plural, =0 {none complete} other {# complete}} ({share}%)",
+      "global": "Overall",
+      "morning": "Morning",
+      "evening": "Evening",
+      "average": "{systolic}/{diastolic}",
+      "noAverage": "–",
+      "position": "Period average:"
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "incomplete": "Incomplete campaign: {count}/{total} measurements, missing slots: {slots}",
+      "delta": "Change from previous campaign: {systolic}/{diastolic} mmHg",
+      "noPrevious": "First campaign: no change to compute.",
+      "showMeasurements": "Show measurements ({count})",
+      "table": {
+        "caption": "Campaign measurements",
+        "slot": "Slot",
+        "time": "Date and time"
+      }
+    }
+  },
   "reminders": {
     "morningTitle": "Morning measurements",
     "eveningTitle": "Evening measurements",
