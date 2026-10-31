@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { e2eServerEnv } from "./e2e/env";
 
 // Les tests E2E tournent contre l'app servie avec `DATABASE_URL` (une vraie base).
 // En CI, l'app est déjà construite (`pnpm build`) : serveur standalone, comme dans l'image.
@@ -24,6 +25,7 @@ export default defineConfig({
   webServer: {
     command: `pnpm db:migrate && ${serve}`,
     url: `${baseURL}/health`,
+    env: e2eServerEnv(baseURL),
     reuseExistingServer: !isCi,
     timeout: 120_000,
   },
