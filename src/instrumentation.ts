@@ -4,4 +4,7 @@ export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   const { bootstrapAdmin } = await import("@/server/auth");
   await bootstrapAdmin();
+  // Clés VAPID générées au premier démarrage, puis relues de la base (ADR-0003).
+  const { bootstrapVapidKeys } = await import("@/server/push");
+  await bootstrapVapidKeys();
 }

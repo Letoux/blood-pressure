@@ -21,6 +21,10 @@ import { measurementsDelete } from "./measurements-delete";
 import { measurementsList } from "./measurements-list";
 import { measurementsUpdate } from "./measurements-update";
 import { reportGet } from "./report-get";
+import { pushPublicKey } from "./push-public-key";
+import { pushSendTest } from "./push-send-test";
+import { pushSubscribe } from "./push-subscribe";
+import { pushUnsubscribe } from "./push-unsubscribe";
 import { settingsGet, settingsUpdate } from "./settings";
 import { signUpOpen } from "./sign-up-open";
 
@@ -45,6 +49,12 @@ export const router = {
   settings: {
     get: settingsGet,
     update: settingsUpdate,
+  },
+  push: {
+    publicKey: pushPublicKey,
+    subscribe: pushSubscribe,
+    unsubscribe: pushUnsubscribe,
+    sendTest: pushSendTest,
   },
   account: {
     changePassword: accountChangePassword,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { detectPlatform, type Platform } from "./platform";
 
 /** Événement de Chrome et Edge (Android et ordinateur), absent des types du DOM. */
 type BeforeInstallPromptEvent = Event & {
@@ -52,6 +53,15 @@ export function useInstallPrompt(): (() => Promise<void>) | null {
 }
 
 const noSubscription = () => () => {};
+
+/** Le système de l'appareil, connu seulement dans le navigateur (`null` au rendu serveur). */
+export function usePlatform(): Platform | null {
+  return useSyncExternalStore(
+    noSubscription,
+    () => detectPlatform(navigator.userAgent, navigator.maxTouchPoints),
+    () => null,
+  );
+}
 
 /** L'app tourne-t-elle déjà installée (écran d'accueil, fenêtre d'app) ? */
 export function useIsInstalled(): boolean {

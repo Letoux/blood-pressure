@@ -50,6 +50,13 @@
       "when": 1793485850910,
       "tag": "0006_guideline",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793486633766,
+      "tag": "0007_onboarding_push",
+      "breakpoints": true
     }
   ]
 }

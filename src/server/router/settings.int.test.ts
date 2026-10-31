@@ -2,6 +2,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ensureAdmin } from "@/server/auth/ensure-admin";
 import { createTestApi, type TestApi } from "@/server/testing/test-api";
 
+/** Préférences de rappel et premier lancement d'un utilisateur qui n'a rien réglé. */
+const defaultReminders = {
+  morningTime: "07:30",
+  eveningTime: "21:00",
+  dayBeforeReminder: true,
+  followUpEnabled: false,
+  followUpDelayMinutes: 30,
+  onboarded: false,
+};
+
 describe("settings", () => {
   let api: TestApi;
   let alice: Headers;
@@ -33,6 +43,7 @@ describe("settings", () => {
       theme: "system",
       timeZone: null,
       frequencyMonths: 3,
+      ...defaultReminders,
       guideline: "sfhta",
     });
   });
@@ -46,6 +57,7 @@ describe("settings", () => {
       theme: "dark",
       timeZone: null,
       frequencyMonths: 3,
+      ...defaultReminders,
       guideline: "sfhta",
     });
 
@@ -56,6 +68,7 @@ describe("settings", () => {
       theme: "dark",
       timeZone: null,
       frequencyMonths: 3,
+      ...defaultReminders,
       guideline: "sfhta",
     });
     await expect(api.as(nextSession).me()).resolves.toMatchObject({ name: "Alice D." });
@@ -68,6 +81,7 @@ describe("settings", () => {
       theme: "light",
       timeZone: null,
       frequencyMonths: 3,
+      ...defaultReminders,
       guideline: "sfhta",
     });
   });
@@ -93,8 +107,35 @@ describe("settings", () => {
       theme: "system",
       timeZone: null,
       frequencyMonths: 3,
+      ...defaultReminders,
       guideline: "sfhta",
     });
+  });
+
+  it("enregistre les préférences de rappel : heures, rappel la veille, relance et son délai", async () => {
+    await expect(
+      api.as(alice).settings.update({
+        morningTime: "06:45",
+        eveningTime: "22:15",
+        dayBeforeReminder: false,
+        followUpEnabled: true,
+        followUpDelayMinutes: 60,
+      }),
+    ).resolves.toMatchObject({
+      morningTime: "06:45",
+      eveningTime: "22:15",
+      dayBeforeReminder: false,
+      followUpEnabled: true,
+      followUpDelayMinutes: 60,
+      timeZone: "America/New_York",
+      frequencyMonths: 6,
+    });
+  });
+
+  it("retient que le premier lancement a été vu", async () => {
+    await expect(api.as(alice).settings.update({ onboarded: true })).resolves.toMatchObject({ onboarded: true });
+    await expect(api.as(alice).settings.get()).resolves.toMatchObject({ onboarded: true, morningTime: "06:45" });
+    await expect(api.as(bob).settings.get()).resolves.toMatchObject({ onboarded: false });
   });
 
   it("refuse un nom vide, une langue ou un thème inconnus", async () => {
@@ -105,6 +146,11 @@ describe("settings", () => {
       { timeZone: "Mars/Olympus" },
       { frequencyMonths: 0 },
       { frequencyMonths: 13 },
+      { morningTime: "24:00" },
+      { eveningTime: "7:30" },
+      { followUpDelayMinutes: 5 },
+      { followUpDelayMinutes: 241 },
+      { followUpDelayMinutes: 30.5 },
       { guideline: "france" },
     ]) {
       await expect(

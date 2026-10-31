@@ -32,8 +32,9 @@ test("l'admin crée un utilisateur, qui se connecte puis se déconnecte", async 
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await expect(page).toHaveURL(/\/login$/);
 
+  // Un nouvel utilisateur commence par le premier lancement.
   await signIn(page, user.email, user.password);
-  await expect(page.getByRole("heading", { name: `Bonjour ${user.name}` })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bienvenue" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Gérer les utilisateurs" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Se déconnecter" }).click();

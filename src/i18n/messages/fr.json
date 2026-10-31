@@ -173,7 +173,21 @@
       "submit": "Enregistrer le référentiel",
       "saved": "Référentiel enregistré.",
       "failed": "L’enregistrement du référentiel a échoué."
-    }
+    },
+    "reminders": {
+      "title": "Rappels",
+      "hint": "Heures des rappels de mesure, dans votre fuseau horaire.",
+      "morning": "Heure du matin",
+      "evening": "Heure du soir",
+      "dayBefore": "Rappel la veille d’une campagne",
+      "followUp": "Relance si le créneau n’est toujours pas rempli",
+      "followUpDelay": "Délai de la relance",
+      "delay": "{count, plural, =60 {1 heure} =90 {1 h 30} =120 {2 heures} =180 {3 heures} =240 {4 heures} other {# minutes}}",
+      "submit": "Enregistrer les rappels",
+      "saved": "Rappels enregistrés.",
+      "failed": "L’enregistrement des rappels a échoué."
+    },
+    "welcomeAgain": "Revoir le premier lancement"
   },
   "measurements": {
     "form": {
@@ -341,6 +355,49 @@
       "hint": "Saisies en dehors des campagnes : elles n’entrent ni dans les moyennes ni dans le graphique.",
       "empty": "Aucune mesure libre."
     }
+  },
+  "protocol": {
+    "title": "Protocole de mesure",
+    "intro": "Pour des mesures fiables, suivez la règle du 3-3-3 : 3 mesures le matin et 3 le soir, 3 jours de suite.",
+    "rest": "Mesurez au repos, assis depuis 5 minutes, le dos appuyé et les pieds à plat.",
+    "noStimulants": "Sans café ni tabac depuis 30 minutes.",
+    "morning": "Le matin : avant le petit-déjeuner et avant les médicaments.",
+    "evening": "Le soir : avant le coucher.",
+    "cuff": "Brassard sur le bras nu, à hauteur du cœur. Ne parlez pas pendant la mesure.",
+    "series": "À chaque fois, 3 mesures à environ 1 minute d’intervalle."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "hint": "Les rappels de mesure arrivent sous forme de notifications sur cet appareil.",
+    "enable": "Activer les notifications",
+    "disable": "Désactiver sur cet appareil",
+    "enabled": "Les notifications sont activées sur cet appareil.",
+    "sendTest": "Envoyer une notification de test",
+    "testSent": "Notification de test envoyée. Elle doit s’afficher dans quelques secondes.",
+    "testNone": "Aucun appareil abonné : activez d’abord les notifications.",
+    "testBody": "Les notifications fonctionnent sur cet appareil.",
+    "failed": "L’activation des notifications a échoué.",
+    "testFailed": "L’envoi de la notification de test a échoué.",
+    "denied": "Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages du navigateur, puis rechargez la page.",
+    "unsupported": "Ce navigateur ne permet pas de recevoir les notifications de l’application.",
+    "iosInstallFirst": "Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application installée sur l’écran d’accueil (iOS 16.4 ou plus). Installez-la d’abord, puis ouvrez-la depuis l’écran d’accueil pour activer les notifications.",
+    "installLink": "Voir comment l’installer"
+  },
+  "welcome": {
+    "title": "Bienvenue",
+    "progress": "Étape {current} sur {total}",
+    "steps": {
+      "protocol": "Protocole de mesure",
+      "install": "Installer l’application",
+      "notifications": "Notifications",
+      "reminders": "Rappels"
+    },
+    "installIntro": "Installée sur l’écran d’accueil, l’application s’ouvre comme une app et peut recevoir les rappels.",
+    "remindersIntro": "Choisissez quand recevoir les rappels de mesure.",
+    "next": "Suivant",
+    "skip": "Passer",
+    "finish": "Enregistrer et terminer",
+    "later": "Chaque étape se retrouve dans les Réglages."
   },
   "report": {
     "period": {
