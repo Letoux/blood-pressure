@@ -65,6 +65,53 @@
       "dark": "Sombre"
     }
   },
+  "measurements": {
+    "form": {
+      "title": "Saisir un créneau",
+      "hint": "Jusqu’à 3 mesures. Une ligne vide est ignorée.",
+      "takenAt": "Date et heure",
+      "moment": "Moment",
+      "row": "Mesure {number}",
+      "fieldLabel": "{field}, mesure {number}",
+      "comment": "Commentaire (facultatif)",
+      "free": "Hors campagne, les mesures sont enregistrées comme mesures libres.",
+      "submit": "Enregistrer",
+      "saved": "{count, plural, one {# mesure enregistrée} other {# mesures enregistrées}}.",
+      "failed": "L’enregistrement a échoué."
+    },
+    "fields": {
+      "systolic": "Systolique",
+      "diastolic": "Diastolique",
+      "pulse": "Pouls"
+    },
+    "moments": {
+      "morning": "Matin",
+      "evening": "Soir"
+    },
+    "alert": "Valeur d’alerte : 180/110 ou plus. Refaites la mesure au calme ; si elle se confirme, demandez un avis médical. Vous pouvez tout de même l’enregistrer.",
+    "errors": {
+      "empty": "Saisissez au moins une mesure.",
+      "takenAt": "Indiquez la date et l’heure.",
+      "incomplete": "Remplissez la systolique, la diastolique et le pouls, ou laissez la ligne vide.",
+      "systolicOutOfRange": "Systolique : de {min} à {max} mmHg.",
+      "diastolicOutOfRange": "Diastolique : de {min} à {max} mmHg.",
+      "pulseOutOfRange": "Pouls : de {min} à {max} battements par minute.",
+      "systolicNotAboveDiastolic": "La systolique doit être supérieure à la diastolique."
+    },
+    "list": {
+      "title": "Mes mesures",
+      "empty": "Aucune mesure pour l’instant.",
+      "free": "Mesure libre",
+      "pressure": "{systolic}/{diastolic} mmHg",
+      "pulse": "Pouls {pulse}",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "confirmDelete": "Confirmer la suppression",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "failed": "L’opération a échoué."
+    }
+  },
   "health": {
     "title": "Santé de l’application",
     "ok": "OK",
