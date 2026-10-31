@@ -165,6 +165,14 @@
       "submit": "Save frequency and time zone",
       "saved": "Settings saved.",
       "failed": "Saving the settings failed."
+    },
+    "guideline": {
+      "title": "Guideline",
+      "hint": "The recommendation whose home monitoring threshold is drawn on the charts.",
+      "label": "Guideline",
+      "submit": "Save",
+      "saved": "Guideline saved.",
+      "failed": "Saving the guideline failed."
     }
   },
   "measurements": {
@@ -303,6 +311,35 @@
       "confirmDelete": "Delete the campaign and its measurements",
       "cancel": "Cancel",
       "failed": "Deletion failed."
+    }
+  },
+  "chart": {
+    "label": "Campaign averages",
+    "systolic": "Systolic",
+    "diastolic": "Diastolic",
+    "threshold": "{guideline} threshold ({systolic}/{diastolic})",
+    "incompleteLegend": "Incomplete campaign",
+    "value": "{systolic}/{diastolic} mmHg",
+    "incomplete": "Incomplete: {count}/{total} measurements",
+    "date": "Start",
+    "measurements": "Measurements"
+  },
+  "stats": {
+    "campaigns": "My campaigns",
+    "empty": "No finished campaign yet. Each finished campaign adds a point to the chart.",
+    "disclaimer": "Does not replace medical advice.",
+    "guideline": "Guideline: {acronym} ({name}).",
+    "changeGuideline": "Change guideline",
+    "standing": {
+      "latest": "Latest campaign, started on {date}: {systolic}/{diastolic} mmHg",
+      "incomplete": "{count}/{total} measurements",
+      "below": "Below the {guideline} threshold ({systolic}/{diastolic})",
+      "above": "At or above the {guideline} threshold ({systolic}/{diastolic})"
+    },
+    "free": {
+      "title": "Free measurements",
+      "hint": "Taken outside campaigns: they are not part of the averages or the chart.",
+      "empty": "No free measurements."
     }
   }
 }

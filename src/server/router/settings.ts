@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { FREQUENCY_MONTHS } from "@/domain/campaign";
+import { DEFAULT_GUIDELINE, GUIDELINE_IDS } from "@/domain/guideline";
 import { isTimeZone } from "@/domain/local-date";
 import { LOCALES } from "@/i18n/locale";
 import type { Db } from "@/server/db/client";
@@ -10,8 +11,9 @@ import { authed } from "./authed";
 
 /**
  * Réglages de l'appelant : nom affiché, langue (`null` : celle du navigateur), thème, fuseau
- * (`null` : pas encore détecté depuis le navigateur) et fréquence des campagnes. Aucun n'est une
- * donnée de santé : l'admin règle aussi les siens (`ADMIN_ALLOWED` de `access.int.test.ts`).
+ * (`null` : pas encore détecté depuis le navigateur), fréquence des campagnes et référentiel.
+ * Aucun n'est une donnée de santé : l'admin règle aussi les siens (`ADMIN_ALLOWED` de
+ * `access.int.test.ts`).
  */
 async function readSettings(db: Db, userId: string) {
   const [row] = await db
@@ -21,6 +23,7 @@ async function readSettings(db: Db, userId: string) {
       theme: userSettings.theme,
       timeZone: userSettings.timeZone,
       frequencyMonths: userSettings.frequencyMonths,
+      guideline: userSettings.guideline,
     })
     .from(user)
     .leftJoin(userSettings, eq(userSettings.userId, user.id))
@@ -32,6 +35,7 @@ async function readSettings(db: Db, userId: string) {
     theme: row.theme ?? DEFAULT_THEME,
     timeZone: row.timeZone ?? null,
     frequencyMonths: row.frequencyMonths ?? FREQUENCY_MONTHS.default,
+    guideline: row.guideline ?? DEFAULT_GUIDELINE,
   };
 }
 
@@ -47,6 +51,7 @@ export const settingsUpdate = authed
       theme: z.enum(THEMES).optional(),
       timeZone: z.string().refine(isTimeZone, "Fuseau horaire inconnu.").optional(),
       frequencyMonths: z.number().int().min(FREQUENCY_MONTHS.min).max(FREQUENCY_MONTHS.max).optional(),
+      guideline: z.enum(GUIDELINE_IDS).optional(),
     }),
   )
   .handler(async ({ context, input }) => {

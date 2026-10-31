@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ADD COLUMN "guideline" text DEFAULT 'sfhta' NOT NULL;

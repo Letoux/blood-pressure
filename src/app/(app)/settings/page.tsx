@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth/current-user";
 import { CampaignSettingsForm } from "./campaign-settings-form";
 import { DataCard } from "./data-card";
+import { GuidelineForm } from "./guideline-form";
 import { PasswordForm } from "./password-form";
 import { ProfileForm } from "./profile-form";
 
@@ -19,6 +20,7 @@ export default async function SettingsPage() {
       <div className="flex flex-col gap-6">
         <ProfileForm />
         {user.role !== "admin" && <CampaignSettingsForm />}
+        {user.role !== "admin" && <GuidelineForm />}
         <PasswordForm />
         {/* L'admin n'a pas de mesures, et son compte vient du `.env` (ADR-0004). */}
         {user.role !== "admin" && <DataCard />}

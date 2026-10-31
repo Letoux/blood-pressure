@@ -39,6 +39,9 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  /* Graphiques : systolique et diastolique (palette validée en clair et en sombre). */
+  --chart-systolic: #2a78d6;
+  --chart-diastolic: #eb6834;
 }
 
 /* Mêmes valeurs sombres, en thème sombre choisi et en thème système sur un système sombre. */
@@ -62,6 +65,8 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --chart-systolic: #3987e5;
+  --chart-diastolic: #d95926;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -85,6 +90,8 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
+  --chart-systolic: #3987e5;
+  --chart-diastolic: #d95926;
   }
 }
 
@@ -111,6 +118,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-systolic: var(--chart-systolic);
+  --color-chart-diastolic: var(--chart-diastolic);
 }
 
 @layer base {

@@ -33,6 +33,7 @@ describe("settings", () => {
       theme: "system",
       timeZone: null,
       frequencyMonths: 3,
+      guideline: "sfhta",
     });
   });
 
@@ -45,6 +46,7 @@ describe("settings", () => {
       theme: "dark",
       timeZone: null,
       frequencyMonths: 3,
+      guideline: "sfhta",
     });
 
     const nextSession = await api.signIn("alice@example.org", "alice-password");
@@ -54,6 +56,7 @@ describe("settings", () => {
       theme: "dark",
       timeZone: null,
       frequencyMonths: 3,
+      guideline: "sfhta",
     });
     await expect(api.as(nextSession).me()).resolves.toMatchObject({ name: "Alice D." });
   });
@@ -65,6 +68,7 @@ describe("settings", () => {
       theme: "light",
       timeZone: null,
       frequencyMonths: 3,
+      guideline: "sfhta",
     });
   });
 
@@ -74,6 +78,14 @@ describe("settings", () => {
     ).resolves.toMatchObject({ timeZone: "America/New_York", frequencyMonths: 6, theme: "light" });
   });
 
+  it("enregistre le référentiel choisi (SFHTA par défaut)", async () => {
+    await expect(api.as(alice).settings.update({ guideline: "accAha2017" })).resolves.toMatchObject({
+      guideline: "accAha2017",
+      frequencyMonths: 6,
+    });
+    await expect(api.as(alice).settings.get()).resolves.toMatchObject({ guideline: "accAha2017" });
+  });
+
   it("les réglages d'un utilisateur n'affectent pas ceux d'un autre", async () => {
     await expect(api.as(bob).settings.get()).resolves.toEqual({
       name: "Bob",
@@ -81,6 +93,7 @@ describe("settings", () => {
       theme: "system",
       timeZone: null,
       frequencyMonths: 3,
+      guideline: "sfhta",
     });
   });
 
@@ -92,6 +105,7 @@ describe("settings", () => {
       { timeZone: "Mars/Olympus" },
       { frequencyMonths: 0 },
       { frequencyMonths: 13 },
+      { guideline: "france" },
     ]) {
       await expect(
         // @ts-expect-error valeurs invalides envoyées volontairement

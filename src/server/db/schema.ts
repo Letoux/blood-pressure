@@ -15,6 +15,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { FREQUENCY_MONTHS } from "@/domain/campaign";
+import { DEFAULT_GUIDELINE, GUIDELINE_IDS } from "@/domain/guideline";
 import { MOMENTS } from "@/domain/slot";
 import { LOCALES } from "@/i18n/locale";
 import { DEFAULT_THEME, THEMES } from "@/lib/theme";
@@ -124,6 +125,8 @@ export const userSettings = pgTable("user_settings", {
   timeZone: text("time_zone"),
   // Fréquence des campagnes, en mois (`GLOSSARY.md`).
   frequencyMonths: smallint("frequency_months").notNull().default(FREQUENCY_MONTHS.default),
+  // Référentiel choisi (`GLOSSARY.md`), dont le seuil est tracé sur les graphiques.
+  guideline: text("guideline", { enum: GUIDELINE_IDS }).notNull().default(DEFAULT_GUIDELINE),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   check(
