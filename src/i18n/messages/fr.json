@@ -341,5 +341,39 @@
       "hint": "Saisies en dehors des campagnes : elles n’entrent ni dans les moyennes ni dans le graphique.",
       "empty": "Aucune mesure libre."
     }
+  },
+  "report": {
+    "period": {
+      "label": "Période",
+      "lastCampaign": "Dernière campagne",
+      "oneYear": "1 an",
+      "fiveYears": "5 ans",
+      "all": "Tout"
+    },
+    "print": "Imprimer / PDF",
+    "range": "Du {from} au {to}",
+    "summary": {
+      "title": "Résumé de la période",
+      "empty": "Aucune campagne terminée sur cette période.",
+      "count": "{count, plural, one {# campagne} other {# campagnes}}, dont {complete, plural, =0 {aucune complète} one {# complète} other {# complètes}} ({share} %)",
+      "global": "Globale",
+      "morning": "Matin",
+      "evening": "Soir",
+      "average": "{systolic}/{diastolic}",
+      "noAverage": "–",
+      "position": "Moyenne de la période :"
+    },
+    "campaigns": {
+      "title": "Campagnes",
+      "incomplete": "Campagne incomplète : {count}/{total} mesures, créneaux manquants : {slots}",
+      "delta": "Écart avec la campagne précédente : {systolic}/{diastolic} mmHg",
+      "noPrevious": "Première campagne : pas d’écart à calculer.",
+      "showMeasurements": "Voir les mesures ({count})",
+      "table": {
+        "caption": "Mesures de la campagne",
+        "slot": "Créneau",
+        "time": "Date et heure"
+      }
+    }
   }
 }

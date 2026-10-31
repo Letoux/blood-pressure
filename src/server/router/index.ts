@@ -20,6 +20,7 @@ import { measurementsCreate } from "./measurements-create";
 import { measurementsDelete } from "./measurements-delete";
 import { measurementsList } from "./measurements-list";
 import { measurementsUpdate } from "./measurements-update";
+import { reportGet } from "./report-get";
 import { settingsGet, settingsUpdate } from "./settings";
 import { signUpOpen } from "./sign-up-open";
 
@@ -37,6 +38,9 @@ export const router = {
     overview: campaignsOverview,
     schedule: campaignsSchedule,
     delete: campaignsDelete,
+  },
+  report: {
+    get: reportGet,
   },
   settings: {
     get: settingsGet,
