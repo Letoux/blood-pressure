@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isAlertValue, readEntryRows, type EntryRow } from "@/domain/measurement";
 import { MOMENTS, type Moment } from "@/domain/slot";
+import { useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
 import { fromDateTimeLocal, toDateTimeLocal } from "./entry-draft";
 import { AlertValueWarning, EntryErrors, type EntryError } from "./measurement-messages";
@@ -23,6 +24,7 @@ type Measurement = {
   comment: string | null;
   moment: Moment;
   campaignId: string | null;
+  campaignDay: number | null;
 };
 
 const FIELDS = ["systolic", "diastolic", "pulse"] as const;
@@ -54,7 +56,12 @@ function MeasurementItem({ measurement }: { measurement: Measurement }) {
   const format = useFormatter();
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<"view" | "edit" | "confirmDelete">("view");
-  const refresh = () => queryClient.invalidateQueries({ queryKey: orpc.measurements.key() });
+  const campaignFormat = useCampaignFormat();
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: orpc.measurements.key() }),
+      queryClient.invalidateQueries({ queryKey: orpc.campaigns.key() }),
+    ]);
   const remove = useMutation(orpc.measurements.delete.mutationOptions({ onSuccess: refresh }));
 
   if (mode === "edit") {
@@ -75,8 +82,9 @@ function MeasurementItem({ measurement }: { measurement: Measurement }) {
         <p className="text-sm text-muted-foreground">
           {format.dateTime(measurement.takenAt, { dateStyle: "medium", timeStyle: "short" })}
           {" · "}
-          {t(`moments.${measurement.moment}`)}
-          {measurement.campaignId === null && ` · ${t("list.free")}`}
+          {measurement.campaignDay === null
+            ? `${t(`moments.${measurement.moment}`)} · ${t("list.free")}`
+            : campaignFormat.slot({ day: measurement.campaignDay, moment: measurement.moment })}
         </p>
         {measurement.comment && <p className="text-sm">{measurement.comment}</p>}
         {isAlertValue(measurement) && <AlertValueWarning />}
@@ -132,6 +140,7 @@ function MeasurementEditor({ measurement, onDone }: { measurement: Measurement; 
     orpc.measurements.update.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: orpc.measurements.key() });
+        await queryClient.invalidateQueries({ queryKey: orpc.campaigns.key() });
         onDone();
       },
     }),

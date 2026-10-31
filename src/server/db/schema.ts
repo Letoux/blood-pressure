@@ -4,14 +4,17 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  date,
   index,
   integer,
   pgTable,
   smallint,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { FREQUENCY_MONTHS } from "@/domain/campaign";
 import { MOMENTS } from "@/domain/slot";
 import { LOCALES } from "@/i18n/locale";
 import { DEFAULT_THEME, THEMES } from "@/lib/theme";
@@ -116,12 +119,43 @@ export const userSettings = pgTable("user_settings", {
   // `null` : la langue du navigateur, sinon le français.
   locale: text("locale", { enum: LOCALES }),
   theme: text("theme", { enum: THEMES }).notNull().default(DEFAULT_THEME),
+  // Fuseau IANA, détecté depuis le navigateur puis modifiable. `null` : pas encore détecté
+  // (`DEFAULT_TIME_ZONE` s'applique). Tous les jours de campagne sont comptés dans ce fuseau.
+  timeZone: text("time_zone"),
+  // Fréquence des campagnes, en mois (`GLOSSARY.md`).
+  frequencyMonths: smallint("frequency_months").notNull().default(FREQUENCY_MONTHS.default),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [
+  check(
+    "user_settings_frequency_months_check",
+    sql`${table.frequencyMonths} between 1 and 12`,
+  ),
+]);
+
+// --- Campagnes (voir `GLOSSARY.md`, ADR-0006) ---
+// Seule la date de début prévue est stockée (jour local dans le fuseau de l'utilisateur). Le
+// début réel, le statut (y compris « manquée »), la complétude et les moyennes sont calculés par
+// le domaine (`src/domain/campaign.ts`) à partir des mesures. Supprimer une campagne supprime
+// ses mesures (clé étrangère de `measurement`).
+
+export const campaign = pgTable(
+  "campaign",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    plannedStart: date("planned_start", { mode: "string" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  // Deux saisies simultanées qui commencent la même campagne calculée n'en créent qu'une.
+  (table) => [uniqueIndex("campaign_user_id_planned_start_idx").on(table.userId, table.plannedStart)],
+);
 
 // --- Mesures (voir `GLOSSARY.md`) ---
 // Une ligne par mesure. Une mesure libre n'a ni campagne ni jour de campagne ; une mesure de
-// campagne a les deux (ticket Campagnes, qui ajoutera la table `campaign` et la clé étrangère).
+// campagne a les deux, rattachés à la saisie par le domaine (`attachMeasurement`).
 // Les bornes des valeurs sont vérifiées par le domaine (`src/domain/measurement.ts`).
 
 export const measurement = pgTable(
@@ -138,7 +172,7 @@ export const measurement = pgTable(
     comment: text("comment"),
     // Créneau : le moment est toujours connu ; le jour (1 à 3) seulement dans une campagne.
     moment: text("moment", { enum: MOMENTS }).notNull(),
-    campaignId: uuid("campaign_id"),
+    campaignId: uuid("campaign_id").references(() => campaign.id, { onDelete: "cascade" }),
     campaignDay: smallint("campaign_day"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

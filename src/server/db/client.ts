@@ -1,10 +1,14 @@
 import path from "node:path";
-import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase, type NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import type { PgDatabase } from "drizzle-orm/pg-core";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 import * as schema from "./schema";
 
 export type Db = NodePgDatabase<typeof schema>;
+
+/** La base ou une transaction ouverte (`db.transaction(async (tx) => …)`). */
+export type Queryable = PgDatabase<NodePgQueryResultHKT, typeof schema>;
 
 export type DbConnection = {
   db: Db;

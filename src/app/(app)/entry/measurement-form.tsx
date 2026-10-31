@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isAlertValue, readEntryRows, type EntryRow, type EntryRowsResult } from "@/domain/measurement";
 import { MOMENTS, type Moment } from "@/domain/slot";
+import { useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
 import { useDraft } from "@/lib/use-draft";
 import { useOnline } from "@/lib/use-online";
@@ -57,9 +58,16 @@ function SlotForm({ userId }: { userId: string }) {
         clearDraft(newEntryDraft(new Date()));
         setSubmitted(null);
         void queryClient.invalidateQueries({ queryKey: orpc.measurements.key() });
+        void queryClient.invalidateQueries({ queryKey: orpc.campaigns.key() });
       },
     }),
   );
+  // Le serveur rattache la saisie au créneau d'une campagne active (`attachMeasurement`) ;
+  // le formulaire l'annonce seulement.
+  const campaigns = useQuery(orpc.campaigns.overview.queryOptions());
+  const campaignActive = Boolean(campaigns.data?.todaySlots);
+  const format = useCampaignFormat();
+  const savedSlot = create.data?.[0];
 
   const update = (changes: Partial<EntryDraft>) => setDraft({ ...draft, ...changes });
   const updateRow = (index: number, changes: Partial<EntryRow>) =>
@@ -167,7 +175,7 @@ function SlotForm({ userId }: { userId: string }) {
             />
           </div>
 
-          <p className="text-sm text-muted-foreground">{t("form.free")}</p>
+          <p className="text-sm text-muted-foreground">{t(campaignActive ? "form.campaign" : "form.free")}</p>
 
           {submitted && !submitted.ok && submitted.empty && <EntryErrors errors={["empty"]} />}
           {submitted && !fromDateTimeLocal(draft.takenAt) && <EntryErrors errors={["takenAt"]} />}
@@ -178,7 +186,12 @@ function SlotForm({ userId }: { userId: string }) {
           )}
           {create.isSuccess && (
             <p role="status" className="text-sm text-muted-foreground">
-              {t("form.saved", { count: create.data.length })}
+              {savedSlot?.campaignDay
+                ? t("form.savedSlot", {
+                    count: create.data.length,
+                    slot: format.slot({ day: savedSlot.campaignDay, moment: savedSlot.moment }),
+                  })
+                : t("form.saved", { count: create.data.length })}
             </p>
           )}
           <Button type="submit" disabled={!online || create.isPending} className="self-start">

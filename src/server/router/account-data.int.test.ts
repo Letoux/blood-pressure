@@ -52,9 +52,8 @@ describe("export et suppression du compte", () => {
         measurements: [{ systolic: 177, diastolic: 99, pulse: 66 }],
       });
 
-      const { filename, csv } = await api
-        .as(alice.headers)
-        .account.exportMeasurements({ timeZone: "Europe/Paris", locale: "fr" });
+      await api.as(alice.headers).settings.update({ timeZone: "Europe/Paris" });
+      const { filename, csv } = await api.as(alice.headers).account.exportMeasurements({ locale: "fr" });
 
       expect(filename).toMatch(/^tension-\d{4}-\d{2}-\d{2}\.csv$/);
       expect(csv.startsWith("﻿")).toBe(true);
@@ -74,24 +73,32 @@ describe("export et suppression du compte", () => {
     it("suit la langue demandée, et vaut l'en-tête seul sans mesure", async () => {
       const carol = await createUser("Carol");
 
-      const { csv } = await api.as(carol.headers).account.exportMeasurements({ timeZone: "UTC", locale: "en" });
+      const { csv } = await api.as(carol.headers).account.exportMeasurements({ locale: "en" });
 
       expect(csvLines(csv)).toEqual([
         "Date,Time,Time zone,Systolic (mmHg),Diastolic (mmHg),Pulse (bpm),Comment,Free measurement,Campaign,Campaign day,Moment",
       ]);
     });
 
-    it("refuse un fuseau inconnu", async () => {
+    it("donne l'heure dans le fuseau des réglages et la campagne par sa date de début", async () => {
       const dave = await createUser("Dave");
+      await api.as(dave.headers).settings.update({ timeZone: "Asia/Tokyo" });
+      const at = api.as(dave.headers, { now: new Date("2026-02-02T10:00:00+09:00") });
+      await at.campaigns.schedule({ start: "2026-02-02" });
+      await at.measurements.create({
+        takenAt: new Date("2026-02-02T07:00:00+09:00"),
+        moment: "morning",
+        measurements: [{ systolic: 131, diastolic: 84, pulse: 72 }],
+      });
 
-      await expect(
-        api.as(dave.headers).account.exportMeasurements({ timeZone: "Mars/Olympus", locale: "fr" }),
-      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      const { csv } = await at.account.exportMeasurements({ locale: "fr" });
+
+      expect(csvLines(csv)[1]).toBe("2026-02-02,07:00,Asia/Tokyo,131,84,72,,non,2026-02-02,1,Matin");
     });
 
     it("est interdit à l'admin, qui n'a pas de mesures et ne peut exporter celles de personne", async () => {
       await expect(
-        api.as(admin).account.exportMeasurements({ timeZone: "UTC", locale: "fr" }),
+        api.as(admin).account.exportMeasurements({ locale: "fr" }),
       ).rejects.toMatchObject({ code: "FORBIDDEN" });
     });
   });

@@ -32,7 +32,7 @@ test("l'interface suit le navigateur, puis la langue, le thème et le nom enregi
   await page.getByLabel("Display name").fill("Alice D.");
   await page.getByLabel("Language").selectOption("fr");
   await page.getByLabel("Theme").selectOption("dark");
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
 
   // Appliqué aussitôt : le libellé de navigation passe en français.
   await expect(nav(page).getByRole("link", { name: "Accueil" })).toBeVisible();

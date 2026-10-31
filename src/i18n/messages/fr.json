@@ -155,6 +155,16 @@
         "yes": "oui",
         "no": "non"
       }
+    },
+    "campaigns": {
+      "title": "Campagnes",
+      "hint": "Les jours des campagnes et les heures affichées suivent ce fuseau horaire.",
+      "frequency": "Fréquence des campagnes",
+      "months": "{count, plural, one {Tous les mois} other {Tous les # mois}}",
+      "timeZone": "Fuseau horaire",
+      "submit": "Enregistrer la fréquence et le fuseau",
+      "saved": "Réglages enregistrés.",
+      "failed": "L’enregistrement des réglages a échoué."
     }
   },
   "measurements": {
@@ -169,7 +179,9 @@
       "free": "Hors campagne, les mesures sont enregistrées comme mesures libres.",
       "submit": "Enregistrer",
       "saved": "{count, plural, one {# mesure enregistrée} other {# mesures enregistrées}}.",
-      "failed": "L’enregistrement a échoué."
+      "failed": "L’enregistrement a échoué.",
+      "campaign": "Pendant une campagne, les mesures sont rattachées au créneau de leur jour et du moment choisi.",
+      "savedSlot": "{count, plural, one {# mesure enregistrée} other {# mesures enregistrées}} ({slot})."
     },
     "fields": {
       "systolic": "Systolique",
@@ -239,6 +251,58 @@
     "desktop": {
       "addressBar": "Dans Chrome ou Edge, cliquez sur l’icône d’installation à droite de la barre d’adresse.",
       "menu": "Sinon, ouvrez le menu du navigateur et choisissez « Installer Tension »."
+    }
+  },
+  "campaigns": {
+    "slot": "J{day} {moment, select, morning {matin} other {soir}}",
+    "status": {
+      "planned": "Planifiée",
+      "inProgress": "En cours",
+      "finished": "Terminée",
+      "incomplete": "Incomplète",
+      "missed": "Manquée"
+    },
+    "completeness": "{count}/{total} mesures",
+    "missingSlots": "Créneaux manquants : {slots}",
+    "none": {
+      "title": "Aucune campagne planifiée",
+      "description": "Une campagne dure 3 jours : 3 mesures le matin et 3 le soir. Choisissez la date de votre première campagne."
+    },
+    "schedule": {
+      "start": "Date de début",
+      "first": "Planifier ma première campagne",
+      "move": "Avancer ou reporter",
+      "past": "Choisissez aujourd’hui ou une date à venir.",
+      "overlap": "Choisissez une date après la fin de la campagne en cours.",
+      "failed": "La planification a échoué."
+    },
+    "next": {
+      "title": "Prochaine campagne",
+      "on": "Le {date}",
+      "startsToday": "Votre campagne peut commencer aujourd’hui : votre première saisie en sera le J1."
+    },
+    "current": {
+      "title": "Campagne en cours",
+      "since": "Commencée le {date}"
+    },
+    "today": {
+      "title": "Créneaux du jour",
+      "todo": "À faire",
+      "filled": "Rempli ({count}/3)",
+      "now": "maintenant",
+      "enter": "Saisir mes mesures"
+    },
+    "history": {
+      "title": "Mes campagnes",
+      "from": "Du {start} au {end}",
+      "plannedOn": "Prévue le {date}",
+      "average": "Moyenne {systolic}/{diastolic} mmHg ({count} mesures)",
+      "morning": "Matin {systolic}/{diastolic}",
+      "evening": "Soir {systolic}/{diastolic}",
+      "delete": "Supprimer la campagne",
+      "confirmDelete": "Supprimer la campagne et ses mesures",
+      "cancel": "Annuler",
+      "failed": "La suppression a échoué."
     }
   }
 }

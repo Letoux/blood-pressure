@@ -30,7 +30,7 @@ const row = {
   pulse: 72,
   comment: null,
   moment: "morning" as const,
-  campaignId: null,
+  campaign: null,
   campaignDay: null,
 };
 
@@ -63,11 +63,11 @@ describe("export CSV des mesures", () => {
     expect(lines(measurementsCsv([midnight], { timeZone: "Europe/Paris", labels }))[1]).toMatch(/^2026-10-31,00:00,/);
   });
 
-  it("indique la campagne et son jour pour une mesure de campagne", () => {
-    const inCampaign = { ...row, campaignId: "c-1", campaignDay: 2 };
+  it("indique la campagne (sa date de début) et son jour pour une mesure de campagne", () => {
+    const inCampaign = { ...row, campaign: "2026-10-29", campaignDay: 2 };
 
     expect(lines(measurementsCsv([inCampaign], { timeZone: "UTC", labels }))[1]).toBe(
-      "2026-10-30,06:30,UTC,132,84,72,,non,c-1,2,Matin",
+      "2026-10-30,06:30,UTC,132,84,72,,non,2026-10-29,2,Matin",
     );
   });
 

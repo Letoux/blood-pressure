@@ -155,6 +155,16 @@
         "yes": "yes",
         "no": "no"
       }
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "hint": "Campaign days and displayed times follow this time zone.",
+      "frequency": "Campaign frequency",
+      "months": "{count, plural, one {Every month} other {Every # months}}",
+      "timeZone": "Time zone",
+      "submit": "Save frequency and time zone",
+      "saved": "Settings saved.",
+      "failed": "Saving the settings failed."
     }
   },
   "measurements": {
@@ -169,7 +179,9 @@
       "free": "Outside a campaign, measurements are saved as free measurements.",
       "submit": "Save",
       "saved": "{count, plural, one {# measurement saved} other {# measurements saved}}.",
-      "failed": "Saving failed."
+      "failed": "Saving failed.",
+      "campaign": "During a campaign, measurements are attached to the slot of their day and the chosen moment.",
+      "savedSlot": "{count, plural, one {# measurement saved} other {# measurements saved}} ({slot})."
     },
     "fields": {
       "systolic": "Systolic",
@@ -239,6 +251,58 @@
     "desktop": {
       "addressBar": "In Chrome or Edge, click the install icon on the right of the address bar.",
       "menu": "Otherwise, open the browser menu and choose “Install Blood pressure”."
+    }
+  },
+  "campaigns": {
+    "slot": "Day {day} {moment, select, morning {morning} other {evening}}",
+    "status": {
+      "planned": "Planned",
+      "inProgress": "In progress",
+      "finished": "Finished",
+      "incomplete": "Incomplete",
+      "missed": "Missed"
+    },
+    "completeness": "{count}/{total} measurements",
+    "missingSlots": "Missing slots: {slots}",
+    "none": {
+      "title": "No campaign planned",
+      "description": "A campaign lasts 3 days: 3 measurements in the morning and 3 in the evening. Choose the date of your first campaign."
+    },
+    "schedule": {
+      "start": "Start date",
+      "first": "Plan my first campaign",
+      "move": "Move earlier or later",
+      "past": "Choose today or a later date.",
+      "overlap": "Choose a date after the end of the current campaign.",
+      "failed": "Planning failed."
+    },
+    "next": {
+      "title": "Next campaign",
+      "on": "On {date}",
+      "startsToday": "Your campaign can start today: your first entry will be its day 1."
+    },
+    "current": {
+      "title": "Campaign in progress",
+      "since": "Started on {date}"
+    },
+    "today": {
+      "title": "Today’s slots",
+      "todo": "To do",
+      "filled": "Filled ({count}/3)",
+      "now": "now",
+      "enter": "Enter my measurements"
+    },
+    "history": {
+      "title": "My campaigns",
+      "from": "From {start} to {end}",
+      "plannedOn": "Planned on {date}",
+      "average": "Average {systolic}/{diastolic} mmHg ({count} measurements)",
+      "morning": "Morning {systolic}/{diastolic}",
+      "evening": "Evening {systolic}/{diastolic}",
+      "delete": "Delete campaign",
+      "confirmDelete": "Delete the campaign and its measurements",
+      "cancel": "Cancel",
+      "failed": "Deletion failed."
     }
   }
 }

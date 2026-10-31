@@ -50,10 +50,8 @@ export function DataCard() {
   );
 
   function onExport() {
-    exportCsv.mutate({
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      locale: isLocale(locale) ? locale : undefined,
-    });
+    // L'heure est donnée dans le fuseau des réglages de l'utilisateur, lu par le serveur.
+    exportCsv.mutate({ locale: isLocale(locale) ? locale : undefined });
   }
 
   function onDelete(event: FormEvent<HTMLFormElement>) {

@@ -9,10 +9,11 @@ const catalogs: Record<Locale, () => Promise<{ default: Record<string, unknown> 
 
 // Pas de langue dans l'URL : la langue vient des réglages de l'utilisateur ou du navigateur.
 export default getRequestConfig(async () => {
-  const { locale } = await viewerPreferences();
+  const { locale, timeZone } = await viewerPreferences();
   return {
     locale,
     messages: (await catalogs[locale]()).default,
-    timeZone: "Europe/Paris",
+    // Dates et heures affichées dans le fuseau des réglages de l'utilisateur.
+    timeZone,
   };
 });

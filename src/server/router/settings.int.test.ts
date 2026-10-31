@@ -31,19 +31,29 @@ describe("settings", () => {
       name: "Alice",
       locale: null,
       theme: "system",
+      timeZone: null,
+      frequencyMonths: 3,
     });
   });
 
   it("enregistre le nom affiché, la langue et le thème, et les relit à la session suivante", async () => {
     await expect(
       api.as(alice).settings.update({ name: "  Alice D.  ", locale: "en", theme: "dark" }),
-    ).resolves.toEqual({ name: "Alice D.", locale: "en", theme: "dark" });
+    ).resolves.toEqual({
+      name: "Alice D.",
+      locale: "en",
+      theme: "dark",
+      timeZone: null,
+      frequencyMonths: 3,
+    });
 
     const nextSession = await api.signIn("alice@example.org", "alice-password");
     await expect(api.as(nextSession).settings.get()).resolves.toEqual({
       name: "Alice D.",
       locale: "en",
       theme: "dark",
+      timeZone: null,
+      frequencyMonths: 3,
     });
     await expect(api.as(nextSession).me()).resolves.toMatchObject({ name: "Alice D." });
   });
@@ -53,7 +63,15 @@ describe("settings", () => {
       name: "Alice D.",
       locale: "en",
       theme: "light",
+      timeZone: null,
+      frequencyMonths: 3,
     });
+  });
+
+  it("enregistre le fuseau (IANA) et la fréquence des campagnes (1 à 12 mois)", async () => {
+    await expect(
+      api.as(alice).settings.update({ timeZone: "America/New_York", frequencyMonths: 6 }),
+    ).resolves.toMatchObject({ timeZone: "America/New_York", frequencyMonths: 6, theme: "light" });
   });
 
   it("les réglages d'un utilisateur n'affectent pas ceux d'un autre", async () => {
@@ -61,11 +79,20 @@ describe("settings", () => {
       name: "Bob",
       locale: null,
       theme: "system",
+      timeZone: null,
+      frequencyMonths: 3,
     });
   });
 
   it("refuse un nom vide, une langue ou un thème inconnus", async () => {
-    for (const input of [{ name: "   " }, { locale: "de" }, { theme: "sepia" }]) {
+    for (const input of [
+      { name: "   " },
+      { locale: "de" },
+      { theme: "sepia" },
+      { timeZone: "Mars/Olympus" },
+      { frequencyMonths: 0 },
+      { frequencyMonths: 13 },
+    ]) {
       await expect(
         // @ts-expect-error valeurs invalides envoyées volontairement
         api.as(bob).settings.update(input),

@@ -1,6 +1,6 @@
 // Export CSV des mesures (ADR-0001) : RFC 4180 (virgules, CRLF, guillemets doublés), UTF-8 avec
 // BOM pour qu'Excel reconnaisse l'encodage. Fonction pure : les libellés traduits et le fuseau
-// sont fournis par l'appelant (`router/account-export.ts`).
+// sont fournis par l'appelant (`router/account-export-measurements.ts`).
 import type { Moment } from "@/domain/slot";
 
 export type CsvColumn =
@@ -30,8 +30,8 @@ export type ExportedMeasurement = {
   pulse: number;
   comment: string | null;
   moment: Moment;
-  /** Identifiant (ou libellé) de la campagne ; `null` pour une mesure libre. */
-  campaignId: string | null;
+  /** Libellé lisible de la campagne (sa date de début, `AAAA-MM-JJ`) ; `null` pour une mesure libre. */
+  campaign: string | null;
   campaignDay: number | null;
 };
 
@@ -91,7 +91,7 @@ export function measurementsCsv(
   const header = COLUMNS.map((column) => field(labels.columns[column]));
   const rows = measurements.map((m) => {
     const { date, time } = localDateTime(m.takenAt, timeZone);
-    const free = m.campaignId === null;
+    const free = m.campaign === null;
     const cells: Record<CsvColumn, string | number | null> = {
       date,
       time,
@@ -101,7 +101,7 @@ export function measurementsCsv(
       pulse: m.pulse,
       comment: m.comment === null ? null : neutralizeFormula(m.comment),
       free: free ? labels.yes : labels.no,
-      campaign: m.campaignId === null ? null : neutralizeFormula(m.campaignId),
+      campaign: m.campaign,
       campaignDay: m.campaignDay,
       moment: labels.moments[m.moment],
     };

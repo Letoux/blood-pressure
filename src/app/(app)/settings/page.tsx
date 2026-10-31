@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth/current-user";
+import { CampaignSettingsForm } from "./campaign-settings-form";
 import { DataCard } from "./data-card";
 import { PasswordForm } from "./password-form";
 import { ProfileForm } from "./profile-form";
@@ -17,6 +18,7 @@ export default async function SettingsPage() {
       <PageTitle>{t("title")}</PageTitle>
       <div className="flex flex-col gap-6">
         <ProfileForm />
+        {user.role !== "admin" && <CampaignSettingsForm />}
         <PasswordForm />
         {/* L'admin n'a pas de mesures, et son compte vient du `.env` (ADR-0004). */}
         {user.role !== "admin" && <DataCard />}

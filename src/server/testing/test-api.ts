@@ -15,8 +15,11 @@ import { router, type AppRouter } from "@/server/router";
 export type TestApi = {
   /** Client du routeur pour un appelant non authentifié. */
   client: RouterClient<AppRouter>;
-  /** Client du routeur pour l'appelant porteur de ces en-têtes (cookie de session). */
-  as: (headers: Headers) => RouterClient<AppRouter>;
+  /**
+   * Client du routeur pour l'appelant porteur de ces en-têtes (cookie de session), avec une
+   * horloge fixée si `now` est fourni.
+   */
+  as: (headers: Headers, options?: { now?: Date }) => RouterClient<AppRouter>;
   /** Connexion par email et mot de passe ; renvoie les en-têtes portant le cookie de session. */
   signIn: (email: string, password: string) => Promise<Headers>;
   /** Requête HTTP vers les routes better-auth (`/api/auth/...`), comme le ferait un navigateur. */
@@ -64,7 +67,12 @@ export async function createTestApi(): Promise<TestApi> {
     baseURL: BASE_URL,
   });
   const db = connection.db;
-  const as = (headers: Headers) => createRouterClient(router, { context: { db, auth, headers } });
+  const as: TestApi["as"] = (headers, options = {}) => {
+    const { now } = options;
+    return createRouterClient(router, {
+      context: { db, auth, headers, now: now ? () => new Date(now) : undefined },
+    });
+  };
 
   const authRequest: TestApi["authRequest"] = (path, init = {}) => {
     const headers = new Headers(init.headers);
