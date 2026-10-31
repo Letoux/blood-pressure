@@ -19,6 +19,7 @@
     "test": "vitest run --project unit --passWithNoTests",
     "test:int": "vitest run --project integration",
     "test:e2e": "playwright test",
+    "test:backup": "sh docker/backup.test.sh",
     "test:all": "vitest run"
   },
   "dependencies": {
