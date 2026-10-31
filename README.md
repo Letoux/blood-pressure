@@ -13,7 +13,7 @@ L'application tourne avec `docker compose`, derrière un reverse proxy qui gère
 
 ## Installation
 
-Prérequis : Docker avec le plugin Compose 2.23 ou plus récent (`docker compose version`), et un nom de domaine qui pointe vers votre Nginx Proxy Manager.
+Prérequis : Docker avec le plugin Compose 2.23.1 ou plus récent (`docker compose version`), et un nom de domaine qui pointe vers votre Nginx Proxy Manager.
 
 1. Récupérez les fichiers, au choix :
    - **depuis une release** (recommandé) : sur la page [Releases](https://github.com/Letoux/blood-pressure/releases), téléchargez `docker-compose.yml` et `env.template` dans un même dossier, puis `mv env.template .env`. Ce compose est épinglé sur l'image de la version ;

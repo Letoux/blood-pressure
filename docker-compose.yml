@@ -63,8 +63,10 @@ services:
       BACKUP_TIME: ${BACKUP_TIME:-03:00}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       TZ: ${BACKUP_TZ:-Europe/Paris}
+    configs:
+      - source: backup-script
+        target: /usr/local/bin/backup.sh
     volumes:
-      - ./docker/backup.sh:/usr/local/bin/backup.sh:ro
       - ${BACKUP_DIR:-./backups}:/backups
     depends_on:
       db:
@@ -72,3 +74,8 @@ services:
 
 volumes:
   db-data:
+
+configs:
+  # Le compose des releases embarque ce script en ligne (src/scripts/release-compose.ts).
+  backup-script:
+    file: ./docker/backup.sh
