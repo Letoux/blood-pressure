@@ -20,10 +20,6 @@ const authSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   ADMIN_EMAIL: z.email(),
   ADMIN_PASSWORD: z.string().min(MIN_PASSWORD_LENGTH),
-  ALLOW_SIGN_UP: z
-    .enum(["true", "false"])
-    .default("false")
-    .transform((value) => value === "true"),
 });
 
 export type AuthEnv = z.infer<typeof authSchema>;

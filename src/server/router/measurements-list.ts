@@ -1,7 +1,7 @@
 import { asc, desc, eq } from "drizzle-orm";
 import { measurement } from "@/server/db/schema";
 import { measurementColumns } from "./measurement-input";
-import { userOnly } from "./user-only";
+import { userOnly } from "./authed";
 
 /** Les mesures de l'appelant, de la plus récente à la plus ancienne. */
 export const measurementsList = userOnly.handler(({ context }) =>

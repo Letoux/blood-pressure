@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { measurement } from "@/server/db/schema";
 import { ownMeasurement } from "./measurement-input";
-import { userOnly } from "./user-only";
+import { userOnly } from "./authed";
 
 /** Supprime une mesure de l'appelant. */
 export const measurementsDelete = userOnly

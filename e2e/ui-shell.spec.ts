@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { createUserAsAdmin, signIn, uniqueUser } from "./helpers";
+import { expect, type Page } from "@playwright/test";
+import { createUserAsAdmin, signIn, test, uniqueUser } from "./helpers";
 
 // Navigateur en anglais : sans langue enregistrée, l'interface suit le navigateur.
 test.use({ locale: "en-US", viewport: { width: 360, height: 740 } });

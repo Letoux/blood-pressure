@@ -23,16 +23,66 @@
     "signedInAs": "Connecté en tant que {email}",
     "manageUsers": "Gérer les utilisateurs"
   },
+  "passwordBanner": {
+    "label": "Changement de mot de passe conseillé",
+    "message": "Votre mot de passe a été réinitialisé. Nous vous conseillons de le changer.",
+    "action": "Changer mon mot de passe",
+    "dismiss": "Fermer"
+  },
   "login": {
     "title": "Connexion",
     "email": "Email",
     "password": "Mot de passe",
     "submit": "Se connecter",
     "tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
-    "invalidCredentials": "Email ou mot de passe incorrect."
+    "invalidCredentials": "Email ou mot de passe incorrect.",
+    "accountDisabled": "Ce compte est désactivé. Contactez l’administrateur.",
+    "signUp": "Créer un compte"
+  },
+  "signUp": {
+    "title": "Créer un compte",
+    "closed": "L’inscription est fermée. Demandez un compte à l’administrateur.",
+    "name": "Nom",
+    "email": "Email",
+    "password": "Mot de passe",
+    "submit": "Créer mon compte",
+    "failed": "La création du compte a échoué.",
+    "toLogin": "J’ai déjà un compte"
   },
   "admin": {
     "title": "Administration",
+    "users": {
+      "title": "Utilisateurs",
+      "empty": "Aucun utilisateur.",
+      "createdAt": "Créé le {date}",
+      "status": {
+        "active": "Actif",
+        "disabled": "Désactivé"
+      },
+      "disable": "Désactiver",
+      "enable": "Réactiver",
+      "revokeSessions": "Révoquer les sessions",
+      "resetPassword": "Réinitialiser le mot de passe",
+      "delete": "Supprimer",
+      "temporaryPasswordPrompt": "Mot de passe temporaire pour {email} (10 caractères minimum) :",
+      "temporaryPasswordTooShort": "Le mot de passe temporaire doit faire au moins 10 caractères.",
+      "confirmDisable": "Désactiver {email} ? Ses sessions seront révoquées.",
+      "confirmDelete": "Supprimer {email} et toutes ses données (mesures, campagnes, réglages) ? Cette action est définitive.",
+      "done": {
+        "disable": "Utilisateur désactivé.",
+        "enable": "Utilisateur réactivé.",
+        "revokeSessions": "Sessions révoquées.",
+        "resetPassword": "Mot de passe réinitialisé. Communiquez-le à l’utilisateur.",
+        "delete": "Utilisateur supprimé."
+      },
+      "failed": "L’action a échoué."
+    },
+    "signUp": {
+      "title": "Inscription libre",
+      "label": "Autoriser l’inscription libre",
+      "help": "Fermée, seul l’admin crée les comptes.",
+      "failed": "L’enregistrement du réglage a échoué."
+    },
     "createUser": {
       "title": "Créer un utilisateur",
       "email": "Email",
@@ -54,6 +104,15 @@
       "submit": "Enregistrer",
       "saved": "Réglages enregistrés.",
       "failed": "L’enregistrement des réglages a échoué."
+    },
+    "password": {
+      "title": "Mot de passe",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "submit": "Changer le mot de passe",
+      "changed": "Mot de passe changé.",
+      "wrongCurrent": "Le mot de passe actuel est incorrect.",
+      "failed": "Le changement de mot de passe a échoué."
     },
     "languages": {
       "fr": "Français",

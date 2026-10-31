@@ -26,10 +26,6 @@ export type TestApi = {
   close: () => Promise<void>;
 };
 
-export type TestApiOptions = {
-  allowSignUp?: boolean;
-};
-
 const DEFAULT_ADMIN_URL = "postgres://postgres:postgres@localhost:5432/postgres";
 const BASE_URL = "http://localhost:3000";
 
@@ -52,7 +48,7 @@ export function cookieHeaders(response: Response): Headers {
   return new Headers({ cookie: cookies });
 }
 
-export async function createTestApi(options: TestApiOptions = {}): Promise<TestApi> {
+export async function createTestApi(): Promise<TestApi> {
   const adminUrl = process.env.TEST_DATABASE_URL ?? DEFAULT_ADMIN_URL;
   const name = `bp_test_${randomUUID().replaceAll("-", "")}`;
   await adminQuery(adminUrl, `create database "${name}"`);
@@ -66,7 +62,6 @@ export async function createTestApi(options: TestApiOptions = {}): Promise<TestA
     db: connection.db,
     secret: "test-secret-test-secret-test-secret",
     baseURL: BASE_URL,
-    allowSignUp: options.allowSignUp,
   });
   const db = connection.db;
   const as = (headers: Headers) => createRouterClient(router, { context: { db, auth, headers } });

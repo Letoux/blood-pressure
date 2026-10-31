@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { BottomNav } from "./bottom-nav";
+import { PasswordChangeBanner } from "./password-change-banner";
 import { SignOutButton } from "./sign-out-button";
 
 /** Coquille des pages connectées : en-tête, contenu, barre de navigation en bas. */
@@ -22,6 +23,7 @@ export async function AppShell({
         </div>
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))]">
+        <PasswordChangeBanner />
         {children}
       </main>
       <BottomNav role={role} />

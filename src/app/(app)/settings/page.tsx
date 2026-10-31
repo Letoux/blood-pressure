@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { PageTitle } from "@/components/page-title";
+import { PasswordForm } from "./password-form";
 import { ProfileForm } from "./profile-form";
 
 export default async function SettingsPage() {
@@ -8,7 +9,10 @@ export default async function SettingsPage() {
   return (
     <>
       <PageTitle>{t("title")}</PageTitle>
-      <ProfileForm />
+      <div className="flex flex-col gap-6">
+        <ProfileForm />
+        <PasswordForm />
+      </div>
     </>
   );
 }

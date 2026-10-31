@@ -1,5 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { e2eAdmin } from "./env";
+import { test } from "./helpers";
 
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/login");

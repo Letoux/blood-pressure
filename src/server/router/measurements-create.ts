@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { measurement } from "@/server/db/schema";
 import { comment, measurementColumns, measurementValues, moment } from "./measurement-input";
-import { userOnly } from "./user-only";
+import { userOnly } from "./authed";
 
 /**
  * Enregistre les mesures d'un formulaire de créneau (1 à 3), avec le même horodatage, le même

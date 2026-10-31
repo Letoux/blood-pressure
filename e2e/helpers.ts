@@ -1,5 +1,16 @@
-import type { APIRequestContext, Page } from "@playwright/test";
+import { test as base, type APIRequestContext, type Page } from "@playwright/test";
 import { e2eAdmin } from "./env";
+
+/**
+ * `test` de Playwright où chaque test a sa propre adresse IP cliente (`x-forwarded-for`) :
+ * la limite de connexions par IP (`SIGN_IN_RATE_LIMIT`) ne se partage pas entre les tests.
+ */
+export const test = base.extend({
+  extraHTTPHeaders: async ({ extraHTTPHeaders }, provide) => {
+    const octet = () => Math.floor(Math.random() * 256);
+    await provide({ ...extraHTTPHeaders, "x-forwarded-for": `10.${octet()}.${octet()}.${octet()}` });
+  },
+});
 
 export type E2eUser = { email: string; name: string; password: string };
 

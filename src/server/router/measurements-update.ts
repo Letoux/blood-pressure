@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { measurement } from "@/server/db/schema";
 import { comment, measurementColumns, measurementValues, moment, ownMeasurement } from "./measurement-input";
-import { userOnly } from "./user-only";
+import { userOnly } from "./authed";
 
 /** Remplace l'horodatage, le moment, les valeurs et le commentaire d'une mesure de l'appelant. */
 export const measurementsUpdate = userOnly

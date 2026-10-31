@@ -1,9 +1,11 @@
 import { hash, verify } from "@node-rs/argon2";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin } from "better-auth/plugins";
 import type { Db } from "@/server/db/client";
 import * as schema from "@/server/db/schema";
+import { getAppSettings } from "@/server/settings/app-settings";
 import { MIN_PASSWORD_LENGTH } from "./password-policy";
 
 export { MIN_PASSWORD_LENGTH };
@@ -26,22 +28,25 @@ export type AuthOptions = {
   secret: string;
   /** URL publique de l'application (`APP_URL`). */
   baseURL: string;
-  /** Inscription libre (`ALLOW_SIGN_UP`), désactivée par défaut (ADR-0004). */
-  allowSignUp?: boolean;
 };
 
-export function createAuth({ db, secret, baseURL, allowSignUp = false }: AuthOptions) {
+export function createAuth({ db, secret, baseURL }: AuthOptions) {
   return betterAuth({
     secret,
     baseURL,
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: {
       enabled: true,
-      disableSignUp: !allowSignUp,
       minPasswordLength: MIN_PASSWORD_LENGTH,
       password: {
         hash: (password) => hash(password, argon2Options),
         verify: ({ hash: digest, password }) => verify(digest, password),
+      },
+    },
+    user: {
+      additionalFields: {
+        // Colonne `password_change_suggested` : posée par la réinitialisation de l'admin.
+        passwordChangeSuggested: { type: "boolean", required: false, defaultValue: false, input: false },
       },
     },
     session: {
@@ -49,6 +54,17 @@ export function createAuth({ db, secret, baseURL, allowSignUp = false }: AuthOpt
       // L'échéance est repoussée à 180 jours dès qu'une session sert après plus d'un jour :
       // chaque utilisation prolonge la session sans écrire en base à chaque requête.
       updateAge: DAY_IN_SECONDS,
+    },
+    hooks: {
+      // Inscription libre : réglage de l'admin, lu en base à chaque inscription (ADR-0004).
+      // Les comptes créés par l'admin passent par `/admin/create-user`, jamais bloqué.
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/sign-up/email") return;
+        const { signUpOpen } = await getAppSettings(db);
+        if (!signUpOpen) {
+          throw APIError.from("FORBIDDEN", { message: "Sign up is closed", code: "SIGN_UP_CLOSED" });
+        }
+      }),
     },
     rateLimit: {
       enabled: true,

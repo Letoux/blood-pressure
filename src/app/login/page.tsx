@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
@@ -8,14 +10,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/lib/orpc";
 
-type LoginError = "tooManyAttempts" | "invalidCredentials";
+type LoginError = "tooManyAttempts" | "invalidCredentials" | "accountDisabled";
 
 export default function LoginPage() {
   const t = useTranslations("login");
   const router = useRouter();
   const [error, setError] = useState<LoginError | null>(null);
   const [pending, setPending] = useState(false);
+  const signUpOpen = useQuery(orpc.signUpOpen.queryOptions());
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,7 +32,13 @@ export default function LoginPage() {
     });
     setPending(false);
     if (signInError) {
-      setError(signInError.status === 429 ? "tooManyAttempts" : "invalidCredentials");
+      setError(
+        signInError.status === 429
+          ? "tooManyAttempts"
+          : signInError.code === "BANNED_USER"
+            ? "accountDisabled"
+            : "invalidCredentials",
+      );
       return;
     }
     router.replace("/");
@@ -68,6 +78,11 @@ export default function LoginPage() {
               {t("submit")}
             </Button>
           </form>
+          {signUpOpen.data && (
+            <Button asChild variant="link" className="mt-4 px-0">
+              <Link href="/signup">{t("signUp")}</Link>
+            </Button>
+          )}
         </CardContent>
       </Card>
     </main>
