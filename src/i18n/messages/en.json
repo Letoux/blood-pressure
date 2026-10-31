@@ -124,7 +124,38 @@
       "light": "Light",
       "dark": "Dark"
     },
-    "install": "Install the app"
+    "install": "Install the app",
+    "data": {
+      "title": "My data",
+      "exportTitle": "Export my data",
+      "exportHelp": "All your measurements in a CSV file, readable by a spreadsheet.",
+      "exportButton": "Download the CSV",
+      "exportFailed": "The export failed.",
+      "deleteTitle": "Delete my account",
+      "deleteHelp": "Permanently deletes your account and all your data (measurements, campaigns, settings), then signs you out. Consider exporting your data first.",
+      "deletePassword": "Password",
+      "deleteButton": "Delete my account",
+      "deleteConfirm": "Permanently delete your account and all your data? This cannot be undone.",
+      "deleteWrongPassword": "The password is incorrect.",
+      "deleteFailed": "Deleting the account failed.",
+      "csv": {
+        "columns": {
+          "date": "Date",
+          "time": "Time",
+          "timeZone": "Time zone",
+          "systolic": "Systolic (mmHg)",
+          "diastolic": "Diastolic (mmHg)",
+          "pulse": "Pulse (bpm)",
+          "comment": "Comment",
+          "free": "Free measurement",
+          "campaign": "Campaign",
+          "campaignDay": "Campaign day",
+          "moment": "Moment"
+        },
+        "yes": "yes",
+        "no": "no"
+      }
+    }
   },
   "measurements": {
     "form": {

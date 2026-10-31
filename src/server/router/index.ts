@@ -1,5 +1,7 @@
 import { accountChangePassword } from "./account-change-password";
+import { accountDelete } from "./account-delete";
 import { accountDismissPasswordChangeSuggestion } from "./account-dismiss-password-change-suggestion";
+import { accountExportMeasurements } from "./account-export-measurements";
 import { adminCreateUser } from "./admin-create-user";
 import { adminDeleteUser } from "./admin-delete-user";
 import { adminDisableUser } from "./admin-disable-user";
@@ -35,6 +37,8 @@ export const router = {
   account: {
     changePassword: accountChangePassword,
     dismissPasswordChangeSuggestion: accountDismissPasswordChangeSuggestion,
+    exportMeasurements: accountExportMeasurements,
+    delete: accountDelete,
   },
   admin: {
     createUser: adminCreateUser,
