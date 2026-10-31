@@ -1,44 +1,38 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { e2eAdmin } from "./env";
-
-async function signIn(page: Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Mot de passe").fill(password);
-  await page.getByRole("button", { name: "Se connecter" }).click();
-}
+import { createUserAsAdmin, signIn, test, uniqueUser } from "./helpers";
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await expect(page).toHaveURL(/\/login$/);
 }
 
-/** L'admin crée un utilisateur depuis la page d'administration. */
-async function createUser(page: Page, user: { email: string; name: string; password: string }) {
+/** La fiche d'un utilisateur dans la liste de la page d'administration. */
+async function openUserAsAdmin(page: Page, email: string) {
+  await signIn(page, e2eAdmin);
+  await expect(page.getByRole("heading", { name: /Bonjour/ })).toBeVisible();
   await page.goto("/admin");
-  await page.getByLabel("Email").fill(user.email);
-  await page.getByLabel("Nom").fill(user.name);
-  await page.getByLabel("Mot de passe initial").fill(user.password);
-  await page.getByRole("button", { name: "Créer" }).click();
-  await expect(page.getByRole("row", { name: new RegExp(user.email) })).toBeVisible();
+  const item = page.getByRole("listitem", { name: email });
+  await expect(item).toBeVisible();
+  return item;
 }
 
-test("après une réinitialisation par l'admin, l'utilisateur voit un bandeau qu'il peut fermer", async ({ page }) => {
-  // La base E2E persiste d'un lancement à l'autre : un email unique par exécution.
-  const user = { email: `reset-${Date.now()}@e2e.test`, name: "Bruno", password: "initial-password" };
+test("après une réinitialisation par l'admin, l'utilisateur voit un bandeau qu'il peut fermer", async ({
+  page,
+  request,
+}) => {
+  const user = uniqueUser("Bruno");
+  await createUserAsAdmin(request, user);
 
-  await signIn(page, e2eAdmin.email, e2eAdmin.password);
-  await expect(page.getByRole("heading", { name: /Bonjour/ })).toBeVisible();
-  await createUser(page, user);
-
-  const row = page.getByRole("row", { name: new RegExp(user.email) });
+  const item = await openUserAsAdmin(page, user.email);
   page.once("dialog", (dialog) => dialog.accept("temporaire-123"));
-  await row.getByRole("button", { name: "Réinitialiser le mot de passe" }).click();
+  await item.getByRole("button", { name: "Réinitialiser le mot de passe" }).click();
   await expect(page.getByRole("status")).toContainText("Mot de passe réinitialisé");
   await signOut(page);
 
-  await signIn(page, user.email, "temporaire-123");
-  const banner = page.getByRole("region", { name: "Changer mon mot de passe" });
+  await signIn(page, { email: user.email, password: "temporaire-123" });
+  await expect(page.getByRole("heading", { name: `Bonjour ${user.name}` })).toBeVisible();
+  const banner = page.getByRole("region", { name: "Changement de mot de passe conseillé" });
   await expect(banner).toBeVisible();
   await banner.getByRole("button", { name: "Fermer" }).click();
   await expect(banner).toHaveCount(0);
@@ -47,34 +41,44 @@ test("après une réinitialisation par l'admin, l'utilisateur voit un bandeau qu
   await expect(banner).toHaveCount(0);
 });
 
-test("un utilisateur désactivé par l'admin ne peut plus se connecter", async ({ page }) => {
-  const user = { email: `disabled-${Date.now()}@e2e.test`, name: "Chloé", password: "chloe-password" };
+test("l'utilisateur change son mot de passe depuis ses réglages", async ({ page, request }) => {
+  const user = uniqueUser("Lucie");
+  await createUserAsAdmin(request, user);
+  await signIn(page, user);
+  await expect(page.getByRole("heading", { name: `Bonjour ${user.name}` })).toBeVisible();
 
-  await signIn(page, e2eAdmin.email, e2eAdmin.password);
-  await expect(page.getByRole("heading", { name: /Bonjour/ })).toBeVisible();
-  await createUser(page, user);
-
-  const row = page.getByRole("row", { name: new RegExp(user.email) });
-  page.once("dialog", (dialog) => dialog.accept());
-  await row.getByRole("button", { name: "Désactiver" }).click();
-  await expect(row).toContainText("Désactivé");
+  await page.getByRole("navigation").getByRole("link", { name: "Réglages" }).click();
+  await page.getByLabel("Mot de passe actuel").fill(user.password);
+  await page.getByLabel("Nouveau mot de passe").fill("nouveau-mot-de-passe");
+  await page.getByRole("button", { name: "Changer le mot de passe" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Mot de passe changé" })).toBeVisible();
   await signOut(page);
 
-  await signIn(page, user.email, user.password);
-  await expect(page.getByRole("alert")).toContainText("désactivé");
+  await signIn(page, { email: user.email, password: "nouveau-mot-de-passe" });
+  await expect(page.getByRole("heading", { name: `Bonjour ${user.name}` })).toBeVisible();
+});
+
+test("un utilisateur désactivé par l'admin ne peut plus se connecter", async ({ page, request }) => {
+  const user = uniqueUser("Chloe");
+  await createUserAsAdmin(request, user);
+
+  const item = await openUserAsAdmin(page, user.email);
+  page.once("dialog", (dialog) => dialog.accept());
+  await item.getByRole("button", { name: "Désactiver" }).click();
+  await expect(item).toContainText("Désactivé");
+  await signOut(page);
+
+  await signIn(page, user);
+  await expect(page.getByText("Ce compte est désactivé.")).toBeVisible();
   await expect(page).toHaveURL(/\/login$/);
 });
 
-test("un utilisateur ordinaire n'accède pas à la page d'administration", async ({ page }) => {
-  const user = { email: `plain-${Date.now()}@e2e.test`, name: "Denis", password: "denis-password" };
-
-  await signIn(page, e2eAdmin.email, e2eAdmin.password);
-  await expect(page.getByRole("heading", { name: /Bonjour/ })).toBeVisible();
-  await createUser(page, user);
-  await signOut(page);
-
-  await signIn(page, user.email, user.password);
+test("un utilisateur ordinaire n'accède pas à la page d'administration", async ({ page, request }) => {
+  const user = uniqueUser("Denis");
+  await createUserAsAdmin(request, user);
+  await signIn(page, user);
   await expect(page.getByRole("heading", { name: `Bonjour ${user.name}` })).toBeVisible();
+
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { name: "Administration" })).toHaveCount(0);

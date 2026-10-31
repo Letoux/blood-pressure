@@ -1,24 +1,30 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { orpc } from "@/lib/orpc";
-import { adminText as t } from "@/lib/ui-text";
 import { MIN_PASSWORD_LENGTH } from "@/server/auth/password-policy";
 
-type Action = keyof typeof t.done;
+type Action = "disable" | "enable" | "revokeSessions" | "resetPassword" | "delete";
+type Feedback = { ok: true; action: Action } | { ok: false; message: "failed" | "temporaryPasswordTooShort" };
 
+/** Utilisateurs de l'instance et actions de l'admin (ADR-0004). */
 export function UsersTable() {
+  const t = useTranslations("admin.users");
+  const format = useFormatter();
   const queryClient = useQueryClient();
   const users = useQuery(orpc.admin.listUsers.queryOptions());
-  const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const options = (action: Action) => ({
     onSuccess: () => {
-      setFeedback({ ok: true, message: t.done[action] });
+      setFeedback({ ok: true, action });
       return queryClient.invalidateQueries({ queryKey: orpc.admin.listUsers.key() });
     },
-    onError: (error: Error) => setFeedback({ ok: false, message: error.message || t.failed }),
+    onError: () => setFeedback({ ok: false, message: "failed" }),
   });
   const disable = useMutation(orpc.admin.disableUser.mutationOptions(options("disable")));
   const enable = useMutation(orpc.admin.enableUser.mutationOptions(options("enable")));
@@ -27,69 +33,85 @@ export function UsersTable() {
   const remove = useMutation(orpc.admin.deleteUser.mutationOptions(options("delete")));
 
   function resetPassword(userId: string, email: string) {
-    const temporaryPassword = window.prompt(t.temporaryPasswordPrompt(email));
+    const temporaryPassword = window.prompt(t("temporaryPasswordPrompt", { email }));
     if (temporaryPassword === null) return;
     if (temporaryPassword.length < MIN_PASSWORD_LENGTH) {
-      setFeedback({ ok: false, message: t.failed });
+      setFeedback({ ok: false, message: "temporaryPasswordTooShort" });
       return;
     }
     reset.mutate({ userId, temporaryPassword });
   }
 
   return (
-    <section>
-      <h2>{t.usersTitle}</h2>
-      {feedback && <p role={feedback.ok ? "status" : "alert"}>{feedback.message}</p>}
-      {users.data?.length === 0 && <p>{t.noUsers}</p>}
-      {users.data && users.data.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>{t.columns.email}</th>
-              <th>{t.columns.name}</th>
-              <th>{t.columns.status}</th>
-              <th>{t.columns.createdAt}</th>
-              <th>{t.columns.actions}</th>
-            </tr>
-          </thead>
-          <tbody>
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h2>{t("title")}</h2>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {feedback?.ok === true && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t(`done.${feedback.action}`)}
+          </p>
+        )}
+        {feedback?.ok === false && (
+          <p role="alert" className="text-sm text-destructive">
+            {t(feedback.message)}
+          </p>
+        )}
+        {users.data?.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
+        {users.data && users.data.length > 0 && (
+          <ul className="flex flex-col divide-y">
             {users.data.map((user) => (
-              <tr key={user.id}>
-                <td>{user.email}</td>
-                <td>{user.name}</td>
-                <td>{t.status[user.status]}</td>
-                <td>{user.createdAt.toLocaleDateString()}</td>
-                <td>
+              <li key={user.id} aria-label={user.email} className="flex flex-col gap-2 py-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{user.name}</p>
+                  <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t(`status.${user.status}`)} ·{" "}
+                    {t("createdAt", { date: format.dateTime(user.createdAt, { dateStyle: "medium" }) })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {user.status === "active" ? (
-                    <button
-                      type="button"
-                      onClick={() => window.confirm(t.confirmDisable(user.email)) && disable.mutate({ userId: user.id })}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        window.confirm(t("confirmDisable", { email: user.email })) &&
+                        disable.mutate({ userId: user.id })
+                      }
                     >
-                      {t.disable}
-                    </button>
+                      {t("disable")}
+                    </Button>
                   ) : (
-                    <button type="button" onClick={() => enable.mutate({ userId: user.id })}>
-                      {t.enable}
-                    </button>
+                    <Button size="sm" variant="outline" onClick={() => enable.mutate({ userId: user.id })}>
+                      {t("enable")}
+                    </Button>
                   )}
-                  <button type="button" onClick={() => revoke.mutate({ userId: user.id })}>
-                    {t.revokeSessions}
-                  </button>
-                  <button type="button" onClick={() => resetPassword(user.id, user.email)}>
-                    {t.resetPassword}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => window.confirm(t.confirmDelete(user.email)) && remove.mutate({ userId: user.id })}
+                  <Button size="sm" variant="outline" onClick={() => revoke.mutate({ userId: user.id })}>
+                    {t("revokeSessions")}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => resetPassword(user.id, user.email)}>
+                    {t("resetPassword")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() =>
+                      window.confirm(t("confirmDelete", { email: user.email })) &&
+                      remove.mutate({ userId: user.id })
+                    }
                   >
-                    {t.delete}
-                  </button>
-                </td>
-              </tr>
+                    {t("delete")}
+                  </Button>
+                </div>
+              </li>
             ))}
-          </tbody>
-        </table>
-      )}
-    </section>
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -17,6 +17,9 @@ const ADMIN_ALLOWED = new Set([
   "signUpOpen",
   "account.changePassword",
   "account.dismissPasswordChangeSuggestion",
+  // Profil de l'appelant lui-même (nom, langue, thème) : l'admin règle aussi son interface.
+  "settings.get",
+  "settings.update",
 ]);
 
 type Call = (input?: unknown) => Promise<unknown>;

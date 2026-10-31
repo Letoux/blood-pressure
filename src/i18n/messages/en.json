@@ -1,0 +1,132 @@
+{
+  "app": {
+    "name": "Blood pressure"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "entry": "Entry",
+    "stats": "Statistics",
+    "report": "Report",
+    "settings": "Settings",
+    "admin": "Admin"
+  },
+  "common": {
+    "signOut": "Sign out"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "This page will arrive in a future version."
+  },
+  "home": {
+    "greeting": "Hello {name}",
+    "signedInAs": "Signed in as {email}",
+    "manageUsers": "Manage users"
+  },
+  "passwordBanner": {
+    "label": "Password change recommended",
+    "message": "Your password was reset. We recommend changing it.",
+    "action": "Change my password",
+    "dismiss": "Dismiss"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "tooManyAttempts": "Too many attempts. Try again in a minute.",
+    "invalidCredentials": "Incorrect email or password.",
+    "accountDisabled": "This account is disabled. Contact the administrator.",
+    "signUp": "Create an account"
+  },
+  "signUp": {
+    "title": "Create an account",
+    "closed": "Sign-up is closed. Ask the administrator for an account.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Create my account",
+    "failed": "Creating the account failed.",
+    "toLogin": "I already have an account"
+  },
+  "admin": {
+    "title": "Admin",
+    "users": {
+      "title": "Users",
+      "empty": "No users.",
+      "createdAt": "Created on {date}",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "disable": "Disable",
+      "enable": "Enable",
+      "revokeSessions": "Revoke sessions",
+      "resetPassword": "Reset password",
+      "delete": "Delete",
+      "temporaryPasswordPrompt": "Temporary password for {email} (at least 10 characters):",
+      "temporaryPasswordTooShort": "The temporary password must be at least 10 characters long.",
+      "confirmDisable": "Disable {email}? Their sessions will be revoked.",
+      "confirmDelete": "Delete {email} and all their data (measurements, campaigns, settings)? This cannot be undone.",
+      "done": {
+        "disable": "User disabled.",
+        "enable": "User enabled.",
+        "revokeSessions": "Sessions revoked.",
+        "resetPassword": "Password reset. Give it to the user.",
+        "delete": "User deleted."
+      },
+      "failed": "The action failed."
+    },
+    "signUp": {
+      "title": "Open sign-up",
+      "label": "Allow open sign-up",
+      "help": "When closed, only the admin creates accounts.",
+      "failed": "Saving the setting failed."
+    },
+    "createUser": {
+      "title": "Create a user",
+      "email": "Email",
+      "name": "Name",
+      "password": "Initial password",
+      "submit": "Create",
+      "created": "User {email} created.",
+      "emailTaken": "This email is already in use.",
+      "failed": "Creating the user failed."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "name": "Display name",
+      "language": "Language",
+      "theme": "Theme",
+      "submit": "Save",
+      "saved": "Settings saved.",
+      "failed": "Saving the settings failed."
+    },
+    "password": {
+      "title": "Password",
+      "current": "Current password",
+      "new": "New password",
+      "submit": "Change password",
+      "changed": "Password changed.",
+      "wrongCurrent": "The current password is incorrect.",
+      "failed": "Changing the password failed."
+    },
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "health": {
+    "title": "App health",
+    "ok": "OK",
+    "error": "Error"
+  }
+}

@@ -19,8 +19,15 @@
     {
       "idx": 2,
       "version": "7",
-      "when": 1793476080603,
-      "tag": "0002_admin_users",
+      "when": 1793475884401,
+      "tag": "0002_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793476525991,
+      "tag": "0003_admin_users",
       "breakpoints": true
     }
   ]

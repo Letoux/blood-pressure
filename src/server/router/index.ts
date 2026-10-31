@@ -11,12 +11,17 @@ import { adminRevokeSessions } from "./admin-revoke-sessions";
 import { adminSetSignUpOpen } from "./admin-set-sign-up-open";
 import { health } from "./health";
 import { me } from "./me";
+import { settingsGet, settingsUpdate } from "./settings";
 import { signUpOpen } from "./sign-up-open";
 
 export const router = {
   health,
   me,
   signUpOpen,
+  settings: {
+    get: settingsGet,
+    update: settingsUpdate,
+  },
   account: {
     changePassword: accountChangePassword,
     dismissPasswordChangeSuggestion: accountDismissPasswordChangeSuggestion,

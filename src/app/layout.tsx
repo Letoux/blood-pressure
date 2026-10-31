@@ -1,16 +1,32 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { viewerPreferences } from "@/server/preferences";
 import { Providers } from "./providers";
+import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Tension",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("app");
+  return { title: t("name") };
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Langue et thème rendus côté serveur : aucun script ni flash au chargement.
+  const { locale, theme } = await viewerPreferences();
+
   return (
-    <html lang="fr">
-      <body>
-        <Providers>{children}</Providers>
+    <html lang={locale} data-theme={theme}>
+      <body className="min-h-dvh">
+        <NextIntlClientProvider>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
