@@ -1,5 +1,5 @@
 {
-  "id": "52535b16-faf3-4b2c-a86e-e8d0c07186db",
+  "id": "2ea37c03-12df-4cfd-b6f5-45a5abf0decd",
   "prevId": "539d39ae-1638-42c9-9d6a-dbfdfc48ed01",
   "version": "7",
   "dialect": "postgresql",
@@ -405,102 +405,6 @@
       },
       "isRLSEnabled": false
     },
-    "public.push_subscription": {
-      "name": "push_subscription",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "endpoint": {
-          "name": "endpoint",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "p256dh": {
-          "name": "p256dh",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "auth": {
-          "name": "auth",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "push_subscription_user_id_idx": {
-          "name": "push_subscription_user_id_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "push_subscription_user_id_user_id_fk": {
-          "name": "push_subscription_user_id_user_id_fk",
-          "tableFrom": "push_subscription",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "push_subscription_endpoint_unique": {
-          "name": "push_subscription_endpoint_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "endpoint"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.session": {
       "name": "session",
       "schema": "",
@@ -742,47 +646,12 @@
           "notNull": true,
           "default": 3
         },
-        "morning_time": {
-          "name": "morning_time",
+        "guideline": {
+          "name": "guideline",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'07:30'"
-        },
-        "evening_time": {
-          "name": "evening_time",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'21:00'"
-        },
-        "day_before_reminder": {
-          "name": "day_before_reminder",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "follow_up_enabled": {
-          "name": "follow_up_enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "follow_up_delay_minutes": {
-          "name": "follow_up_delay_minutes",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 30
-        },
-        "onboarded": {
-          "name": "onboarded",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
+          "default": "'sfhta'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -815,54 +684,6 @@
         "user_settings_frequency_months_check": {
           "name": "user_settings_frequency_months_check",
           "value": "\"user_settings\".\"frequency_months\" between 1 and 12"
-        },
-        "user_settings_follow_up_delay_minutes_check": {
-          "name": "user_settings_follow_up_delay_minutes_check",
-          "value": "\"user_settings\".\"follow_up_delay_minutes\" between 15 and 240"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.vapid_keys": {
-      "name": "vapid_keys",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "default": 1
-        },
-        "public_key": {
-          "name": "public_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "private_key": {
-          "name": "private_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "vapid_keys_single_row": {
-          "name": "vapid_keys_single_row",
-          "value": "\"vapid_keys\".\"id\" = 1"
         }
       },
       "isRLSEnabled": false

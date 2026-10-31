@@ -16,6 +16,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { FREQUENCY_MONTHS } from "@/domain/campaign";
 import { REMINDER_DEFAULTS } from "@/domain/reminder";
+import { DEFAULT_GUIDELINE, GUIDELINE_IDS } from "@/domain/guideline";
 import { MOMENTS } from "@/domain/slot";
 import { LOCALES } from "@/i18n/locale";
 import { DEFAULT_THEME, THEMES } from "@/lib/theme";
@@ -136,6 +137,8 @@ export const userSettings = pgTable("user_settings", {
     .default(REMINDER_DEFAULTS.followUpDelayMinutes),
   // Premier lancement vu (ou passé) : il ne s'affiche plus d'office.
   onboarded: boolean("onboarded").notNull().default(false),
+  // Référentiel choisi (`GLOSSARY.md`), dont le seuil est tracé sur les graphiques.
+  guideline: text("guideline", { enum: GUIDELINE_IDS }).notNull().default(DEFAULT_GUIDELINE),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   check(

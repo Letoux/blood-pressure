@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { FREQUENCY_MONTHS } from "@/domain/campaign";
+import { DEFAULT_GUIDELINE, GUIDELINE_IDS } from "@/domain/guideline";
 import { isTimeZone } from "@/domain/local-date";
 import { FOLLOW_UP_DELAY_MINUTES, isTimeOfDay, REMINDER_DEFAULTS, type TimeOfDay } from "@/domain/reminder";
 import { LOCALES } from "@/i18n/locale";
@@ -14,6 +15,9 @@ import { authed } from "./authed";
  * (`null` : pas encore détecté depuis le navigateur), fréquence des campagnes, préférences de
  * rappel et premier lancement vu. Aucun n'est une donnée de santé : l'admin règle aussi les siens
  * (`ADMIN_ALLOWED` de `access.int.test.ts`).
+ * (`null` : pas encore détecté depuis le navigateur), fréquence des campagnes et référentiel.
+ * Aucun n'est une donnée de santé : l'admin règle aussi les siens (`ADMIN_ALLOWED` de
+ * `access.int.test.ts`).
  */
 async function readSettings(db: Db, userId: string) {
   const [row] = await db
@@ -29,6 +33,7 @@ async function readSettings(db: Db, userId: string) {
       followUpEnabled: userSettings.followUpEnabled,
       followUpDelayMinutes: userSettings.followUpDelayMinutes,
       onboarded: userSettings.onboarded,
+      guideline: userSettings.guideline,
     })
     .from(user)
     .leftJoin(userSettings, eq(userSettings.userId, user.id))
@@ -46,6 +51,7 @@ async function readSettings(db: Db, userId: string) {
     followUpEnabled: row.followUpEnabled ?? REMINDER_DEFAULTS.followUpEnabled,
     followUpDelayMinutes: row.followUpDelayMinutes ?? REMINDER_DEFAULTS.followUpDelayMinutes,
     onboarded: row.onboarded ?? false,
+    guideline: row.guideline ?? DEFAULT_GUIDELINE,
   };
 }
 
@@ -74,6 +80,7 @@ export const settingsUpdate = authed
         .max(FOLLOW_UP_DELAY_MINUTES.max)
         .optional(),
       onboarded: z.boolean().optional(),
+      guideline: z.enum(GUIDELINE_IDS).optional(),
     }),
   )
   .handler(async ({ context, input }) => {

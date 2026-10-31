@@ -166,6 +166,14 @@
       "saved": "Réglages enregistrés.",
       "failed": "L’enregistrement des réglages a échoué."
     },
+    "guideline": {
+      "title": "Référentiel",
+      "hint": "La recommandation dont le seuil d’automesure est tracé sur les graphiques.",
+      "label": "Référentiel",
+      "submit": "Enregistrer le référentiel",
+      "saved": "Référentiel enregistré.",
+      "failed": "L’enregistrement du référentiel a échoué."
+    },
     "reminders": {
       "title": "Rappels",
       "hint": "Heures des rappels de mesure, dans votre fuseau horaire.",
@@ -317,6 +325,35 @@
       "confirmDelete": "Supprimer la campagne et ses mesures",
       "cancel": "Annuler",
       "failed": "La suppression a échoué."
+    }
+  },
+  "chart": {
+    "label": "Moyennes des campagnes",
+    "systolic": "Systolique",
+    "diastolic": "Diastolique",
+    "threshold": "Seuil {guideline} ({systolic}/{diastolic})",
+    "incompleteLegend": "Campagne incomplète",
+    "value": "{systolic}/{diastolic} mmHg",
+    "incomplete": "Incomplète : {count}/{total} mesures",
+    "date": "Début",
+    "measurements": "Mesures"
+  },
+  "stats": {
+    "campaigns": "Mes campagnes",
+    "empty": "Aucune campagne terminée pour l’instant. Chaque campagne terminée ajoute un point au graphique.",
+    "disclaimer": "Ne remplace pas un avis médical.",
+    "guideline": "Référentiel : {acronym} ({name}).",
+    "changeGuideline": "Changer de référentiel",
+    "standing": {
+      "latest": "Dernière campagne, commencée le {date} : {systolic}/{diastolic} mmHg",
+      "incomplete": "{count}/{total} mesures",
+      "below": "Sous le seuil {guideline} ({systolic}/{diastolic})",
+      "above": "Atteint ou dépasse le seuil {guideline} ({systolic}/{diastolic})"
+    },
+    "free": {
+      "title": "Mesures libres",
+      "hint": "Saisies en dehors des campagnes : elles n’entrent ni dans les moyennes ni dans le graphique.",
+      "empty": "Aucune mesure libre."
     }
   },
   "protocol": {

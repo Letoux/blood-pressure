@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/server/auth/current-user";
 import { CampaignSettingsForm } from "./campaign-settings-form";
 import { DataCard } from "./data-card";
+import { GuidelineForm } from "./guideline-form";
 import { NotificationCard } from "./notification-card";
 import { PasswordForm } from "./password-form";
 import { ProfileForm } from "./profile-form";
@@ -26,6 +27,7 @@ export default async function SettingsPage() {
       <div className="flex flex-col gap-6">
         <ProfileForm />
         {isUser && <CampaignSettingsForm />}
+        {isUser && <GuidelineForm />}
         {isUser && <ReminderSettingsForm />}
         {isUser && <NotificationCard />}
         {isUser && (
