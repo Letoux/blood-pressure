@@ -1,3 +1,4 @@
+import { withSerwist } from "@serwist/turbopack";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -8,4 +9,5 @@ const nextConfig: NextConfig = {
   output: "standalone",
 };
 
-export default withNextIntl(nextConfig);
+// `withSerwist` : esbuild, qui compile le service worker au build, reste hors du bundle serveur.
+export default withSerwist(withNextIntl(nextConfig));

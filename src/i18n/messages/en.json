@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "Blood pressure"
+    "name": "Blood pressure",
+    "description": "Home blood pressure monitoring, following the 3-3-3 rule."
   },
   "nav": {
     "label": "Main navigation",
@@ -122,11 +123,44 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
-    }
+    },
+    "install": "Install the app"
   },
   "health": {
     "title": "App health",
     "ok": "OK",
     "error": "Error"
+  },
+  "offline": {
+    "banner": "No network. Saving is disabled, but what you type is kept.",
+    "title": "No network",
+    "description": "This page needs a connection. Anything you typed in a form is kept and will come back once you are online.",
+    "retry": "Try again"
+  },
+  "install": {
+    "title": "Install the app",
+    "intro": "Installed on your home screen, the app opens like an app and can send you measurement reminders.",
+    "installed": "The app is already installed on this device.",
+    "button": "Install",
+    "otherPlatforms": "Other devices",
+    "platforms": {
+      "ios": "iPhone and iPad",
+      "android": "Android",
+      "desktop": "Computer"
+    },
+    "ios": {
+      "safari": "Open this page in Safari.",
+      "share": "Tap the Share button (the square with an arrow pointing up).",
+      "addToHome": "Choose “Add to Home Screen”, then “Add”.",
+      "notifications": "On iPhone and iPad, reminders only work once the app is installed (iOS 16.4 or later)."
+    },
+    "android": {
+      "menu": "In Chrome, open the menu (the three dots at the top right).",
+      "add": "Choose “Install app” or “Add to Home screen”."
+    },
+    "desktop": {
+      "addressBar": "In Chrome or Edge, click the install icon on the right of the address bar.",
+      "menu": "Otherwise, open the browser menu and choose “Install Blood pressure”."
+    }
   }
 }

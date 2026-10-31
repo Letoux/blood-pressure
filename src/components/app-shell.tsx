@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { BottomNav } from "./bottom-nav";
+import { OfflineBanner } from "./offline-banner";
 import { PasswordChangeBanner } from "./password-change-banner";
 import { SignOutButton } from "./sign-out-button";
 
@@ -21,6 +22,7 @@ export async function AppShell({
           <span className="truncate font-semibold">{t("name")}</span>
           <SignOutButton />
         </div>
+        <OfflineBanner />
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))]">
         <PasswordChangeBanner />

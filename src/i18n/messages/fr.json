@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "Tension"
+    "name": "Tension",
+    "description": "Suivi de l’automesure tensionnelle, selon la règle du 3-3-3."
   },
   "nav": {
     "label": "Navigation principale",
@@ -122,11 +123,44 @@
       "system": "Système",
       "light": "Clair",
       "dark": "Sombre"
-    }
+    },
+    "install": "Installer l’application"
   },
   "health": {
     "title": "Santé de l’application",
     "ok": "OK",
     "error": "Erreur"
+  },
+  "offline": {
+    "banner": "Pas de réseau. L’enregistrement est désactivé, mais ce que vous tapez est conservé.",
+    "title": "Pas de réseau",
+    "description": "Cette page demande une connexion. Ce que vous aviez tapé dans un formulaire est conservé : il réapparaîtra au retour du réseau.",
+    "retry": "Réessayer"
+  },
+  "install": {
+    "title": "Installer l’application",
+    "intro": "Installée sur l’écran d’accueil, l’application s’ouvre comme une app et peut vous envoyer les rappels de mesure.",
+    "installed": "L’application est déjà installée sur cet appareil.",
+    "button": "Installer",
+    "otherPlatforms": "Autres appareils",
+    "platforms": {
+      "ios": "iPhone et iPad",
+      "android": "Android",
+      "desktop": "Ordinateur"
+    },
+    "ios": {
+      "safari": "Ouvrez cette page dans Safari.",
+      "share": "Touchez le bouton Partager (le carré avec une flèche vers le haut).",
+      "addToHome": "Choisissez « Sur l’écran d’accueil », puis « Ajouter ».",
+      "notifications": "Sur iPhone et iPad, les rappels ne fonctionnent qu’une fois l’application installée (iOS 16.4 ou plus)."
+    },
+    "android": {
+      "menu": "Dans Chrome, ouvrez le menu (les trois points en haut à droite).",
+      "add": "Choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil »."
+    },
+    "desktop": {
+      "addressBar": "Dans Chrome ou Edge, cliquez sur l’icône d’installation à droite de la barre d’adresse.",
+      "menu": "Sinon, ouvrez le menu du navigateur et choisissez « Installer Tension »."
+    }
   }
 }

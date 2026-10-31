@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { isLocale, LOCALES } from "@/i18n/locale";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 import { THEMES, type Theme } from "@/lib/theme";
 
 const isTheme = (value: unknown): value is Theme => THEMES.includes(value as Theme);
@@ -19,6 +20,7 @@ const isTheme = (value: unknown): value is Theme => THEMES.includes(value as The
 export function ProfileForm() {
   const t = useTranslations("settings");
   const currentLocale = useLocale();
+  const online = useOnline();
   const router = useRouter();
   const queryClient = useQueryClient();
   const settings = useQuery(orpc.settings.get.queryOptions());
@@ -105,7 +107,7 @@ export function ProfileForm() {
               {t("profile.saved")}
             </p>
           )}
-          <Button type="submit" disabled={update.isPending} className="self-start">
+          <Button type="submit" disabled={!online || update.isPending} className="self-start">
             {t("profile.submit")}
           </Button>
         </form>

@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 import { MIN_PASSWORD_LENGTH } from "@/server/auth/password-policy";
 
 export function CreateUserForm() {
   const t = useTranslations("admin.createUser");
+  const online = useOnline();
   const queryClient = useQueryClient();
   const createUser = useMutation(
     orpc.admin.createUser.mutationOptions({
@@ -73,7 +75,7 @@ export function CreateUserForm() {
               {t("created", { email: createUser.data.email })}
             </p>
           )}
-          <Button type="submit" disabled={createUser.isPending} className="self-start">
+          <Button type="submit" disabled={!online || createUser.isPending} className="self-start">
             {t("submit")}
           </Button>
         </form>

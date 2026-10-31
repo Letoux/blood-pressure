@@ -8,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 import { MIN_PASSWORD_LENGTH } from "@/server/auth/password-policy";
 
 /** L'utilisateur change son mot de passe en donnant l'ancien. */
 export function PasswordForm() {
   const t = useTranslations("settings.password");
+  const online = useOnline();
   const queryClient = useQueryClient();
   const change = useMutation(
     orpc.account.changePassword.mutationOptions({
@@ -71,7 +73,7 @@ export function PasswordForm() {
               {t("changed")}
             </p>
           )}
-          <Button type="submit" disabled={change.isPending} className="self-start">
+          <Button type="submit" disabled={!online || change.isPending} className="self-start">
             {t("submit")}
           </Button>
         </form>

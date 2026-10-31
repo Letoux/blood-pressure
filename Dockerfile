@@ -20,6 +20,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 RUN addgroup -S app && adduser -S app -G app
+# `public/` (icônes de la PWA) est copié dans le standalone par `pnpm build`.
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
 COPY --from=build --chown=app:app /app/dist ./dist

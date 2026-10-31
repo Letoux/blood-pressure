@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build && pnpm build:node && cp -r .next/static .next/standalone/.next/",
+    "build": "next build && pnpm build:node && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "build:node": "esbuild src/scripts/migrate.ts src/worker/main.ts --bundle --platform=node --format=esm --target=node22 --outdir=dist --out-extension:.js=.mjs --external:pg-native --banner:js=\"import { createRequire } from \\\"node:module\\\"; const require = createRequire(import.meta.url);\"",
     "start": "node .next/standalone/server.js",
     "db:generate": "drizzle-kit generate",
@@ -20,13 +20,15 @@
     "test:int": "vitest run --project integration",
     "test:e2e": "playwright test",
     "test:backup": "sh docker/backup.test.sh",
-    "test:all": "vitest run"
+    "test:all": "vitest run",
+    "icons": "sh src/scripts/generate-icons.sh"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
     "@orpc/client": "^1.16.1",
     "@orpc/server": "^1.16.1",
     "@orpc/tanstack-query": "^1.16.1",
+    "@serwist/turbopack": "9.5.13",
     "@tanstack/react-query": "^5.105.0",
     "better-auth": "^1.7.14",
     "class-variance-authority": "^0.7.1",
@@ -39,6 +41,7 @@
     "radix-ui": "^1.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "serwist": "9.5.13",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7"
   },
