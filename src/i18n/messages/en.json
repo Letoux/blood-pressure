@@ -126,6 +126,53 @@
     },
     "install": "Install the app"
   },
+  "measurements": {
+    "form": {
+      "title": "Enter a slot",
+      "hint": "Up to 3 measurements. An empty row is ignored.",
+      "takenAt": "Date and time",
+      "moment": "Time of day",
+      "row": "Measurement {number}",
+      "fieldLabel": "{field}, measurement {number}",
+      "comment": "Comment (optional)",
+      "free": "Outside a campaign, measurements are saved as free measurements.",
+      "submit": "Save",
+      "saved": "{count, plural, one {# measurement saved} other {# measurements saved}}.",
+      "failed": "Saving failed."
+    },
+    "fields": {
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "pulse": "Pulse"
+    },
+    "moments": {
+      "morning": "Morning",
+      "evening": "Evening"
+    },
+    "alert": "Alert value: 180/110 or higher. Measure again at rest; if it is confirmed, seek medical advice. You can still save it.",
+    "errors": {
+      "empty": "Enter at least one measurement.",
+      "takenAt": "Enter the date and time.",
+      "incomplete": "Fill in systolic, diastolic and pulse, or leave the row empty.",
+      "systolicOutOfRange": "Systolic: {min} to {max} mmHg.",
+      "diastolicOutOfRange": "Diastolic: {min} to {max} mmHg.",
+      "pulseOutOfRange": "Pulse: {min} to {max} beats per minute.",
+      "systolicNotAboveDiastolic": "Systolic must be higher than diastolic."
+    },
+    "list": {
+      "title": "My measurements",
+      "empty": "No measurements yet.",
+      "free": "Free measurement",
+      "pressure": "{systolic}/{diastolic} mmHg",
+      "pulse": "Pulse {pulse}",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Confirm deletion",
+      "cancel": "Cancel",
+      "save": "Save",
+      "failed": "The operation failed."
+    }
+  },
   "health": {
     "title": "App health",
     "ok": "OK",

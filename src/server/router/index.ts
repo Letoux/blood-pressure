@@ -11,6 +11,10 @@ import { adminRevokeSessions } from "./admin-revoke-sessions";
 import { adminSetSignUpOpen } from "./admin-set-sign-up-open";
 import { health } from "./health";
 import { me } from "./me";
+import { measurementsCreate } from "./measurements-create";
+import { measurementsDelete } from "./measurements-delete";
+import { measurementsList } from "./measurements-list";
+import { measurementsUpdate } from "./measurements-update";
 import { settingsGet, settingsUpdate } from "./settings";
 import { signUpOpen } from "./sign-up-open";
 
@@ -18,6 +22,12 @@ export const router = {
   health,
   me,
   signUpOpen,
+  measurements: {
+    list: measurementsList,
+    create: measurementsCreate,
+    update: measurementsUpdate,
+    delete: measurementsDelete,
+  },
   settings: {
     get: settingsGet,
     update: settingsUpdate,
