@@ -43,6 +43,13 @@
       "when": 1793477473773,
       "tag": "0005_campaigns",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793485880538,
+      "tag": "0006_onboarding_push",
+      "breakpoints": true
     }
   ]
 }

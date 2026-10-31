@@ -15,6 +15,8 @@ export type ViewerPreferences = {
   timeZone: string;
   /** Faux tant que le fuseau du navigateur n'a pas été enregistré (`TimeZoneDetector`). */
   timeZoneSaved: boolean;
+  /** Premier lancement déjà vu (ou passé) : l'accueil ne le rouvre plus. */
+  onboarded: boolean;
 };
 
 /**
@@ -27,7 +29,12 @@ export const viewerPreferences = cache(async (): Promise<ViewerPreferences> => {
   const session = await currentSession();
   const [saved] = session
     ? await getDb()
-        .select({ locale: userSettings.locale, theme: userSettings.theme, timeZone: userSettings.timeZone })
+        .select({
+          locale: userSettings.locale,
+          theme: userSettings.theme,
+          timeZone: userSettings.timeZone,
+          onboarded: userSettings.onboarded,
+        })
         .from(userSettings)
         .where(eq(userSettings.userId, session.user.id))
     : [];
@@ -39,5 +46,6 @@ export const viewerPreferences = cache(async (): Promise<ViewerPreferences> => {
     theme: saved?.theme ?? DEFAULT_THEME,
     timeZone: saved?.timeZone ?? DEFAULT_TIME_ZONE,
     timeZoneSaved: Boolean(saved?.timeZone),
+    onboarded: saved?.onboarded ?? false,
   };
 });

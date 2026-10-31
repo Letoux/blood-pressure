@@ -20,8 +20,16 @@ export function uniqueUser(name: string): E2eUser {
   return { email: `${name.toLowerCase()}-${id}@e2e.test`, name, password: `${name.toLowerCase()}-password` };
 }
 
-/** Crée l'utilisateur par l'API better-auth, avec une session admin séparée de celle de la page. */
-export async function createUserAsAdmin(request: APIRequestContext, user: E2eUser) {
+/**
+ * Crée l'utilisateur par l'API better-auth, avec une session admin séparée de celle de la page.
+ * Sauf `{ onboarded: false }`, le premier lancement est marqué comme vu : la connexion mène
+ * directement à l'accueil.
+ */
+export async function createUserAsAdmin(
+  request: APIRequestContext,
+  user: E2eUser,
+  { onboarded = true }: { onboarded?: boolean } = {},
+) {
   const signIn = await request.post("/api/auth/sign-in/email", {
     data: { email: e2eAdmin.email, password: e2eAdmin.password },
   });
@@ -32,6 +40,18 @@ export async function createUserAsAdmin(request: APIRequestContext, user: E2eUse
     headers: { origin: new URL(signIn.url()).origin },
   });
   if (!created.ok()) throw new Error(`création refusée (${created.status()}) : ${await created.text()}`);
+  if (onboarded) await skipOnboarding(request, user, new URL(signIn.url()).origin);
+}
+
+/** Marque le premier lancement comme vu, avec une session de l'utilisateur (protocole RPC d'oRPC). */
+async function skipOnboarding(request: APIRequestContext, user: E2eUser, origin: string) {
+  const signIn = await request.post("/api/auth/sign-in/email", {
+    data: { email: user.email, password: user.password },
+    headers: { origin },
+  });
+  if (!signIn.ok()) throw new Error(`connexion refusée (${signIn.status()})`);
+  const updated = await request.post("/rpc/settings/update", { data: { json: { onboarded: true } } });
+  if (!updated.ok()) throw new Error(`réglage refusé (${updated.status()}) : ${await updated.text()}`);
 }
 
 /** Connexion par le formulaire, quelle que soit la langue de la page. */

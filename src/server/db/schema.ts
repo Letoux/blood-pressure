@@ -15,6 +15,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { FREQUENCY_MONTHS } from "@/domain/campaign";
+import { REMINDER_DEFAULTS } from "@/domain/reminder";
 import { MOMENTS } from "@/domain/slot";
 import { LOCALES } from "@/i18n/locale";
 import { DEFAULT_THEME, THEMES } from "@/lib/theme";
@@ -124,13 +125,61 @@ export const userSettings = pgTable("user_settings", {
   timeZone: text("time_zone"),
   // Fréquence des campagnes, en mois (`GLOSSARY.md`).
   frequencyMonths: smallint("frequency_months").notNull().default(FREQUENCY_MONTHS.default),
+  // Rappels (`GLOSSARY.md` : Rappel, Relance) : heures `HH:MM` dans le fuseau ci-dessus, validées
+  // par le domaine (`src/domain/reminder.ts`). Ce ne sont pas des données de santé.
+  morningTime: text("morning_time").notNull().default(REMINDER_DEFAULTS.morningTime),
+  eveningTime: text("evening_time").notNull().default(REMINDER_DEFAULTS.eveningTime),
+  dayBeforeReminder: boolean("day_before_reminder").notNull().default(REMINDER_DEFAULTS.dayBeforeReminder),
+  followUpEnabled: boolean("follow_up_enabled").notNull().default(REMINDER_DEFAULTS.followUpEnabled),
+  followUpDelayMinutes: smallint("follow_up_delay_minutes")
+    .notNull()
+    .default(REMINDER_DEFAULTS.followUpDelayMinutes),
+  // Premier lancement vu (ou passé) : il ne s'affiche plus d'office.
+  onboarded: boolean("onboarded").notNull().default(false),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   check(
     "user_settings_frequency_months_check",
     sql`${table.frequencyMonths} between 1 and 12`,
   ),
+  check(
+    "user_settings_follow_up_delay_minutes_check",
+    sql`${table.followUpDelayMinutes} between 15 and 240`,
+  ),
 ]);
+
+// --- Notifications push (ADR-0002, ADR-0003) ---
+
+// Clés VAPID de l'instance : une seule ligne (`id = 1`), générée au premier démarrage
+// (`src/server/push/vapid.ts`) puis réutilisée. Jamais dans le `.env` ni dans le dépôt.
+export const vapidKeys = pgTable(
+  "vapid_keys",
+  {
+    id: integer("id").primaryKey().default(1),
+    publicKey: text("public_key").notNull(),
+    privateKey: text("private_key").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [check("vapid_keys_single_row", sql`${table.id} = 1`)],
+);
+
+// Un abonnement Web Push par appareil (navigateur) d'un utilisateur. L'`endpoint` identifie
+// l'appareil : s'il se réabonne avec un autre compte, l'abonnement change de propriétaire.
+export const pushSubscription = pgTable(
+  "push_subscription",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("push_subscription_user_id_idx").on(table.userId)],
+);
 
 // --- Campagnes (voir `GLOSSARY.md`, ADR-0006) ---
 // Seule la date de début prévue est stockée (jour local dans le fuseau de l'utilisateur). Le

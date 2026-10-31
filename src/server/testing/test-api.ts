@@ -3,6 +3,7 @@ import { createRouterClient, type RouterClient } from "@orpc/server";
 import pg from "pg";
 import { createAuth, type Auth } from "@/server/auth/create-auth";
 import { connectDb, runMigrations, type Db } from "@/server/db/client";
+import type { PushSender } from "@/server/push/sender";
 import { router, type AppRouter } from "@/server/router";
 
 /**
@@ -51,7 +52,8 @@ export function cookieHeaders(response: Response): Headers {
   return new Headers({ cookie: cookies });
 }
 
-export async function createTestApi(): Promise<TestApi> {
+/** `push` : l'envoi des notifications injecté dans le contexte (un faux qui les enregistre). */
+export async function createTestApi({ push }: { push?: PushSender } = {}): Promise<TestApi> {
   const adminUrl = process.env.TEST_DATABASE_URL ?? DEFAULT_ADMIN_URL;
   const name = `bp_test_${randomUUID().replaceAll("-", "")}`;
   await adminQuery(adminUrl, `create database "${name}"`);
@@ -70,7 +72,7 @@ export async function createTestApi(): Promise<TestApi> {
   const as: TestApi["as"] = (headers, options = {}) => {
     const { now } = options;
     return createRouterClient(router, {
-      context: { db, auth, headers, now: now ? () => new Date(now) : undefined },
+      context: { db, auth, headers, push, now: now ? () => new Date(now) : undefined },
     });
   };
 

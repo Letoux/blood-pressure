@@ -1,12 +1,16 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/server/auth/current-user";
+import { viewerPreferences } from "@/server/preferences";
 import { CampaignHome } from "./campaign-home";
 
 export default async function HomePage() {
   const user = await requireUser();
+  // Premier lancement, une seule fois (l'admin n'a pas de rappels, ADR-0004).
+  if (user.role !== "admin" && !(await viewerPreferences()).onboarded) redirect("/welcome");
   const t = await getTranslations("home");
 
   return (

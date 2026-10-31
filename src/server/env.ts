@@ -15,6 +15,19 @@ export function serverEnv(): ServerEnv {
   return cached;
 }
 
+const pushSchema = z.object({
+  // Communiquée aux services push comme contact de l'instance (« subject » VAPID).
+  APP_URL: z.url(),
+});
+
+let cachedPush: z.infer<typeof pushSchema> | undefined;
+
+/** Variables de l'envoi des notifications push (services `app` et `worker`). */
+export function pushEnv(): z.infer<typeof pushSchema> {
+  cachedPush ??= pushSchema.parse(process.env);
+  return cachedPush;
+}
+
 const authSchema = z.object({
   APP_URL: z.url(),
   BETTER_AUTH_SECRET: z.string().min(32),

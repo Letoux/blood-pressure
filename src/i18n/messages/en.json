@@ -165,7 +165,21 @@
       "submit": "Save frequency and time zone",
       "saved": "Settings saved.",
       "failed": "Saving the settings failed."
-    }
+    },
+    "reminders": {
+      "title": "Reminders",
+      "hint": "Measurement reminder times, in your time zone.",
+      "morning": "Morning time",
+      "evening": "Evening time",
+      "dayBefore": "Reminder the day before a campaign",
+      "followUp": "Follow-up if the slot is still empty",
+      "followUpDelay": "Follow-up delay",
+      "delay": "{count, plural, =60 {1 hour} =90 {1.5 hours} =120 {2 hours} =180 {3 hours} =240 {4 hours} other {# minutes}}",
+      "submit": "Save reminders",
+      "saved": "Reminders saved.",
+      "failed": "Saving the reminders failed."
+    },
+    "welcomeAgain": "See the first launch again"
   },
   "measurements": {
     "form": {
@@ -304,5 +318,48 @@
       "cancel": "Cancel",
       "failed": "Deletion failed."
     }
+  },
+  "protocol": {
+    "title": "Measurement protocol",
+    "intro": "For reliable readings, follow the 3-3-3 rule: 3 measurements in the morning and 3 in the evening, 3 days in a row.",
+    "rest": "Measure at rest, seated for 5 minutes, back supported and feet flat on the floor.",
+    "noStimulants": "No coffee or tobacco in the previous 30 minutes.",
+    "morning": "In the morning: before breakfast and before taking any medication.",
+    "evening": "In the evening: before going to bed.",
+    "cuff": "Cuff on the bare arm, at heart level. Do not talk during the measurement.",
+    "series": "Each time, take 3 measurements about 1 minute apart."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "hint": "Measurement reminders arrive as notifications on this device.",
+    "enable": "Turn on notifications",
+    "disable": "Turn off on this device",
+    "enabled": "Notifications are turned on for this device.",
+    "sendTest": "Send a test notification",
+    "testSent": "Test notification sent. It should appear within a few seconds.",
+    "testNone": "No subscribed device: turn on notifications first.",
+    "testBody": "Notifications are working on this device.",
+    "failed": "Turning on notifications failed.",
+    "testFailed": "Sending the test notification failed.",
+    "denied": "Notifications are blocked for this site. Allow them in your browser settings, then reload the page.",
+    "unsupported": "This browser cannot receive the app’s notifications.",
+    "iosInstallFirst": "On iPhone and iPad, notifications only work once the app is installed on the Home Screen (iOS 16.4 or later). Install it first, then open it from the Home Screen to turn on notifications.",
+    "installLink": "See how to install it"
+  },
+  "welcome": {
+    "title": "Welcome",
+    "progress": "Step {current} of {total}",
+    "steps": {
+      "protocol": "Measurement protocol",
+      "install": "Install the app",
+      "notifications": "Notifications",
+      "reminders": "Reminders"
+    },
+    "installIntro": "Installed on your Home Screen, the app opens like a regular app and can receive reminders.",
+    "remindersIntro": "Choose when to receive measurement reminders.",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Save and finish",
+    "later": "You can find every step again in Settings."
   }
 }

@@ -1,11 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useInstallPrompt, useIsInstalled } from "@/lib/install-prompt";
-import { detectPlatform, type Platform } from "@/lib/platform";
+import { useInstallPrompt, useIsInstalled, usePlatform } from "@/lib/install-prompt";
+import type { Platform } from "@/lib/platform";
 
 const PLATFORMS: Platform[] = ["ios", "android", "desktop"];
 
@@ -14,17 +13,6 @@ const STEPS = {
   android: ["android.menu", "android.add"],
   desktop: ["desktop.addressBar", "desktop.menu"],
 } as const;
-
-const noSubscription = () => () => {};
-
-/** Le système de l'appareil, connu seulement dans le navigateur (`null` au rendu serveur). */
-function usePlatform(): Platform | null {
-  return useSyncExternalStore(
-    noSubscription,
-    () => detectPlatform(navigator.userAgent, navigator.maxTouchPoints),
-    () => null,
-  );
-}
 
 function Steps({ platform }: { platform: Platform }) {
   const t = useTranslations("install");
