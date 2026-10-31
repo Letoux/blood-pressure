@@ -11,6 +11,15 @@ export const authed = base.use(async ({ context, next }) => {
   return next({ context: { session: session.session, user: session.user } });
 });
 
+/**
+ * Procédures sur les données d'un utilisateur (mesures, campagnes, réglages, compte rendu…) :
+ * l'admin n'y a jamais accès (ADR-0004). `access.int.test.ts` le vérifie pour tout le routeur.
+ */
+export const userOnly = authed.use(async ({ context, next }) => {
+  if (context.user.role === "admin") throw new ORPCError("FORBIDDEN");
+  return next();
+});
+
 /** Procédures réservées à l'admin, qui n'accède jamais aux mesures (ADR-0004). */
 export const adminOnly = authed.use(async ({ context, next }) => {
   if (context.user.role !== "admin") throw new ORPCError("FORBIDDEN");

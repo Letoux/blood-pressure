@@ -1,12 +1,17 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 import { orpc } from "@/lib/orpc";
 import { MIN_PASSWORD_LENGTH } from "@/server/auth/password-policy";
 
 export function CreateUserForm() {
-  const createUser = useMutation(orpc.admin.createUser.mutationOptions());
+  const queryClient = useQueryClient();
+  const createUser = useMutation(
+    orpc.admin.createUser.mutationOptions({
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: orpc.admin.listUsers.key() }),
+    }),
+  );
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

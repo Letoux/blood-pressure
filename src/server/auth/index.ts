@@ -13,7 +13,6 @@ export function getAuth(): Auth {
       db: getDb(),
       secret: env.BETTER_AUTH_SECRET,
       baseURL: env.APP_URL,
-      allowSignUp: env.ALLOW_SIGN_UP,
     });
   }
   return auth;

@@ -1,13 +1,18 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/lib/orpc";
+import { loginText, signUpText } from "@/lib/ui-text";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const signUpOpen = useQuery(orpc.signUpOpen.queryOptions());
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,7 +28,9 @@ export default function LoginPage() {
       setError(
         signInError.status === 429
           ? "Trop de tentatives. Réessayez dans une minute."
-          : "Email ou mot de passe incorrect.",
+          : signInError.code === "BANNED_USER"
+            ? loginText.disabled
+            : "Email ou mot de passe incorrect.",
       );
       return;
     }
@@ -48,6 +55,7 @@ export default function LoginPage() {
           Se connecter
         </button>
       </form>
+      {signUpOpen.data && <Link href="/signup">{signUpText.link}</Link>}
     </main>
   );
 }

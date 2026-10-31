@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { account, user } from "@/server/db/schema";
-import { cookieHeaders, createTestApi, type TestApi } from "@/server/testing/test-api";
+import { createTestApi, type TestApi } from "@/server/testing/test-api";
 import { SIGN_IN_RATE_LIMIT } from "./create-auth";
 import { ensureAdmin } from "./ensure-admin";
 
@@ -99,37 +99,38 @@ describe("authentification", () => {
     expect(blocked.status).toBe(429);
   });
 
-  it("avec l'inscription libre désactivée, l'inscription publique est refusée", async () => {
-    const response = await api.authRequest("/sign-up/email", {
-      body: { email: "mallory@example.org", name: "Mallory", password: "mallory-password" },
+  it("un utilisateur désactivé voit un refus explicite à la connexion", async () => {
+    const adminHeaders = await api.signIn("admin@example.org", "admin-password");
+    const erin = await api.as(adminHeaders).admin.createUser({
+      email: "erin@example.org",
+      name: "Erin",
+      password: "erin-password",
+    });
+    await api.as(adminHeaders).admin.disableUser({ userId: erin.id });
+
+    const response = await api.authRequest("/sign-in/email", {
+      body: { email: "erin@example.org", password: "erin-password" },
+      headers: { "x-forwarded-for": "203.0.113.8" },
     });
 
-    expect(response.ok).toBe(false);
-    await expect(api.signIn("mallory@example.org", "mallory-password")).rejects.toThrow();
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({ code: "BANNED_USER" });
   });
 });
 
-describe("inscription libre activée", () => {
+// L'ouverture et la fermeture de l'inscription libre sont testées dans `admin-sign-up.int.test.ts`.
+describe("inscription libre ouverte", () => {
   let api: TestApi;
 
   beforeAll(async () => {
-    api = await createTestApi({ allowSignUp: true });
+    api = await createTestApi();
+    await ensureAdmin(api.auth, { email: "admin@example.org", password: "admin-password" });
+    const adminHeaders = await api.signIn("admin@example.org", "admin-password");
+    await api.as(adminHeaders).admin.setSignUpOpen({ open: true });
   });
 
   afterAll(async () => {
     await api.close();
-  });
-
-  it("l'inscription publique crée un utilisateur connecté", async () => {
-    const response = await api.authRequest("/sign-up/email", {
-      body: { email: "carol@example.org", name: "Carol", password: "carol-password" },
-    });
-    expect(response.ok).toBe(true);
-
-    await expect(api.as(cookieHeaders(response)).me()).resolves.toMatchObject({
-      email: "carol@example.org",
-      role: "user",
-    });
   });
 
   it("refuse un mot de passe de moins de 10 caractères", async () => {

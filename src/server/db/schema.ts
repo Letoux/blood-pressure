@@ -1,6 +1,21 @@
 // Schéma Drizzle. Après toute modification : `pnpm db:generate` pour créer la migration SQL
 // dans `drizzle/`, puis la committer. Les migrations s'appliquent au démarrage du conteneur `app`.
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { boolean, check, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+
+// --- Réglages de l'instance, modifiés par l'admin (ADR-0004) ---
+// Une seule ligne (`id = 1`), créée au premier enregistrement ; absente = valeurs par défaut.
+
+export const appSettings = pgTable(
+  "app_settings",
+  {
+    id: integer("id").primaryKey().default(1),
+    // Inscription libre, désactivée par défaut : seul l'admin crée les comptes.
+    signUpOpen: boolean("sign_up_open").notNull().default(false),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [check("app_settings_single_row", sql`${table.id} = 1`)],
+);
 
 // --- Authentification (better-auth, plugin admin) : ADR-0004, ADR-0009 ---
 // Noms de tables et de colonnes attendus par better-auth (`src/server/auth`).
@@ -18,6 +33,9 @@ export const user = pgTable("user", {
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires", { withTimezone: true }),
+  // Après une réinitialisation par l'admin : l'app propose (sans l'imposer) de changer de
+  // mot de passe, jusqu'au changement ou à la fermeture du bandeau (ADR-0004).
+  passwordChangeSuggested: boolean("password_change_suggested").notNull().default(false),
 });
 
 export const session = pgTable(
