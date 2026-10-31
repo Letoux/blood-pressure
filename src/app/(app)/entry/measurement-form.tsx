@@ -11,6 +11,8 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { isAlertValue, readEntryRows, type EntryRow, type EntryRowsResult } from "@/domain/measurement";
 import { MOMENTS, type Moment } from "@/domain/slot";
 import { orpc } from "@/lib/orpc";
+import { useDraft } from "@/lib/use-draft";
+import { useOnline } from "@/lib/use-online";
 import { fromDateTimeLocal, newEntryDraft, type EntryDraft } from "./entry-draft";
 import { AlertValueWarning, EntryErrors } from "./measurement-messages";
 
@@ -26,27 +28,33 @@ const isAlertRow = (row: EntryRow) => {
  * Formulaire d'un créneau : jusqu'à 3 mesures, un horodatage et un moment communs, un
  * commentaire facultatif. Tout son état tient dans un `EntryDraft`.
  */
-export function MeasurementForm() {
+export function MeasurementForm({ userId }: { userId: string }) {
   // Rendu côté client seulement : l'heure et le moment par défaut sont ceux du navigateur.
   const isClient = useSyncExternalStore(
     noSubscription,
     () => true,
     () => false,
   );
-  return isClient ? <SlotForm /> : null;
+  return isClient ? <SlotForm userId={userId} /> : null;
 }
 
 const noSubscription = () => () => {};
 
-function SlotForm() {
+function SlotForm({ userId }: { userId: string }) {
   const t = useTranslations("measurements");
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<EntryDraft>(() => newEntryDraft(new Date()));
+  // Brouillon gardé dans le navigateur jusqu'à l'enregistrement, même sans réseau (ADR-0010).
+  const {
+    value: draft,
+    setValue: setDraft,
+    clear: clearDraft,
+  } = useDraft<EntryDraft>(userId, "measurement", () => newEntryDraft(new Date()));
+  const online = useOnline();
   const [submitted, setSubmitted] = useState<EntryRowsResult | null>(null);
   const create = useMutation(
     orpc.measurements.create.mutationOptions({
       onSuccess: () => {
-        setDraft(newEntryDraft(new Date()));
+        clearDraft(newEntryDraft(new Date()));
         setSubmitted(null);
         void queryClient.invalidateQueries({ queryKey: orpc.measurements.key() });
       },
@@ -173,7 +181,7 @@ function SlotForm() {
               {t("form.saved", { count: create.data.length })}
             </p>
           )}
-          <Button type="submit" disabled={create.isPending} className="self-start">
+          <Button type="submit" disabled={!online || create.isPending} className="self-start">
             {t("form.submit")}
           </Button>
         </form>

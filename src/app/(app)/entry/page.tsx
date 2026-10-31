@@ -5,13 +5,13 @@ import { MeasurementForm } from "./measurement-form";
 import { MeasurementList } from "./measurement-list";
 
 export default async function EntryPage() {
-  await requireUser();
+  const user = await requireUser();
   const t = await getTranslations("nav");
 
   return (
     <>
       <PageTitle>{t("entry")}</PageTitle>
-      <MeasurementForm />
+      <MeasurementForm userId={user.id} />
       <MeasurementList />
     </>
   );

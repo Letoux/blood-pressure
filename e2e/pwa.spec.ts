@@ -15,21 +15,47 @@ test("le manifeste rend l'app installable", async ({ request }) => {
   }
 });
 
-test("hors ligne, un bandeau s'affiche et l'enregistrement est désactivé", async ({ page, context, request }) => {
+test("hors ligne, un bandeau s'affiche, l'enregistrement est désactivé et le brouillon est conservé", async ({
+  page,
+  context,
+  request,
+}) => {
   const user = uniqueUser("Hugo");
   await createUserAsAdmin(request, user);
   await signIn(page, user);
-  await page.getByRole("navigation").getByRole("link", { name: "Réglages" }).click();
+  await page.getByRole("navigation").getByRole("link", { name: "Saisie" }).click();
   const save = page.getByRole("button", { name: "Enregistrer", exact: true });
+  const systolic = page.getByLabel("Systolique, mesure 1");
   await expect(save).toBeEnabled();
 
   await context.setOffline(true);
   await expect(page.getByRole("alert").filter({ hasText: "Pas de réseau" })).toBeVisible();
   await expect(save).toBeDisabled();
+  await systolic.fill("131");
+  await page.getByLabel("Diastolique, mesure 1").fill("83");
+  await page.getByLabel("Commentaire (facultatif)").fill("Sans réseau");
 
+  if (production) {
+    // Rechargement sans réseau : le service worker sert la page hors ligne.
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Pas de réseau" })).toBeVisible();
+  }
+
+  // Au retour du réseau, le brouillon réapparaît, même après un rechargement.
   await context.setOffline(false);
+  await page.goto("/entry");
   await expect(page.getByText("Pas de réseau")).toHaveCount(0);
+  await expect(systolic).toHaveValue("131");
+  await expect(page.getByLabel("Diastolique, mesure 1")).toHaveValue("83");
+  await expect(page.getByLabel("Commentaire (facultatif)")).toHaveValue("Sans réseau");
+
+  // Une fois enregistré, le brouillon est effacé.
+  await page.getByLabel("Pouls, mesure 1").fill("70");
   await expect(save).toBeEnabled();
+  await save.click();
+  await expect(page.getByText("1 mesure enregistrée.")).toBeVisible();
+  await page.reload();
+  await expect(systolic).toHaveValue("");
 });
 
 test.describe("page d'installation", () => {
