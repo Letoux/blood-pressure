@@ -170,7 +170,7 @@
       "title": "Référentiel",
       "hint": "La recommandation dont le seuil d’automesure est tracé sur les graphiques.",
       "label": "Référentiel",
-      "submit": "Enregistrer",
+      "submit": "Enregistrer le référentiel",
       "saved": "Référentiel enregistré.",
       "failed": "L’enregistrement du référentiel a échoué."
     }

@@ -26,7 +26,8 @@ test("l'interface suit le navigateur, puis la langue, le thème et le nom enregi
   expect(await hasHorizontalScroll(page)).toBe(false);
 
   await nav(page).getByRole("link", { name: "Statistics" }).click();
-  await expect(page.getByText("Coming soon")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Statistics" })).toBeVisible();
+  await expect(page.getByText("Does not replace medical advice.")).toBeVisible();
 
   await nav(page).getByRole("link", { name: "Settings" }).click();
   await page.getByLabel("Display name").fill("Alice D.");

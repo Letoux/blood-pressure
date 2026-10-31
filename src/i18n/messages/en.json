@@ -170,7 +170,7 @@
       "title": "Guideline",
       "hint": "The recommendation whose home monitoring threshold is drawn on the charts.",
       "label": "Guideline",
-      "submit": "Save",
+      "submit": "Save guideline",
       "saved": "Guideline saved.",
       "failed": "Saving the guideline failed."
     }

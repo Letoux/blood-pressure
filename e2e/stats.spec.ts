@@ -48,7 +48,7 @@ test("voir ses campagnes face au seuil du référentiel, puis changer de référ
   await guideline.selectOption({ label: "ACC/AHA 2017 (130/80)" });
   const form = page.locator("form").filter({ has: guideline });
   await expect(form.getByText(/^American College of Cardiology/)).toBeVisible();
-  await form.getByRole("button", { name: "Enregistrer" }).click();
+  await form.getByRole("button", { name: "Enregistrer le référentiel" }).click();
   await expect(page.getByText("Référentiel enregistré.")).toBeVisible();
 
   await page.goto("/stats");
