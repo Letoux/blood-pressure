@@ -1,0 +1,2 @@
+-- Migration initiale : la base est vide. Les tables arrivent avec les tickets suivants
+-- (`pnpm db:generate` après chaque modification de src/server/db/schema.ts).
