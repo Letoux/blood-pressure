@@ -57,6 +57,16 @@ export function seedCampaign(email: string, start: string, count: number, values
   });
 }
 
+/** Une campagne prévue le jour `plannedStart`, sans mesure (en retard ou manquée si ce jour est passé). */
+export function seedPlannedCampaign(email: string, plannedStart: string) {
+  return withDb(async (db) => {
+    await db.query("insert into campaign (user_id, planned_start) values ($1, $2)", [
+      await userId(db, email),
+      plannedStart,
+    ]);
+  });
+}
+
 /** Une mesure libre le jour `date`, à midi UTC. */
 export function seedFreeMeasurement(email: string, date: string, values: Values) {
   return withDb(async (db) => {

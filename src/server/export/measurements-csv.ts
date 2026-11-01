@@ -1,6 +1,8 @@
 // Export CSV des mesures (ADR-0001) : RFC 4180 (virgules, CRLF, guillemets doublés), UTF-8 avec
 // BOM pour qu'Excel reconnaisse l'encodage. Fonction pure : les libellés traduits et le fuseau
 // sont fournis par l'appelant (`router/account-export-measurements.ts`).
+import type { CampaignStatus } from "@/domain/campaign";
+import { localDateOf, type LocalDate } from "@/domain/local-date";
 import type { Moment } from "@/domain/slot";
 
 export type CsvColumn =
@@ -14,11 +16,13 @@ export type CsvColumn =
   | "free"
   | "campaign"
   | "campaignDay"
-  | "moment";
+  | "moment"
+  | "campaignStatus";
 
 export type CsvLabels = {
   columns: Record<CsvColumn, string>;
   moments: Record<Moment, string>;
+  statuses: Record<CampaignStatus, string>;
   yes: string;
   no: string;
 };
@@ -33,7 +37,11 @@ export type ExportedMeasurement = {
   /** Libellé lisible de la campagne (sa date de début, `AAAA-MM-JJ`) ; `null` pour une mesure libre. */
   campaign: string | null;
   campaignDay: number | null;
+  campaignStatus: CampaignStatus | null;
 };
+
+/** Une campagne sans mesure, manquée ou sautée (ADR-0011) : une ligne sans valeurs, à sa date prévue. */
+export type ExportedAbsence = { plannedStart: LocalDate; status: "missed" | "skipped" };
 
 const COLUMNS: CsvColumn[] = [
   "date",
@@ -47,6 +55,7 @@ const COLUMNS: CsvColumn[] = [
   "campaign",
   "campaignDay",
   "moment",
+  "campaignStatus",
 ];
 
 const BOM = "﻿";
@@ -68,44 +77,54 @@ function field(value: string | number | null): string {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
-/** Date (`AAAA-MM-JJ`) et heure (`HH:mm`) de l'instant dans le fuseau, lisibles par un tableur. */
-function localDateTime(instant: Date, timeZone: string): { date: string; time: string } {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(instant);
-  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
-  return { date: `${part("year")}-${part("month")}-${part("day")}`, time: `${part("hour")}:${part("minute")}` };
+/** L'heure (`HH:mm`) de l'instant dans le fuseau, lisible par un tableur. */
+function localTime(instant: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(
+    instant,
+  );
 }
 
-/** Le CSV de ces mesures, dans l'ordre donné, avec l'heure dans le fuseau `timeZone`. */
+/**
+ * Le CSV de ces mesures, dans l'ordre donné, avec l'heure dans le fuseau `timeZone`. Chaque
+ * campagne manquée ou sautée y prend place à sa date prévue, avant les mesures de ce jour-là.
+ */
 export function measurementsCsv(
   measurements: ExportedMeasurement[],
+  absences: ExportedAbsence[],
   { timeZone, labels }: { timeZone: string; labels: CsvLabels },
 ): string {
   const header = COLUMNS.map((column) => field(labels.columns[column]));
-  const rows = measurements.map((m) => {
-    const { date, time } = localDateTime(m.takenAt, timeZone);
-    const free = m.campaign === null;
+  const absenceRow = (absence: ExportedAbsence) => {
+    const cells: Partial<Record<CsvColumn, string>> = {
+      date: absence.plannedStart,
+      timeZone,
+      free: labels.no,
+      campaign: absence.plannedStart,
+      campaignStatus: labels.statuses[absence.status],
+    };
+    return COLUMNS.map((column) => field(cells[column] ?? null));
+  };
+  const pending = [...absences].sort((a, b) => (a.plannedStart < b.plannedStart ? -1 : 1));
+  const rows: string[][] = [];
+  for (const m of measurements) {
+    const date = localDateOf(m.takenAt, timeZone);
+    while (pending[0] && pending[0].plannedStart <= date) rows.push(absenceRow(pending.shift()!));
     const cells: Record<CsvColumn, string | number | null> = {
       date,
-      time,
+      time: localTime(m.takenAt, timeZone),
       timeZone,
       systolic: m.systolic,
       diastolic: m.diastolic,
       pulse: m.pulse,
       comment: m.comment === null ? null : neutralizeFormula(m.comment),
-      free: free ? labels.yes : labels.no,
+      free: m.campaign === null ? labels.yes : labels.no,
       campaign: m.campaign,
       campaignDay: m.campaignDay,
       moment: labels.moments[m.moment],
+      campaignStatus: m.campaignStatus === null ? null : labels.statuses[m.campaignStatus],
     };
-    return COLUMNS.map((column) => field(cells[column]));
-  });
+    rows.push(COLUMNS.map((column) => field(cells[column])));
+  }
+  rows.push(...pending.map(absenceRow));
   return BOM + [header, ...rows].map((cells) => cells.join(",") + CRLF).join("");
 }

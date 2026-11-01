@@ -35,7 +35,8 @@ export function BottomNav({ role }: { role: string | null | undefined }) {
                 )}
               >
                 <Icon className={cn("size-5 shrink-0", active && "stroke-[2.5]")} aria-hidden />
-                <span className="w-full truncate text-center">{t(label)}</span>
+                {/* Deux lignes au plus : « Compte rendu » tient entier à 360 px. */}
+                <span className="line-clamp-2 w-full text-center break-words">{t(label)}</span>
               </Link>
             </li>
           );

@@ -4,25 +4,26 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Printer } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
+import { CampaignAverages } from "@/components/campaign-averages";
 import { CampaignChart } from "@/components/campaign-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { EXPECTED_MEASUREMENTS, type Average } from "@/domain/campaign";
+import { EXPECTED_MEASUREMENTS, type Average, type CampaignView } from "@/domain/campaign";
 import { guidelineOf, positionOf, type Guideline } from "@/domain/guideline";
 import { DEFAULT_REPORT_PERIOD, REPORT_PERIODS, type Delta, type Report, type ReportCampaign, type ReportPeriod } from "@/domain/report";
 import type { CampaignDay } from "@/domain/slot";
-import { useCampaignFormat } from "@/lib/campaign-format";
+import { mmHg, useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
 
 type Measurement = NonNullable<ReturnType<typeof useCampaignMeasurements>>[number];
 
-const round = Math.round;
+
 
 /** « +4 », « −2 » (vrai signe moins), « 0 ». */
 function signed(value: number) {
-  const rounded = round(value);
+  const rounded = mmHg(value);
   return rounded > 0 ? `+${rounded}` : rounded < 0 ? `−${-rounded}` : "0";
 }
 
@@ -98,9 +99,40 @@ export function ReportView({ userName }: { userName: string }) {
               ))}
             </section>
           )}
+          {data.absent.length > 0 && <AbsentCampaigns campaigns={data.absent} />}
         </>
       )}
     </div>
+  );
+}
+
+/** Les campagnes manquées ou sautées de la période (ADR-0011), en liste compacte. */
+function AbsentCampaigns({ campaigns }: { campaigns: CampaignView[] }) {
+  const t = useTranslations("report.absent");
+  const tc = useTranslations("campaigns");
+  const format = useCampaignFormat();
+  return (
+    <section aria-labelledby="report-absent-title" className="flex flex-col gap-2 print:break-inside-avoid">
+      <h2 id="report-absent-title" className="text-lg font-semibold">
+        {t("title")}
+      </h2>
+      <ul className="flex flex-col divide-y rounded-xl border text-sm">
+        {[...campaigns].reverse().map((campaign) => (
+          <li key={campaign.id ?? campaign.plannedStart} className="flex flex-wrap justify-between gap-x-3 px-3 py-2">
+            <span>
+              {campaign.status === "skipped" && campaign.skippedOn
+                ? tc("history.skippedOn", {
+                    date: format.date(campaign.plannedStart, "medium"),
+                    skippedOn: format.date(campaign.skippedOn, "medium"),
+                  })
+                : tc("history.plannedOn", { date: format.date(campaign.plannedStart, "medium") })}
+              {campaign.catchUp && ` · ${tc("catchUp")}`}
+            </span>
+            <span className="text-muted-foreground">{tc(`status.${campaign.status}`)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -111,7 +143,7 @@ function AverageValue({ label, average }: { label: string; average: Average | nu
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="font-semibold tabular-nums">
         {average
-          ? t("average", { systolic: round(average.systolic), diastolic: round(average.diastolic) })
+          ? t("average", { systolic: mmHg(average.systolic), diastolic: mmHg(average.diastolic) })
           : t("noAverage")}
       </dd>
     </div>
@@ -138,9 +170,12 @@ function Summary({ report, guideline }: { report: Report; guideline: Guideline }
               {t("count", {
                 count: summary.campaignCount,
                 complete: summary.completeCount,
-                share: round((summary.completeShare ?? 0) * 100),
+                share: Math.round((summary.completeShare ?? 0) * 100),
               })}
             </p>
+            {(summary.missedCount > 0 || summary.skippedCount > 0) && (
+              <p className="text-sm">{t("absent", { missed: summary.missedCount, skipped: summary.skippedCount })}</p>
+            )}
             <dl className="grid grid-cols-3 gap-2">
               <AverageValue label={t("global")} average={global} />
               <AverageValue label={t("morning")} average={summary.averages.morning} />
@@ -181,7 +216,6 @@ function CampaignCard({ entry, measurements }: { entry: ReportCampaign; measurem
   const tc = useTranslations("campaigns");
   const format = useCampaignFormat();
   const { campaign, complete, delta } = entry;
-  const { global, morning, evening } = campaign.averages;
   const start = campaign.actualStart ?? campaign.plannedStart;
 
   return (
@@ -212,13 +246,7 @@ function CampaignCard({ entry, measurements }: { entry: ReportCampaign; measurem
             {tc("completeness", { count: campaign.completeness, total: EXPECTED_MEASUREMENTS })}
           </p>
         )}
-        {global && (
-          <p className="text-sm tabular-nums">
-            {tc("history.average", { systolic: round(global.systolic), diastolic: round(global.diastolic), count: global.count })}
-            {morning && ` · ${tc("history.morning", { systolic: round(morning.systolic), diastolic: round(morning.diastolic) })}`}
-            {evening && ` · ${tc("history.evening", { systolic: round(evening.systolic), diastolic: round(evening.diastolic) })}`}
-          </p>
-        )}
+        <CampaignAverages averages={campaign.averages} />
         <DeltaLine delta={delta} />
         {measurements && measurements.length > 0 && (
           <>

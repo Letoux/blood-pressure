@@ -12,7 +12,7 @@ describe("export et suppression du compte", () => {
   let admin: Headers;
 
   async function createUser(name: string) {
-    const email = `${name.toLowerCase()}@example.org`;
+    const email = `${name.toLowerCase()}-${crypto.randomUUID()}@example.org`;
     const password = `${name.toLowerCase()}-password`;
     await api.as(admin).admin.createUser({ email, name, password });
     return { email, password, headers: await api.signIn(email, password) };
@@ -59,14 +59,14 @@ describe("export et suppression du compte", () => {
       expect(csv.startsWith("﻿")).toBe(true);
       const [header, ...rows] = csvLines(csv);
       expect(header).toBe(
-        "Date,Heure,Fuseau horaire,Systolique (mmHg),Diastolique (mmHg),Pouls (bpm),Commentaire,Mesure libre,Campagne,Jour de campagne,Moment",
+        "Date,Heure,Fuseau horaire,Systolique (mmHg),Diastolique (mmHg),Pouls (bpm),Commentaire,Mesure libre,Campagne,Jour de campagne,Moment,Statut de la campagne",
       );
       // Les mesures d'un même créneau ont le même horodatage : leur ordre entre elles est libre.
       expect(rows.slice(0, 2).sort()).toEqual([
-        "2026-10-30,07:30,Europe/Paris,128,82,70,,oui,,,Matin",
-        "2026-10-30,07:30,Europe/Paris,131,84,72,,oui,,,Matin",
+        "2026-10-30,07:30,Europe/Paris,128,82,70,,oui,,,Matin,",
+        "2026-10-30,07:30,Europe/Paris,131,84,72,,oui,,,Matin,",
       ]);
-      expect(rows.slice(2)).toEqual(["2026-10-30,21:15,Europe/Paris,141,91,80,'=1+1,oui,,,Soir"]);
+      expect(rows.slice(2)).toEqual(["2026-10-30,21:15,Europe/Paris,141,91,80,'=1+1,oui,,,Soir,"]);
       expect(csv).not.toContain("177");
     });
 
@@ -76,7 +76,7 @@ describe("export et suppression du compte", () => {
       const { csv } = await api.as(carol.headers).account.exportMeasurements({ locale: "en" });
 
       expect(csvLines(csv)).toEqual([
-        "Date,Time,Time zone,Systolic (mmHg),Diastolic (mmHg),Pulse (bpm),Comment,Free measurement,Campaign,Campaign day,Moment",
+        "Date,Time,Time zone,Systolic (mmHg),Diastolic (mmHg),Pulse (bpm),Comment,Free measurement,Campaign,Campaign day,Moment,Campaign status",
       ]);
     });
 
@@ -93,7 +93,23 @@ describe("export et suppression du compte", () => {
 
       const { csv } = await at.account.exportMeasurements({ locale: "fr" });
 
-      expect(csvLines(csv)[1]).toBe("2026-02-02,07:00,Asia/Tokyo,131,84,72,,non,2026-02-02,1,Matin");
+      expect(csvLines(csv)[1]).toBe("2026-02-02,07:00,Asia/Tokyo,131,84,72,,non,2026-02-02,1,Matin,En cours");
+    });
+
+    it("garde la trace des campagnes manquées et sautées (ADR-0011)", async () => {
+      const erin = await createUser("Erin");
+      await api.as(erin.headers).settings.update({ timeZone: "Europe/Paris" });
+      await api.as(erin.headers, { now: new Date("2026-02-01T10:00:00+01:00") }).campaigns.schedule({ start: "2026-02-02" });
+      // Manquée le 9 février ; le rattrapage du 9 est sauté le 10.
+      const at = api.as(erin.headers, { now: new Date("2026-02-10T10:00:00+01:00") });
+      await at.campaigns.skip();
+
+      const { csv } = await at.account.exportMeasurements({ locale: "fr" });
+
+      expect(csvLines(csv).slice(1)).toEqual([
+        "2026-02-02,,Europe/Paris,,,,,non,2026-02-02,,,Manquée",
+        "2026-02-09,,Europe/Paris,,,,,non,2026-02-09,,,Sautée",
+      ]);
     });
 
     it("est interdit à l'admin, qui n'a pas de mesures et ne peut exporter celles de personne", async () => {

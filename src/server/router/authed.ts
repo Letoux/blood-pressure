@@ -12,7 +12,7 @@ export const authed = base.use(async ({ context, next }) => {
 });
 
 /**
- * Procédures sur les données d'un utilisateur (mesures, campagnes, réglages, compte rendu…) :
+ * Procédures sur les données de santé d'un utilisateur (mesures, campagnes, compte rendu, export, rappels…) :
  * l'admin n'y a jamais accès (ADR-0004). `access.int.test.ts` le vérifie pour tout le routeur.
  */
 export const userOnly = authed.use(async ({ context, next }) => {

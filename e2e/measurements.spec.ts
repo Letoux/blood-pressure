@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { createUserAsAdmin, signIn, test, uniqueUser } from "./helpers";
+import { createUserAsAdmin, hasHorizontalOverflow, signIn, test, uniqueUser } from "./helpers";
 
 async function fillRow(page: Page, number: number, [systolic, diastolic, pulse]: [string, string, string]) {
   await page.getByLabel(`Systolique, mesure ${number}`).fill(systolic);
@@ -58,7 +58,7 @@ test("saisir 3 mesures d'un créneau, puis les voir, les modifier et les supprim
   await expect(items).toHaveCount(2);
   await expect(list.getByText("182/100 mmHg")).toHaveCount(0);
 
-  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
 });
 
 test("une ligne incomplète ou invalide est signalée et rien n'est enregistré", async ({ page, request }) => {

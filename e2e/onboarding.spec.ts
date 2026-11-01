@@ -9,8 +9,8 @@ test("le premier lancement s'affiche une seule fois, chaque étape se passe et s
   await createUserAsAdmin(request, user, { onboarded: false });
   await signIn(page, user);
 
-  // 1. Protocole de mesure. (Délai large : en développement, la page se compile à la première visite.)
-  await expect(page.getByText("Étape 1 sur 4")).toBeVisible({ timeout: 30_000 });
+  // 1. Protocole de mesure.
+  await expect(page.getByText("Étape 1 sur 4")).toBeVisible();
   await expect(page).toHaveURL(/\/welcome$/);
   await expect(page.getByRole("heading", { name: "Protocole de mesure" })).toBeVisible();
   await expect(page.getByText("assis depuis 5 minutes")).toBeVisible();
@@ -51,8 +51,9 @@ test("le premier lancement s'affiche une seule fois, chaque étape se passe et s
   await expect(page.getByText("Étape 1 sur 4")).toBeVisible();
 });
 
-test("le protocole est aussi disponible en anglais", async ({ browser, request }) => {
-  const context = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US" });
+test("le protocole est aussi disponible en anglais", async ({ browser, request, extraHTTPHeaders }) => {
+  // Même IP cliente propre au test (`helpers.ts`) que le contexte par défaut.
+  const context = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US", extraHTTPHeaders });
   const page = await context.newPage();
   const user = uniqueUser("Max");
   await createUserAsAdmin(request, user, { onboarded: false });

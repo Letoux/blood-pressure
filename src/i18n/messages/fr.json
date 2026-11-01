@@ -15,10 +15,6 @@
   "common": {
     "signOut": "Se déconnecter"
   },
-  "comingSoon": {
-    "title": "Bientôt",
-    "description": "Cette page arrive dans une prochaine version."
-  },
   "home": {
     "greeting": "Bonjour {name}",
     "signedInAs": "Connecté en tant que {email}",
@@ -152,7 +148,8 @@
           "free": "Mesure libre",
           "campaign": "Campagne",
           "campaignDay": "Jour de campagne",
-          "moment": "Moment"
+          "moment": "Moment",
+          "campaignStatus": "Statut de la campagne"
         },
         "yes": "oui",
         "no": "non"
@@ -284,7 +281,8 @@
       "inProgress": "En cours",
       "finished": "Terminée",
       "incomplete": "Incomplète",
-      "missed": "Manquée"
+      "missed": "Manquée",
+      "skipped": "Sautée"
     },
     "completeness": "{count}/{total} mesures",
     "missingSlots": "Créneaux manquants : {slots}",
@@ -303,7 +301,10 @@
     "next": {
       "title": "Prochaine campagne",
       "on": "Le {date}",
-      "startsToday": "Votre campagne peut commencer aujourd’hui : votre première saisie en sera le J1."
+      "startsToday": "Votre campagne peut commencer aujourd’hui : votre première saisie en sera le J1.",
+      "catchUpTitle": "Campagne de rattrapage",
+      "catchUp": "La campagne du {date} a été manquée : faites cette campagne de rattrapage dès que possible.",
+      "late": "Prévue le {date}, elle est en retard : votre première mesure d’ici le {startBy} la commencera (ce jour-là sera son J1)."
     },
     "current": {
       "title": "Campagne en cours",
@@ -326,7 +327,17 @@
       "delete": "Supprimer la campagne",
       "confirmDelete": "Supprimer la campagne et ses mesures",
       "cancel": "Annuler",
-      "failed": "La suppression a échoué."
+      "failed": "La suppression a échoué.",
+      "skippedOn": "Prévue le {date}, sautée le {skippedOn}",
+      "catchUpOf": "Rattrapage de la campagne du {date}"
+    },
+    "catchUp": "Rattrapage",
+    "skip": {
+      "button": "Sauter la campagne",
+      "explain": "En voyage ou sans tensiomètre ? Sautez cette campagne : elle restera visible comme « sautée », et la suivante sera planifiée selon votre fréquence.",
+      "confirm": "Confirmer : sauter la campagne",
+      "cancel": "Annuler",
+      "failed": "Impossible de sauter cette campagne."
     }
   },
   "chart": {
@@ -420,7 +431,8 @@
       "evening": "Soir",
       "average": "{systolic}/{diastolic}",
       "noAverage": "–",
-      "position": "Moyenne de la période :"
+      "position": "Moyenne de la période :",
+      "absent": "{missed, plural, =0 {Aucune campagne manquée} one {# campagne manquée} other {# campagnes manquées}}, {skipped, plural, =0 {aucune sautée} one {# sautée} other {# sautées}}"
     },
     "campaigns": {
       "title": "Campagnes",
@@ -433,6 +445,9 @@
         "slot": "Créneau",
         "time": "Date et heure"
       }
+    },
+    "absent": {
+      "title": "Campagnes manquées ou sautées"
     }
   },
   "reminders": {

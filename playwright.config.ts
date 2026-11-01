@@ -12,7 +12,11 @@ const serve = isCi ? `PORT=${port} pnpm start` : `pnpm dev --port ${port}`;
 export default defineConfig({
   testDir: "./e2e",
   forbidOnly: isCi,
-  retries: isCi ? 1 : 0,
+  // Pas de nouvel essai : un test instable doit échouer, pas passer en silence.
+  retries: 0,
+  // En local (`pnpm dev`), chaque route se compile à sa première visite : avec trop de workers,
+  // ces compilations dépassent les délais des `expect`. En CI, le serveur est déjà construit.
+  workers: isCi ? undefined : 2,
   reporter: isCi ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL,

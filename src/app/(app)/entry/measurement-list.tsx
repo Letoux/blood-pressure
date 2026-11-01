@@ -12,6 +12,7 @@ import { isAlertValue, readEntryRows, type EntryRow } from "@/domain/measurement
 import { MOMENTS, type Moment } from "@/domain/slot";
 import { useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 import { fromDateTimeLocal, toDateTimeLocal } from "./entry-draft";
 import { AlertValueWarning, EntryErrors, type EntryError } from "./measurement-messages";
 
@@ -55,6 +56,7 @@ function MeasurementItem({ measurement }: { measurement: Measurement }) {
   const t = useTranslations("measurements");
   const format = useFormatter();
   const queryClient = useQueryClient();
+  const online = useOnline();
   const [mode, setMode] = useState<"view" | "edit" | "confirmDelete">("view");
   const campaignFormat = useCampaignFormat();
   const refresh = () =>
@@ -99,7 +101,7 @@ function MeasurementItem({ measurement }: { measurement: Measurement }) {
               <Button
                 variant="destructive"
                 size="sm"
-                disabled={remove.isPending}
+                disabled={!online || remove.isPending}
                 onClick={() => remove.mutate({ id: measurement.id })}
               >
                 {t("list.confirmDelete")}
@@ -134,6 +136,7 @@ function MeasurementEditor({ measurement, onDone }: { measurement: Measurement; 
     diastolic: String(measurement.diastolic),
     pulse: String(measurement.pulse),
   });
+  const online = useOnline();
   const [comment, setComment] = useState(measurement.comment ?? "");
   const [errors, setErrors] = useState<EntryError[]>([]);
   const update = useMutation(
@@ -230,7 +233,7 @@ function MeasurementEditor({ measurement, onDone }: { measurement: Measurement; 
             </p>
           )}
           <div className="flex flex-wrap gap-2">
-            <Button type="submit" size="sm" disabled={update.isPending}>
+            <Button type="submit" size="sm" disabled={!online || update.isPending}>
               {t("list.save")}
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={onDone}>

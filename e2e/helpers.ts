@@ -58,3 +58,11 @@ export async function signIn(page: Page, user: { email: string; password: string
   await page.locator('input[name="password"]').fill(user.password);
   await page.locator('button[type="submit"]').click();
 }
+
+/**
+ * Vrai si la page défile horizontalement. `clientWidth`, pas `window.innerWidth` : sur un appareil
+ * mobile émulé (`isMobile`), `innerWidth` grandit avec le contenu et masquerait le débordement.
+ */
+export function hasHorizontalOverflow(page: Page): Promise<boolean> {
+  return page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+}

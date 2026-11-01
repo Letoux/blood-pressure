@@ -5,6 +5,7 @@ import { ORPCError } from "@orpc/client";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
+import { CampaignAverages } from "@/components/campaign-averages";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -110,29 +111,82 @@ function FirstCampaign({ today }: { today: LocalDate }) {
   );
 }
 
+/**
+ * La prochaine campagne : sa date, ou son retard (fenêtre de début de 7 jours), ou le rattrapage
+ * d'une campagne manquée (ADR-0011). Avancer ou reporter, et la sauter si elle est en retard ou
+ * de rattrapage.
+ */
 function NextCampaign({ overview }: { overview: CampaignOverview }) {
   const t = useTranslations("campaigns");
   const format = useCampaignFormat();
   const next = overview.next;
   if (!next) return null;
-  const startsToday = overview.todaySlots !== null;
+  const description = next.late
+    ? t("next.late", { date: format.date(next.plannedStart, "full"), startBy: format.date(next.startBy, "full") })
+    : overview.todaySlots !== null
+      ? t("next.startsToday")
+      : t("next.on", { date: format.date(next.plannedStart, "full") });
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("next.title")}</CardTitle>
-        <CardDescription>
-          {startsToday ? t("next.startsToday") : t("next.on", { date: format.date(next.plannedStart, "full") })}
-        </CardDescription>
+        <CardTitle>{next.catchUp ? t("next.catchUpTitle") : t("next.title")}</CardTitle>
+        {next.catchUp && next.originalStart && (
+          <CardDescription>{t("next.catchUp", { date: format.date(next.originalStart, "full") })}</CardDescription>
+        )}
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
         <ScheduleForm
           key={next.plannedStart}
-          defaultDate={next.plannedStart}
+          defaultDate={next.plannedStart < overview.today ? overview.today : next.plannedStart}
           min={overview.today}
           submitLabel={t("schedule.move")}
         />
+        {next.skippable && <SkipCampaign />}
       </CardContent>
     </Card>
+  );
+}
+
+/** « Sauter la campagne » (en voyage, sans tensiomètre…), avec confirmation. */
+function SkipCampaign() {
+  const t = useTranslations("campaigns.skip");
+  const online = useOnline();
+  const queryClient = useQueryClient();
+  const [confirming, setConfirming] = useState(false);
+  const skip = useMutation(
+    orpc.campaigns.skip.mutationOptions({
+      onSuccess: (overview) => {
+        setConfirming(false);
+        queryClient.setQueryData(orpc.campaigns.overview.queryKey(), overview);
+      },
+    }),
+  );
+  return (
+    <div className="flex flex-col gap-2 border-t pt-4">
+      <p className="text-sm text-muted-foreground">{t("explain")}</p>
+      {skip.isError && (
+        <p role="alert" className="text-sm text-destructive">
+          {t("failed")}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {confirming ? (
+          <>
+            <Button variant="destructive" size="sm" disabled={!online || skip.isPending} onClick={() => skip.mutate({})}>
+              {t("confirm")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setConfirming(false)}>
+              {t("cancel")}
+            </Button>
+          </>
+        ) : (
+          <Button variant="outline" size="sm" onClick={() => setConfirming(true)}>
+            {t("button")}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -206,8 +260,6 @@ function TodaySlots({ overview }: { overview: CampaignOverview }) {
   );
 }
 
-const round = (value: number) => Math.round(value);
-
 function CampaignHistory({ campaigns }: { campaigns: CampaignView[] }) {
   const t = useTranslations("campaigns.history");
   return (
@@ -217,7 +269,8 @@ function CampaignHistory({ campaigns }: { campaigns: CampaignView[] }) {
       </h2>
       <ul className="flex flex-col gap-3">
         {campaigns.map((campaign) => (
-          <li key={campaign.id}>
+          // Une campagne manquée calculée n'a pas encore d'identifiant : sa date prévue est unique.
+          <li key={campaign.id ?? campaign.plannedStart}>
             <CampaignItem campaign={campaign} />
           </li>
         ))}
@@ -226,9 +279,75 @@ function CampaignHistory({ campaigns }: { campaigns: CampaignView[] }) {
   );
 }
 
+/** Le titre d'une campagne de l'historique : ses dates, ou sa date prévue sans mesure. */
+function useCampaignTitle(campaign: CampaignView) {
+  const t = useTranslations("campaigns.history");
+  const format = useCampaignFormat();
+  if (campaign.actualStart) {
+    return t("from", { start: format.date(campaign.actualStart, "medium"), end: format.date(campaign.endDate, "medium") });
+  }
+  if (campaign.status === "skipped" && campaign.skippedOn) {
+    return t("skippedOn", {
+      date: format.date(campaign.plannedStart, "medium"),
+      skippedOn: format.date(campaign.skippedOn, "medium"),
+    });
+  }
+  return t("plannedOn", { date: format.date(campaign.plannedStart, "medium") });
+}
+
 function CampaignItem({ campaign }: { campaign: CampaignView }) {
   const t = useTranslations("campaigns");
   const format = useCampaignFormat();
+  const title = useCampaignTitle(campaign);
+  const started = campaign.actualStart !== null;
+
+  return (
+    <Card className="gap-2 py-4">
+      <CardContent className="flex flex-col gap-2 px-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <p className="font-semibold">{title}</p>
+          <span className="flex gap-1">
+            {campaign.catchUp && (
+              <span className="rounded-full border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                {t("catchUp")}
+              </span>
+            )}
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-xs font-medium",
+                campaign.status === "finished" && "border-primary/40 text-primary",
+                (campaign.status === "incomplete" || campaign.status === "missed") && "border-destructive/40 text-destructive",
+                (campaign.status === "inProgress" || campaign.status === "skipped") && "border-border text-muted-foreground",
+              )}
+            >
+              {t(`status.${campaign.status}`)}
+            </span>
+          </span>
+        </div>
+        {campaign.catchUp && campaign.originalStart && (
+          <p className="text-sm text-muted-foreground">
+            {t("history.catchUpOf", { date: format.date(campaign.originalStart, "medium") })}
+          </p>
+        )}
+        {started && (
+          <p className="text-sm tabular-nums">
+            {t("completeness", { count: campaign.completeness, total: EXPECTED_MEASUREMENTS })}
+          </p>
+        )}
+        {started && campaign.missingSlots.length > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {t("missingSlots", { slots: campaign.missingSlots.map(format.slot).join(", ") })}
+          </p>
+        )}
+        <CampaignAverages averages={campaign.averages} />
+        {campaign.id && <DeleteCampaign campaignId={campaign.id} />}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DeleteCampaign({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("campaigns.history");
   const queryClient = useQueryClient();
   const online = useOnline();
   const [confirming, setConfirming] = useState(false);
@@ -240,76 +359,34 @@ function CampaignItem({ campaign }: { campaign: CampaignView }) {
       },
     }),
   );
-  const { global, morning, evening } = campaign.averages;
-  const start = campaign.actualStart ?? campaign.plannedStart;
-
   return (
-    <Card className="gap-2 py-4">
-      <CardContent className="flex flex-col gap-2 px-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <p className="font-semibold">
-            {campaign.actualStart
-              ? t("history.from", { start: format.date(start, "medium"), end: format.date(campaign.endDate, "medium") })
-              : t("history.plannedOn", { date: format.date(start, "medium") })}
-          </p>
-          <span
-            className={cn(
-              "rounded-full border px-2 py-0.5 text-xs font-medium",
-              campaign.status === "finished" ? "border-primary/40 text-primary" : "border-destructive/40 text-destructive",
-              campaign.status === "inProgress" && "border-border text-foreground",
-            )}
-          >
-            {t(`status.${campaign.status}`)}
-          </span>
-        </div>
-        {campaign.status !== "missed" && (
-          <p className="text-sm tabular-nums">
-            {t("completeness", { count: campaign.completeness, total: EXPECTED_MEASUREMENTS })}
-          </p>
-        )}
-        {campaign.status !== "missed" && campaign.missingSlots.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {t("missingSlots", { slots: campaign.missingSlots.map(format.slot).join(", ") })}
-          </p>
-        )}
-        {global && (
-          <p className="text-sm tabular-nums">
-            {t("history.average", {
-              systolic: round(global.systolic),
-              diastolic: round(global.diastolic),
-              count: global.count,
-            })}
-            {morning && ` · ${t("history.morning", { systolic: round(morning.systolic), diastolic: round(morning.diastolic) })}`}
-            {evening && ` · ${t("history.evening", { systolic: round(evening.systolic), diastolic: round(evening.diastolic) })}`}
-          </p>
-        )}
-        {remove.isError && (
-          <p role="alert" className="text-sm text-destructive">
-            {t("history.failed")}
-          </p>
-        )}
-        <div className="flex flex-wrap gap-2">
-          {confirming ? (
-            <>
-              <Button
-                variant="destructive"
-                size="sm"
-                disabled={!online || remove.isPending}
-                onClick={() => remove.mutate({ id: campaign.id })}
-              >
-                {t("history.confirmDelete")}
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setConfirming(false)}>
-                {t("history.cancel")}
-              </Button>
-            </>
-          ) : (
-            <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
-              {t("history.delete")}
+    <>
+      {remove.isError && (
+        <p role="alert" className="text-sm text-destructive">
+          {t("failed")}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {confirming ? (
+          <>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={!online || remove.isPending}
+              onClick={() => remove.mutate({ id: campaignId })}
+            >
+              {t("confirmDelete")}
             </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            <Button variant="outline" size="sm" onClick={() => setConfirming(false)}>
+              {t("cancel")}
+            </Button>
+          </>
+        ) : (
+          <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
+            {t("delete")}
+          </Button>
+        )}
+      </div>
+    </>
   );
 }

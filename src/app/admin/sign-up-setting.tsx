@@ -4,11 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 
 /** L'admin ouvre ou ferme l'inscription libre (fermée par défaut, ADR-0004). */
 export function SignUpSetting() {
   const t = useTranslations("admin.signUp");
   const queryClient = useQueryClient();
+  const online = useOnline();
   const settings = useQuery(orpc.admin.getSettings.queryOptions());
   const setOpen = useMutation(
     orpc.admin.setSignUpOpen.mutationOptions({
@@ -29,7 +31,7 @@ export function SignUpSetting() {
             type="checkbox"
             className="size-4 accent-primary"
             checked={settings.data?.signUpOpen ?? false}
-            disabled={!settings.data || setOpen.isPending}
+            disabled={!online || !settings.data || setOpen.isPending}
             onChange={(event) => setOpen.mutate({ open: event.target.checked })}
           />
           {t("label")}

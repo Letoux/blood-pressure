@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 
 /** Après une réinitialisation par l'admin : propose, sans l'imposer, de changer de mot de passe. */
 export function PasswordChangeBanner() {
   const t = useTranslations("passwordBanner");
   const queryClient = useQueryClient();
+  const online = useOnline();
   const me = useQuery(orpc.me.queryOptions());
   const dismiss = useMutation(
     orpc.account.dismissPasswordChangeSuggestion.mutationOptions({
@@ -29,7 +31,7 @@ export function PasswordChangeBanner() {
         <Button asChild size="sm">
           <Link href="/settings">{t("action")}</Link>
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => dismiss.mutate(undefined)} disabled={dismiss.isPending}>
+        <Button size="sm" variant="ghost" onClick={() => dismiss.mutate(undefined)} disabled={!online || dismiss.isPending}>
           {t("dismiss")}
         </Button>
       </div>

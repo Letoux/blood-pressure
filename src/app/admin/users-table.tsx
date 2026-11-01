@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 import { MIN_PASSWORD_LENGTH } from "@/server/auth/password-policy";
 
 type Action = "disable" | "enable" | "revokeSessions" | "resetPassword" | "delete";
@@ -31,6 +32,9 @@ export function UsersTable() {
   const revoke = useMutation(orpc.admin.revokeSessions.mutationOptions(options("revokeSessions")));
   const reset = useMutation(orpc.admin.resetPassword.mutationOptions(options("resetPassword")));
   const remove = useMutation(orpc.admin.deleteUser.mutationOptions(options("delete")));
+  const online = useOnline();
+  // Hors ligne ou pendant une action en cours : aucune autre action sur les comptes.
+  const busy = !online || [disable, enable, revoke, reset, remove].some((mutation) => mutation.isPending);
 
   function resetPassword(userId: string, email: string) {
     const temporaryPassword = window.prompt(t("temporaryPasswordPrompt", { email }));
@@ -77,6 +81,7 @@ export function UsersTable() {
                   {user.status === "active" ? (
                     <Button
                       size="sm"
+                      disabled={busy}
                       variant="outline"
                       onClick={() =>
                         window.confirm(t("confirmDisable", { email: user.email })) &&
@@ -86,18 +91,19 @@ export function UsersTable() {
                       {t("disable")}
                     </Button>
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => enable.mutate({ userId: user.id })}>
+                    <Button size="sm" variant="outline" disabled={busy} onClick={() => enable.mutate({ userId: user.id })}>
                       {t("enable")}
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => revoke.mutate({ userId: user.id })}>
+                  <Button size="sm" variant="outline" disabled={busy} onClick={() => revoke.mutate({ userId: user.id })}>
                     {t("revokeSessions")}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => resetPassword(user.id, user.email)}>
+                  <Button size="sm" variant="outline" disabled={busy} onClick={() => resetPassword(user.id, user.email)}>
                     {t("resetPassword")}
                   </Button>
                   <Button
                     size="sm"
+                    disabled={busy}
                     variant="destructive"
                     onClick={() =>
                       window.confirm(t("confirmDelete", { email: user.email })) &&

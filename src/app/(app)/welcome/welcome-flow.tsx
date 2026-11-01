@@ -8,6 +8,7 @@ import { PageTitle } from "@/components/page-title";
 import { Protocol } from "@/components/protocol";
 import { Button } from "@/components/ui/button";
 import { orpc } from "@/lib/orpc";
+import { useOnline } from "@/lib/use-online";
 import { InstallGuide } from "../install/install-guide";
 import { NotificationCard } from "../settings/notification-card";
 import { ReminderSettingsForm } from "../settings/reminder-settings-form";
@@ -19,6 +20,7 @@ export function WelcomeFlow() {
   const t = useTranslations("welcome");
   const router = useRouter();
   const queryClient = useQueryClient();
+  const online = useOnline();
   const [index, setIndex] = useState(0);
   const step = STEPS[index]!;
   const last = index === STEPS.length - 1;
@@ -32,7 +34,8 @@ export function WelcomeFlow() {
     }),
   );
   const seen = () => {
-    if (markOnboarded.isIdle) markOnboarded.mutate({ onboarded: true });
+    // Hors ligne, rien n'est enregistré : ce sera fait à la prochaine étape franchie en ligne.
+    if (online && markOnboarded.isIdle) markOnboarded.mutate({ onboarded: true });
   };
 
   const finish = () => router.push("/");

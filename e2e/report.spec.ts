@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { createUserAsAdmin, signIn, test, uniqueUser } from "./helpers";
+import { createUserAsAdmin, hasHorizontalOverflow, signIn, test, uniqueUser } from "./helpers";
 import { daysAgo, seedCampaign, seedFreeMeasurement } from "./seed";
 
 test.use({ timezoneId: "Europe/Paris", viewport: { width: 360, height: 780 } });
@@ -40,7 +40,7 @@ test("compte rendu sur « tout » : carte de campagne incomplète, à l'écran e
 
   // Les mesures libres sont absentes du compte rendu.
   await expect(page.getByText(/171/)).toHaveCount(0);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  expect(await hasHorizontalOverflow(page)).toBe(false);
 
   // Impression : navigation masquée, bandeau conservé, tableaux dépliés, en-tête nom et période.
   await page.evaluate(() => {
