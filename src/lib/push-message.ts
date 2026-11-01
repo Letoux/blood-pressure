@@ -13,7 +13,7 @@ export type PushMessage = {
 /**
  * Le message reçu par le service worker, à partir du texte de l'événement `push`. Un message
  * illisible donne une notification générique ; une `url` qui n'est pas un chemin de l'app
- * (autre site, `//hôte`) est remplacée par l'accueil.
+ * (autre site, `//hôte`, `/\hôte`) est remplacée par l'accueil.
  */
 export function parsePushMessage(text: string | null | undefined, fallbackTitle: string): PushMessage {
   let data: Record<string, unknown> = {};
@@ -29,7 +29,22 @@ export function parsePushMessage(text: string | null | undefined, fallbackTitle:
   return {
     title: string(data.title) ?? fallbackTitle,
     body: string(data.body) ?? "",
-    url: url && url.startsWith("/") && !url.startsWith("//") ? url : "/",
+    url: url && isAppPath(url) ? url : "/",
     ...(tag ? { tag } : {}),
   };
+}
+
+const PROBE_ORIGIN = "https://app.invalid";
+
+/**
+ * Chemin qui reste dans l'app une fois résolu comme le fait le service worker
+ * (`new URL(url, origine)`) : `/\hôte` ou `/<tab>/hôte` deviennent `https://hôte/`.
+ */
+function isAppPath(url: string): boolean {
+  if (!url.startsWith("/")) return false;
+  try {
+    return new URL(url, PROBE_ORIGIN).origin === PROBE_ORIGIN;
+  } catch {
+    return false;
+  }
 }
