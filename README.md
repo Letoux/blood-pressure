@@ -21,7 +21,10 @@ Prérequis : Docker avec le plugin Compose 2.23.1 ou plus récent (`docker compo
 2. Remplissez `.env`. Chaque variable y est commentée. Au minimum :
    - `APP_URL` : l'adresse publique en `https://`, sans slash final (par exemple `https://tension.example.org`) ;
    - `POSTGRES_PASSWORD` : un mot de passe long, uniquement avec des caractères sûrs dans une URL (`openssl rand -hex 24`) ;
-   - `ADMIN_EMAIL` et `ADMIN_PASSWORD` (10 caractères minimum) : le compte admin, qui gère les comptes mais n'a jamais accès aux mesures ([ADR-0004](docs/adr/0004-admin-hors-donnees-de-sante.md)).
+   - `ADMIN_EMAIL` et `ADMIN_PASSWORD` (10 caractères minimum) : le compte admin, qui gère les comptes mais n'a jamais accès aux mesures ([ADR-0004](docs/adr/0004-admin-hors-donnees-de-sante.md)) ;
+   - `BETTER_AUTH_SECRET` : la clé de signature des sessions, 32 caractères minimum (`openssl rand -hex 32`).
+
+   L'app refuse de démarrer si `ADMIN_PASSWORD` ou `BETTER_AUTH_SECRET` valent encore l'exemple du template (`remplacer-…`).
 3. Lancez :
 
    ```sh
