@@ -141,7 +141,9 @@ export function NotificationCard() {
             )}
             {sendTest.isError && (
               <p role="alert" className="text-sm text-destructive">
-                {t("testFailed")}
+                {"code" in sendTest.error && sendTest.error.code === "TOO_MANY_REQUESTS"
+                  ? t("testTooMany")
+                  : t("testFailed")}
               </p>
             )}
           </>

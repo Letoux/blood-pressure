@@ -391,6 +391,7 @@
     "testBody": "Les notifications fonctionnent sur cet appareil.",
     "failed": "L’activation des notifications a échoué.",
     "testFailed": "L’envoi de la notification de test a échoué.",
+    "testTooMany": "Trop de notifications de test. Réessayez dans une minute.",
     "denied": "Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages du navigateur, puis rechargez la page.",
     "unsupported": "Ce navigateur ne permet pas de recevoir les notifications de l’application.",
     "iosInstallFirst": "Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application installée sur l’écran d’accueil (iOS 16.4 ou plus). Installez-la d’abord, puis ouvrez-la depuis l’écran d’accueil pour activer les notifications.",

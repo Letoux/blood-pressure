@@ -28,10 +28,12 @@ for (const [network, prefix] of [
   nonPublicV4.addSubnet(network, prefix, "ipv4");
 }
 for (const [network, prefix] of [
-  ["::", 127], // non spécifiée et boucle locale
+  ["::", 96], // non spécifiée, boucle locale et IPv4 compatible (obsolète, `::c0a8:10a`)
   ["::ffff:0:0", 96], // IPv4 mappée : les services push n'en utilisent pas
   ["64:ff9b::", 96], // NAT64
   ["100::", 64],
+  ["2001::", 32], // Teredo : tunnel vers une IPv4
+  ["2002::", 16], // 6to4 : tunnel vers une IPv4
   ["fc00::", 7], // unique locale
   ["fe80::", 10], // lien local
   ["ff00::", 8], // multicast

@@ -2,8 +2,7 @@ import { createECDH, randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ensureAdmin } from "@/server/auth/ensure-admin";
 import { createTestApi, type TestApi } from "@/server/testing/test-api";
-import { pushAgent } from "./endpoint";
-import { createWebPushSender, PUSH_SEND_TIMEOUT_MS, type WebPushTransport } from "./sender";
+import { createWebPushSender, type WebPushTransport } from "./sender";
 
 /** Clés d'abonnement valides, comme en produit un navigateur. */
 function browserKeys() {
@@ -59,21 +58,5 @@ describe("envois push vers le réseau local de l'instance (SSRF)", () => {
 
     await expect(sender.send({ endpoint: "https://10.0.0.5/x", ...browserKeys() }, message)).resolves.toBe("gone");
     expect(calls).toEqual([]);
-  });
-
-  it("l'envoi passe par l'agent limité aux adresses publiques, avec un délai maximal", async () => {
-    const options: Parameters<WebPushTransport>[2][] = [];
-    const transport: WebPushTransport = async (_subscription, _payload, requestOptions) => {
-      options.push(requestOptions);
-      return { statusCode: 201 };
-    };
-    const sender = createWebPushSender({ db: api.db, subject: "https://tension.example.org", transport });
-
-    await sender.send({ endpoint: "https://fcm.googleapis.com/fcm/send/abc", ...browserKeys() }, message);
-
-    expect(options).toHaveLength(1);
-    expect(options[0]!.agent).toBe(pushAgent);
-    expect(options[0]!.timeout).toBe(PUSH_SEND_TIMEOUT_MS);
-    expect(PUSH_SEND_TIMEOUT_MS).toBe(10_000);
   });
 });

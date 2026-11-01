@@ -391,6 +391,7 @@
     "testBody": "Notifications are working on this device.",
     "failed": "Turning on notifications failed.",
     "testFailed": "Sending the test notification failed.",
+    "testTooMany": "Too many test notifications. Try again in a minute.",
     "denied": "Notifications are blocked for this site. Allow them in your browser settings, then reload the page.",
     "unsupported": "This browser cannot receive the app’s notifications.",
     "iosInstallFirst": "On iPhone and iPad, notifications only work once the app is installed on the Home Screen (iOS 16.4 or later). Install it first, then open it from the Home Screen to turn on notifications.",

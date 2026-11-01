@@ -10,6 +10,7 @@ describe("adresse d'un service push (protection SSRF)", () => {
     "https://web.push.apple.com/abc",
     "https://wns2-par02p.notify.windows.com/w/?token=abc",
     "https://142.250.74.234/send/abc",
+    "https://[2a00:1450:4007:80e::200a]/send/abc",
   ])("accepte un service public : %s", (endpoint) => {
     expect(isAllowedPushEndpoint(endpoint)).toBe(true);
   });
@@ -25,6 +26,9 @@ describe("adresse d'un service push (protection SSRF)", () => {
     ["IPv6 unique locale", "https://[fd00::1]/x"],
     ["IPv6 lien local", "https://[fe80::1]/x"],
     ["IPv4 mappée en IPv6", "https://[::ffff:192.168.1.10]/x"],
+    ["IPv4 compatible IPv6 (::/96)", "https://[::c0a8:10a]/x"],
+    ["6to4 (2002::/16)", "https://[2002:c0a8:10a::1]/x"],
+    ["Teredo (2001::/32)", "https://[2001:0:4136:e378::1]/x"],
     ["0.0.0.0", "https://0.0.0.0/x"],
     ["localhost", "https://localhost/x"],
     ["sous-domaine de localhost", "https://push.localhost/x"],

@@ -7,8 +7,11 @@ import webpush from "web-push";
 import type { PushMessage } from "@/lib/push-message";
 import type { Db } from "@/server/db/client";
 import { pushSubscription } from "@/server/db/schema";
-import { isAllowedPushEndpoint, pushAgent } from "./endpoint";
+import { isAllowedPushEndpoint } from "./endpoint";
+import { createWebPushTransport, type WebPushTransport } from "./transport";
 import { ensureVapidKeys } from "./vapid";
+
+export type { WebPushTransport } from "./transport";
 
 /** Un appareil abonné, tel que stocké dans `push_subscription`. */
 export type PushTarget = { endpoint: string; p256dh: string; auth: string };
@@ -21,18 +24,8 @@ export type PushSender = {
   send: (target: PushTarget, message: PushMessage) => Promise<PushOutcome>;
 };
 
-/** Signature de `webpush.sendNotification`, remplaçable dans les tests. */
-export type WebPushTransport = (
-  subscription: webpush.PushSubscription,
-  payload: string,
-  options: webpush.RequestOptions,
-) => Promise<{ statusCode: number }>;
-
 /** Durée de vie d'un message chez le service push s'il ne peut pas encore le remettre. */
 const TTL_SECONDS = 60 * 60;
-
-/** Délai maximal d'une requête vers un service push. */
-export const PUSH_SEND_TIMEOUT_MS = 10_000;
 
 /**
  * Le vrai envoi, signé avec les clés VAPID de la base (créées au besoin, ADR-0003).
@@ -41,7 +34,7 @@ export const PUSH_SEND_TIMEOUT_MS = 10_000;
 export function createWebPushSender({
   db,
   subject,
-  transport = webpush.sendNotification,
+  transport = createWebPushTransport(),
 }: {
   db: Db;
   subject: string;
@@ -58,14 +51,10 @@ export function createWebPushSender({
         await transport(
           { endpoint: target.endpoint, keys: { p256dh: target.p256dh, auth: target.auth } },
           JSON.stringify(message),
-          {
-            vapidDetails: { subject, publicKey, privateKey },
-            TTL: TTL_SECONDS,
-            // Connexion aux seules adresses publiques (SSRF), et pas d'attente sans fin : un service
-            // push muet bloquerait la tâche du worker et donc tous les rappels suivants.
-            agent: pushAgent,
-            timeout: PUSH_SEND_TIMEOUT_MS,
-          },
+          // Le transport par défaut ne se connecte qu'aux adresses publiques (SSRF) et coupe
+          // l'envoi au bout de `PUSH_SEND_TIMEOUT_MS` : un service push lent bloquerait la tâche
+          // du worker et donc tous les rappels suivants (`transport.ts`).
+          { vapidDetails: { subject, publicKey, privateKey }, TTL: TTL_SECONDS },
         );
         return "sent";
       } catch (error) {

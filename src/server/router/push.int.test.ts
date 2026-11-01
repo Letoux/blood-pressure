@@ -4,6 +4,7 @@ import type { PushMessage } from "@/lib/push-message";
 import type { PushOutcome, PushTarget } from "@/server/push/sender";
 import { ensureVapidKeys } from "@/server/push/vapid";
 import { createTestApi, type TestApi } from "@/server/testing/test-api";
+import { SEND_TEST_LIMIT } from "./push-send-test";
 
 /** Faux service push : enregistre chaque envoi ; un endpoint de `expired` répond « expiré ». */
 const delivered: { endpoint: string; message: PushMessage }[] = [];
@@ -131,6 +132,27 @@ describe("abonnement push et notification de test", () => {
       // @ts-expect-error valeurs invalides envoyées volontairement
       api.as(alice.headers).push.subscribe(input),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("limite les notifications de test par utilisateur, sur une fenêtre glissante", async () => {
+    const alice = await api.newUser("Alice");
+    const bob = await api.newUser("Bob");
+    await api.as(alice.headers).push.subscribe(newDevice());
+    await api.as(bob.headers).push.subscribe(newDevice());
+    const start = new Date("2026-11-01T10:00:00Z");
+    const at = (seconds: number) => ({ now: new Date(start.getTime() + seconds * 1000) });
+
+    for (let i = 0; i < SEND_TEST_LIMIT.max; i += 1) {
+      await expect(api.as(alice.headers, at(i)).push.sendTest()).resolves.toEqual({ sent: 1 });
+    }
+    await expect(api.as(alice.headers, at(10)).push.sendTest()).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+    expect(delivered).toHaveLength(SEND_TEST_LIMIT.max);
+    // Un autre utilisateur n'est pas concerné.
+    await expect(api.as(bob.headers, at(10)).push.sendTest()).resolves.toEqual({ sent: 1 });
+    // Une fois la fenêtre passée, l'envoi repart.
+    await expect(
+      api.as(alice.headers, at(SEND_TEST_LIMIT.windowSeconds + 1)).push.sendTest(),
+    ).resolves.toEqual({ sent: 1 });
   });
 
   it("refuse un appelant non authentifié", async () => {
