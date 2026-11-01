@@ -275,7 +275,9 @@ function MeasurementTable({ measurements }: { measurements: Measurement[] }) {
   const sorted = [...measurements].sort((a, b) => new Date(a.takenAt).getTime() - new Date(b.takenAt).getTime());
 
   return (
-    <table className="mt-2 w-full text-sm tabular-nums">
+    // À 360 px, le tableau défile dans son conteneur, jamais la page.
+    <div className="mt-2 overflow-x-auto print:overflow-visible">
+    <table className="w-full text-sm tabular-nums">
       <caption className="sr-only">{t("caption")}</caption>
       <thead>
         <tr className="border-b text-left text-xs text-muted-foreground">
@@ -300,5 +302,6 @@ function MeasurementTable({ measurements }: { measurements: Measurement[] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }

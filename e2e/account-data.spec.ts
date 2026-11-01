@@ -23,7 +23,7 @@ test("exporter ses mesures en CSV, puis supprimer son compte avec son mot de pas
   expect(download.suggestedFilename()).toMatch(/^tension-\d{4}-\d{2}-\d{2}\.csv$/);
   const csv = await readFile(await download.path(), "utf8");
   expect(csv.startsWith("﻿Date,Heure,Fuseau horaire,")).toBe(true);
-  expect(csv).toMatch(/,132,84,72,"Calme, assis",oui,,,(Matin|Soir)\r\n$/);
+  expect(csv).toMatch(/,132,84,72,"Calme, assis",oui,,,(Matin|Soir),\r\n$/);
 
   // Mauvais mot de passe : refusé, le compte reste.
   page.on("dialog", (dialog) => dialog.accept());

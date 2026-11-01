@@ -99,7 +99,7 @@ test("une campagne manquée reste visible, et un rattrapage est proposé tout de
   await seedPlannedCampaign(user.email, daysAgo(10));
   await signIn(page, user);
 
-  await expect(page.getByText("Campagne de rattrapage")).toBeVisible();
+  await expect(page.getByText("Campagne de rattrapage", { exact: true })).toBeVisible();
   await expect(page.getByText(/a été manquée/)).toBeVisible();
   const history = page.getByRole("region", { name: "Mes campagnes" });
   await expect(history.getByText("Manquée", { exact: true })).toBeVisible();

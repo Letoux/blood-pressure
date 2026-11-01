@@ -27,6 +27,11 @@ test("hors ligne, un bandeau s'affiche, l'enregistrement est désactivé et le b
   const save = page.getByRole("button", { name: "Enregistrer", exact: true });
   const systolic = page.getByLabel("Systolique, mesure 1");
   await expect(save).toBeEnabled();
+  if (production) {
+    // Le service worker doit contrôler la page avant la coupure, sinon le rechargement hors
+    // ligne n'a personne pour servir la page `/offline`.
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+  }
 
   await context.setOffline(true);
   await expect(page.getByRole("alert").filter({ hasText: "Pas de réseau" })).toBeVisible();
@@ -110,7 +115,9 @@ test.describe("service worker", () => {
     expect(cached.some((url) => url.startsWith("/_next/static/"))).toBe(true);
     expect(cached).toContain("/offline");
 
-    // Sans réseau, une page demandée est remplacée par la page hors ligne.
+    // Sans réseau, une page demandée est remplacée par la page hors ligne (une fois la page
+    // contrôlée par le service worker : `clientsClaim` n'est pas instantané).
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
     await context.setOffline(true);
     await page.goto("/stats");
     await expect(page.getByRole("heading", { name: "Pas de réseau" })).toBeVisible();
