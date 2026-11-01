@@ -64,6 +64,8 @@ check "le dump porte la date du jour" \
   sh -c "echo '$dumps' | grep -q \"^bloodpressure-$(date +%Y-%m-%d)_\""
 check "pg_dump est appelé au format custom" \
   grep -q -- "--format=custom" "$work/backups/$dumps"
+check "pg_dump exclut le schéma de pg-boss (ses partitions bloquent pg_restore --clean)" \
+  grep -q -- "--exclude-schema=pgboss" "$work/backups/$dumps"
 check "le dump n'est lisible que par son propriétaire (données de santé)" \
   [ "$(stat -c %a "$work/backups/$dumps")" = 600 ]
 teardown

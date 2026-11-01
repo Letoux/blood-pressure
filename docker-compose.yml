@@ -21,7 +21,8 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/health"]
+      # La route `health` interroge la base ; la page `/health` répondrait 200 même base coupée.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "--post-data={}", "--header=content-type: application/json", "http://127.0.0.1:3000/rpc/health"]
       interval: 10s
       timeout: 5s
       retries: 6

@@ -23,10 +23,12 @@ log() { echo "[backup] $(date '+%Y-%m-%d %H:%M:%S') $*"; }
 # Dump au format custom de pg_dump (compressé, restaurable avec pg_restore).
 # Il est écrit dans un fichier temporaire, renommé seulement en cas de succès :
 # un dump interrompu ne passe jamais pour une sauvegarde valide.
+# Sans le schéma de pg-boss : ses tables partitionnées font échouer `pg_restore --clean`, et il
+# ne contient rien à conserver (le worker recrée ses files et ses planifications au démarrage).
 dump() {
   name="${PGDATABASE}-$(date +%Y-%m-%d_%H%M%S).dump"
   tmp="$BACKUP_DIR/.$name.partial"
-  if pg_dump --format=custom --file="$tmp"; then
+  if pg_dump --format=custom --exclude-schema=pgboss --file="$tmp"; then
     mv "$tmp" "$BACKUP_DIR/$name"
     log "dump écrit : $name"
   else

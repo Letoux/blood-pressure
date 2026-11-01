@@ -62,7 +62,7 @@ Test : `https://tension.example.org/health` doit répondre, avec un cadenas vali
 
 ## Sauvegardes
 
-Le service `backup` fait chaque jour un `pg_dump` de la base. Le dump est au format custom de Postgres, déjà compressé, et se restaure avec `pg_restore`. Il est écrit dans le dossier `BACKUP_DIR` de l'hôte (`./backups` par défaut, à côté du `docker-compose.yml`) sous le nom `<base>-AAAA-MM-JJ_HHMMSS.dump`. Après chaque dump réussi, les dumps de `BACKUP_RETENTION_DAYS` jours ou plus sont supprimés. Si un dump échoue, rien n'est supprimé.
+Le service `backup` fait chaque jour un `pg_dump` de la base. Le dump est au format custom de Postgres, déjà compressé, et se restaure avec `pg_restore`. Il contient toutes les données de l'application, sans la file de tâches du worker, qui se recrée toute seule. Il est écrit dans le dossier `BACKUP_DIR` de l'hôte (`./backups` par défaut, à côté du `docker-compose.yml`) sous le nom `<base>-AAAA-MM-JJ_HHMMSS.dump`. Après chaque dump réussi, les dumps de `BACKUP_RETENTION_DAYS` jours ou plus sont supprimés. Si un dump échoue, rien n'est supprimé.
 
 Réglages dans `.env` :
 
