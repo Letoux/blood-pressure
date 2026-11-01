@@ -280,6 +280,21 @@ describe("campagnes", () => {
       expect(moved.campaigns.map((view) => view.status)).toEqual(["missed", "planned"]);
     });
 
+    it("sauter une campagne reportée : la suivante part de la date reportée", async () => {
+      const { at } = await plannedUser("SkipPostponed");
+      await at("2026-02-01T10:00:00+01:00").campaigns.schedule({ start: "2026-02-20" });
+      const skipped = await at("2026-02-21T10:00:00+01:00").campaigns.skip();
+      expect(skipped.campaigns).toMatchObject([{ plannedStart: "2026-02-20", status: "skipped" }]);
+      expect(skipped.next).toMatchObject({ plannedStart: "2026-05-20", catchUp: false });
+    });
+
+    it("sauter un rattrapage reporté : la suivante part de la date de la campagne manquée", async () => {
+      const { at } = await plannedUser("SkipPostponedCatchUp");
+      await at("2026-02-10T10:00:00+01:00").campaigns.schedule({ start: "2026-02-20" });
+      const skipped = await at("2026-02-21T10:00:00+01:00").campaigns.skip();
+      expect(skipped.next).toMatchObject({ plannedStart: "2026-05-02", catchUp: false });
+    });
+
     it("une campagne manquée ou sautée fait partie de l'historique : elle ne se supprime pas", async () => {
       const { at, campaignId } = await plannedUser("KeepHistory");
       // Manquée, avant comme après l'enregistrement de son statut.
