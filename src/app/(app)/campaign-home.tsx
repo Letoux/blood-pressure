@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EXPECTED_MEASUREMENTS, type CampaignOverview, type CampaignView, type SlotView } from "@/domain/campaign";
+import { EXPECTED_MEASUREMENTS, isDeletable, type CampaignOverview, type CampaignView, type SlotView } from "@/domain/campaign";
 import type { LocalDate } from "@/domain/local-date";
 import { useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
@@ -340,7 +340,7 @@ function CampaignItem({ campaign }: { campaign: CampaignView }) {
           </p>
         )}
         <CampaignAverages averages={campaign.averages} />
-        {campaign.id && <DeleteCampaign campaignId={campaign.id} />}
+        {campaign.id && isDeletable(campaign) && <DeleteCampaign campaignId={campaign.id} />}
       </CardContent>
     </Card>
   );

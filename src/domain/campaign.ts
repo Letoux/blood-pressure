@@ -153,6 +153,9 @@ export type CampaignOverview = {
 /** Terminée (complète ou non) : elle a une moyenne définitive. */
 export const isFinished = (view: CampaignView) => view.status === "finished" || view.status === "incomplete";
 
+/** Une campagne manquée ou sautée fait partie de l'historique (ADR-0011) : elle ne se supprime pas. */
+export const isDeletable = (view: CampaignView) => view.status !== "missed" && view.status !== "skipped";
+
 /** 18 mesures sur 18. */
 export const isComplete = (view: CampaignView) => view.completeness === EXPECTED_MEASUREMENTS;
 

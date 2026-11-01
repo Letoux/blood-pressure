@@ -86,6 +86,8 @@ test("une campagne en retard se commence encore, ou se saute et reste visible co
   const history = page.getByRole("region", { name: "Mes campagnes" });
   await expect(history.getByText("Sautée", { exact: true })).toBeVisible();
   await expect(history.getByText(/, sautée le /)).toBeVisible();
+  // Elle fait partie de l'historique : pas de suppression.
+  await expect(history.getByRole("button", { name: "Supprimer la campagne" })).toHaveCount(0);
   // La suivante est planifiée selon la fréquence, sans créneau aujourd'hui.
   await expect(page.getByText("Prochaine campagne")).toBeVisible();
   await expect(page.getByRole("list", { name: "Créneaux du jour" })).toHaveCount(0);
@@ -103,6 +105,7 @@ test("une campagne manquée reste visible, et un rattrapage est proposé tout de
   await expect(page.getByText(/a été manquée/)).toBeVisible();
   const history = page.getByRole("region", { name: "Mes campagnes" });
   await expect(history.getByText("Manquée", { exact: true })).toBeVisible();
+  await expect(history.getByRole("button", { name: "Supprimer la campagne" })).toHaveCount(0);
 
   // Une saisie aujourd'hui commence le rattrapage.
   await page.getByRole("navigation").getByRole("link", { name: "Saisie" }).click();

@@ -280,6 +280,26 @@ describe("campagnes", () => {
       expect(moved.campaigns.map((view) => view.status)).toEqual(["missed", "planned"]);
     });
 
+    it("une campagne manquée ou sautée fait partie de l'historique : elle ne se supprime pas", async () => {
+      const { at, campaignId } = await plannedUser("KeepHistory");
+      // Manquée, avant comme après l'enregistrement de son statut.
+      await expect(at("2026-02-09T08:00:00+01:00").campaigns.delete({ id: campaignId! })).rejects.toMatchObject({
+        code: "CONFLICT",
+      });
+      await at("2026-02-10T10:00:00+01:00").campaigns.skip();
+      const overview = await at("2026-02-10T10:00:00+01:00").campaigns.overview();
+      expect(overview.campaigns.map((view) => view.status)).toEqual(["missed", "skipped"]);
+      for (const view of overview.campaigns) {
+        await expect(at("2026-02-10T10:00:00+01:00").campaigns.delete({ id: view.id! })).rejects.toMatchObject({
+          code: "CONFLICT",
+        });
+      }
+      expect(await storedCampaigns("keephistory@example.org")).toEqual([
+        { plannedStart: "2026-02-02", status: "missed", originalStart: null },
+        { plannedStart: "2026-02-09", status: "skipped", originalStart: "2026-02-02" },
+      ]);
+    });
+
     it("un carnet recopié dans le désordre donne les mêmes créneaux que dans l'ordre", async () => {
       const { at, campaignId } = await plannedUser("Shuffled");
       const copy = (takenAt: string, moment: "morning" | "evening") =>
