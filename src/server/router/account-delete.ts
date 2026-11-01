@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { userOnly } from "./authed";
+import { limitPasswordAttempts } from "./password-attempts";
 
 /**
  * L'utilisateur supprime son compte après avoir confirmé son mot de passe (ADR-0001). Toutes ses
@@ -13,6 +14,7 @@ import { userOnly } from "./authed";
  * récente sans mot de passe.
  */
 export const accountDelete = userOnly
+  .use(limitPasswordAttempts)
   .input(z.object({ password: z.string().min(1) }))
   .handler(async ({ context, input }) => {
     const ctx = await context.auth.$context;

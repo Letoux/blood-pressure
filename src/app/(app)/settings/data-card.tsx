@@ -110,7 +110,9 @@ export function DataCard() {
               <p role="alert" className="text-sm text-destructive">
                 {"code" in deleteAccount.error && deleteAccount.error.code === "BAD_REQUEST"
                   ? t("deleteWrongPassword")
-                  : t("deleteFailed")}
+                  : "code" in deleteAccount.error && deleteAccount.error.code === "TOO_MANY_REQUESTS"
+                    ? t("deleteTooManyAttempts")
+                    : t("deleteFailed")}
               </p>
             )}
             <Button
