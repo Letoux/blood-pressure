@@ -35,6 +35,26 @@ describe("route HTTP /rpc", () => {
     expect(response.status).toBe(413);
   });
 
+  it("accepte une requête qui n'est pas une instance native de Request (Next.js sous Node 24)", async () => {
+    // La requête que Next.js passe à la route n'est pas toujours une `Request` native : la
+    // recopier avec `new Request(requête, init)` échouait (« Cannot read private member #state »).
+    const native = new Request("http://localhost:3000/rpc/signUpOpen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const foreign = new Proxy(native, {
+      get: (target, property) => {
+        const value = Reflect.get(target, property, target);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
+
+    const response = await handleRpc(foreign, { db: api.db, auth: api.auth, headers: new Headers() });
+
+    expect(response.status).toBe(200);
+  });
+
   it("répond 404 hors du routeur", async () => {
     const response = await post("/inconnue", JSON.stringify({}));
     expect(response.status).toBe(404);
