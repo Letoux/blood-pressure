@@ -162,12 +162,12 @@ La synchronisation hors ligne (file d'attente, conflits) a été jugée trop co�
 
 ### 6.1 Campagnes manquées, rattrapage et campagne sautée (1er novembre 2026, ADR-0011)
 
-**Ce qui a changé.** La v1 replanifiait la campagne suivante à la date de la campagne manquée plus la fréquence. Elle ne gardait aucune trace d'une campagne manquée qui n'avait jamais été enregistrée. Désormais :
+**Ce qui a changé.** La v1 replanifiait la campagne suivante au lendemain de la période (3 jours) de la campagne manquée plus la fréquence. Elle ne gardait aucune trace d'une campagne manquée qui n'avait jamais été enregistrée. Désormais :
 - une première mesure peut commencer une campagne jusqu'à **7 jours** après sa date prévue (**début en retard**) ;
 - au-delà, la campagne est **manquée**, et ce statut est **enregistré et visible** dans l'accueil, le compte rendu et l'export ;
 - une **campagne de rattrapage** est planifiée **dès le lendemain**. Si elle est manquée à son tour, une autre suit, jusqu'à ce qu'une campagne soit faite ;
 - le bouton **« Sauter la campagne »** arrête la boucle. La campagne est alors **sautée** : visible, sans compter comme manquée. La suivante reprend le rythme de la fréquence, à partir de la date prévue initiale, ou à partir du jour du saut si cette date est déjà passée ;
-- une mesure est rattachée selon son **horodatage**, quelle que soit la date de saisie. Recopier un carnet papier après coup remplit donc la bonne campagne, même manquée.
+- une mesure est rattachée selon son **horodatage**, quelle que soit la date et l'ordre de saisie. Recopier un carnet papier après coup remplit donc la bonne campagne, même manquée si aucune campagne postérieure n'a commencé.
 
 **Pourquoi.** L'utilisateur veut **rattraper au plus tôt** une campagne oubliée, plutôt que d'attendre la prochaine échéance et de perdre trois mois de suivi. Il veut aussi pouvoir **sauter** une campagne quand il ne peut pas la faire, en voyage ou sans tensiomètre, sans être relancé chaque jour. Garder la trace des campagnes manquées et sautées montre au médecin la régularité réelle du suivi (même logique que la souplesse de la section 2.2).
 
