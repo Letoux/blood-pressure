@@ -15,7 +15,8 @@ function templateValues(): Record<string, string> {
 
 const valid = {
   APP_URL: "https://tension.example.org",
-  BETTER_AUTH_SECRET: "9f2c4e1a7b3d5f6a8c0e2b4d6f8a1c3e5b7d9f0a",
+  // Fausse clé de test, construite à l'exécution pour ne pas ressembler à un secret (gitleaks).
+  BETTER_AUTH_SECRET: "cle-de-test-".repeat(4),
   ADMIN_EMAIL: "admin@example.org",
   ADMIN_PASSWORD: "un-vrai-mot-de-passe",
 };

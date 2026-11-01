@@ -1,0 +1,5 @@
+# Faux positifs de gitleaks, un par empreinte (commit:fichier:règle:ligne).
+# Fausse clé BETTER_AUTH_SECRET d'un test unitaire (src/server/env.test.ts), jamais utilisée
+# ailleurs ; remplacée depuis par une valeur construite à l'exécution, mais le commit reste
+# dans l'historique scanné par la CI.
+dd34404de55a346f64dde594cb2ed384913c9cba:src/server/env.test.ts:generic-api-key:18
