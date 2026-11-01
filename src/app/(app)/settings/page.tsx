@@ -40,8 +40,8 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
         )}
-        <PasswordForm />
-        {/* Le compte de l'admin vient du `.env` (ADR-0004). */}
+        {/* Le mot de passe de l'admin vient du `.env` et le remplacerait au redémarrage (ADR-0004). */}
+        {isUser && <PasswordForm />}
         {isUser && <DataCard />}
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">

@@ -15,7 +15,6 @@ const ADMIN_ALLOWED = new Set([
   "health",
   "me",
   "signUpOpen",
-  "account.changePassword",
   "account.dismissPasswordChangeSuggestion",
   // Profil de l'appelant lui-même (nom, langue, thème, fuseau, fréquence des campagnes) : aucune
   // donnée de santé, l'admin règle aussi son interface.
