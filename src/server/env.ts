@@ -44,6 +44,16 @@ const authSchema = z.object({
   BETTER_AUTH_SECRET: notPlaceholder("BETTER_AUTH_SECRET").pipe(z.string().min(32)),
   ADMIN_EMAIL: z.email(),
   ADMIN_PASSWORD: notPlaceholder("ADMIN_PASSWORD").pipe(z.string().min(MIN_PASSWORD_LENGTH)),
+  // Liste séparée par des virgules (IP ou CIDR), vide par défaut : voir `.env.template`.
+  TRUSTED_PROXIES: z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
 });
 
 export type AuthEnv = z.infer<typeof authSchema>;

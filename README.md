@@ -32,7 +32,11 @@ Prérequis : Docker avec le plugin Compose 2.23.1 ou plus récent (`docker compo
    docker compose ps   # `app` doit passer à « healthy »
    ```
 
-L'application écoute sur le port `APP_PORT` de l'hôte (3000 par défaut), en HTTP. Ne l'exposez pas directement sur Internet : passez par le reverse proxy.
+L'application écoute sur le port `APP_PORT` de l'hôte (3000 par défaut), en HTTP, et seulement sur `127.0.0.1` (`APP_BIND`). Elle doit n'être joignable **que** par le reverse proxy : la limite de tentatives de connexion lit l'IP du client dans l'en-tête `X-Forwarded-For` ajouté par le proxy, qu'un client qui joindrait l'app en direct pourrait falsifier.
+
+- Nginx Proxy Manager sur la même machine, hors Docker ou en réseau `host` : gardez `APP_BIND=127.0.0.1`.
+- Nginx Proxy Manager sur une autre machine, ou dans un conteneur en réseau bridge : mettez dans `APP_BIND` l'IP locale de cette machine, et n'autorisez sur ce port que l'IP du proxy. Attention, un port publié par Docker contourne `ufw` : filtrez dans la chaîne `DOCKER-USER` d'iptables.
+- Un autre proxy devant Nginx Proxy Manager (un CDN, par exemple) : listez ses adresses dans `TRUSTED_PROXIES`.
 
 > `.env` contient des secrets. Ne le committez jamais et ne le partagez pas.
 
@@ -45,7 +49,7 @@ Dans Nginx Proxy Manager, **Hosts → Proxy Hosts → Add Proxy Host** :
 - onglet **Details** :
   - *Domain Names* : votre domaine, par exemple `tension.example.org` ;
   - *Scheme* : `http` ;
-  - *Forward Hostname / IP* : l'adresse IP de la machine qui fait tourner le compose, vue depuis Nginx Proxy Manager (son IP sur le réseau local, par exemple) ;
+  - *Forward Hostname / IP* : l'adresse sur laquelle le port de l'app est publié (`APP_BIND`, voir plus haut) : `127.0.0.1` si Nginx Proxy Manager tourne sur la même machine, sinon l'IP locale de la machine du compose ;
   - *Forward Port* : la valeur de `APP_PORT` (3000 par défaut) ;
   - cochez *Block Common Exploits* ;
 - onglet **SSL** :

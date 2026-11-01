@@ -22,7 +22,14 @@ const valid = {
 
 describe("variables de l'authentification", () => {
   it("acceptent des valeurs choisies par l'opérateur", () => {
-    expect(parseAuthEnv(valid)).toEqual(valid);
+    expect(parseAuthEnv(valid)).toEqual({ ...valid, TRUSTED_PROXIES: [] });
+  });
+
+  it("lisent TRUSTED_PROXIES comme une liste séparée par des virgules", () => {
+    expect(parseAuthEnv({ ...valid, TRUSTED_PROXIES: " 192.0.2.10, 10.0.0.0/24 ," }).TRUSTED_PROXIES).toEqual([
+      "192.0.2.10",
+      "10.0.0.0/24",
+    ]);
   });
 
   it("refusent le mot de passe admin d'exemple du .env.template", () => {

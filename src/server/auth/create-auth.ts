@@ -54,10 +54,28 @@ export type AuthOptions = {
   secret: string;
   /** URL publique de l'application (`APP_URL`). */
   baseURL: string;
+  /**
+   * Proxys placés **devant** le reverse proxy et qui ajoutent eux aussi leur hop à
+   * `X-Forwarded-For` (`TRUSTED_PROXIES`, IP ou CIDR ; par exemple un CDN). Vide le plus souvent.
+   */
+  trustedProxies?: string[];
 };
 
-export function createAuth({ db, secret, baseURL }: AuthOptions) {
+/**
+ * IP du client pour la limite de connexions : le reverse proxy ajoute l'IP de son client à droite
+ * de `X-Forwarded-For`, après ce que ce client a pu y écrire. Avec une liste `trustedProxies` non
+ * vide, better-auth lit la chaîne de droite à gauche et garde le premier hop non fiable : la valeur
+ * ajoutée par le reverse proxy. La boucle locale y figure toujours pour activer cette lecture (sans
+ * liste, une chaîne de plusieurs valeurs tomberait dans un compteur partagé par tous les clients).
+ * Ce n'est sûr que si l'app n'est joignable que par le reverse proxy (`APP_BIND`, README).
+ */
+const LOOPBACK_PROXIES = ["127.0.0.1", "::1"];
+
+export function createAuth({ db, secret, baseURL, trustedProxies = [] }: AuthOptions) {
   return betterAuth({
+    advanced: {
+      ipAddress: { trustedProxies: [...LOOPBACK_PROXIES, ...trustedProxies] },
+    },
     secret,
     disabledPaths: ADMIN_HTTP_PATHS,
     baseURL,

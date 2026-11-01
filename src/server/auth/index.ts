@@ -13,6 +13,7 @@ export function getAuth(): Auth {
       db: getDb(),
       secret: env.BETTER_AUTH_SECRET,
       baseURL: env.APP_URL,
+      trustedProxies: env.TRUSTED_PROXIES,
     });
   }
   return auth;
