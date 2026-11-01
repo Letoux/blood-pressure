@@ -3,3 +3,12 @@
 !.env.template
 node_modules/
 .next/
+next-env.d.ts
+*.tsbuildinfo
+dist/
+test-results/
+playwright-report/
+blob-report/
+/backups/
+*.dump
+.claude/

@@ -15,8 +15,8 @@ _Éviter_ : session, prise
 **Créneau rempli** :
 Un créneau qui contient au moins une mesure. Un créneau rempli ne déclenche plus de rappel.
 
-**Mesure libre** (`FreeMeasurement`) :
-Une mesure saisie en dehors de toute campagne. Elle est affichée à part et n'entre jamais dans les moyennes de campagne.
+**Mesure libre** :
+Une mesure saisie en dehors de toute campagne (dans le code : `campaignId` nul). Elle est affichée à part et n'entre jamais dans les moyennes de campagne.
 _Éviter_ : mesure isolée, mesure ponctuelle
 
 **Protocole** :
@@ -32,7 +32,10 @@ _Éviter_ : série, session, cycle
 L'intervalle, en mois (1 à 12, 3 par défaut), entre le début d'une campagne et le début prévu de la suivante.
 
 **Campagne planifiée** :
-Une campagne dont la date de début prévue n'est pas encore passée et qui n'a encore aucune mesure.
+Une campagne qui n'a encore aucune mesure et dont la fenêtre de début n'est pas passée.
+
+**Début en retard** :
+Une première mesure commence une campagne jusqu'à 7 jours après sa date prévue (J+0 à J+6). Ce jour devient son J1. Passé la date prévue sans mesure, la campagne est **en retard**.
 
 **Campagne en cours** :
 Une campagne qui a reçu sa première mesure et dont les 3 jours ne sont pas écoulés. Son début réel est le jour de sa première mesure.
@@ -43,8 +46,15 @@ Une campagne dont les 3 jours sont écoulés et qui contient au moins une mesure
 **Campagne incomplète** :
 Une campagne terminée qui contient moins de 18 mesures. Elle reste valable, mais elle est signalée avec son nombre de mesures (par exemple 14/18) et la liste de ses créneaux manquants.
 
-**Campagne manquée** :
-Une campagne planifiée dont la période est passée sans aucune mesure.
+**Campagne manquée** (`missed`) :
+Une campagne sans aucune mesure dans sa fenêtre de début de 7 jours. Ce statut est enregistré et reste visible dans l'historique, le compte rendu et l'export. Elle est suivie d'une campagne de rattrapage.
+
+**Campagne de rattrapage** (`catchUp`) :
+La campagne planifiée le lendemain de la fenêtre d'une campagne manquée, pour rattraper au plus tôt. Si elle est manquée à son tour, une autre suit, jusqu'à ce qu'une campagne soit faite ou sautée.
+_Éviter_ : campagne replanifiée
+
+**Campagne sautée** (`skipped`) :
+Une campagne en retard ou de rattrapage que l'utilisateur a choisi de sauter (en voyage, sans tensiomètre…). Elle reste visible, sans compter comme manquée. La suivante est prévue à la date prévue initiale plus la fréquence, ou à la date du saut plus la fréquence si la première est passée.
 
 **Moyenne de campagne** :
 La moyenne arithmétique de toutes les mesures présentes dans la campagne, sans écarter le premier jour (méthode SFHTA). On calcule aussi la moyenne du matin et la moyenne du soir.
@@ -70,7 +80,7 @@ _Éviter_ : rapport, bilan
 **Rappel** (`Reminder`) :
 Une notification push envoyée à l'heure choisie pour un créneau, ou la veille du début d'une campagne.
 
-**Relance** :
+**Relance** (`FollowUp`) :
 Un second rappel, facultatif, pour un créneau toujours pas rempli au bout du délai choisi.
 
 ## Personnes

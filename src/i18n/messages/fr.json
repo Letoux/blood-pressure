@@ -1,0 +1,462 @@
+{
+  "app": {
+    "name": "Tension",
+    "description": "Suivi de l’automesure tensionnelle, selon la règle du 3-3-3."
+  },
+  "nav": {
+    "label": "Navigation principale",
+    "home": "Accueil",
+    "entry": "Saisie",
+    "stats": "Statistiques",
+    "report": "Compte rendu",
+    "settings": "Réglages",
+    "admin": "Administration"
+  },
+  "common": {
+    "signOut": "Se déconnecter"
+  },
+  "home": {
+    "greeting": "Bonjour {name}",
+    "signedInAs": "Connecté en tant que {email}",
+    "manageUsers": "Gérer les utilisateurs"
+  },
+  "passwordBanner": {
+    "label": "Changement de mot de passe conseillé",
+    "message": "Votre mot de passe a été réinitialisé. Nous vous conseillons de le changer.",
+    "action": "Changer mon mot de passe",
+    "dismiss": "Fermer"
+  },
+  "login": {
+    "title": "Connexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
+    "invalidCredentials": "Email ou mot de passe incorrect.",
+    "accountDisabled": "Ce compte est désactivé. Contactez l’administrateur.",
+    "signUp": "Créer un compte"
+  },
+  "signUp": {
+    "title": "Créer un compte",
+    "closed": "L’inscription est fermée. Demandez un compte à l’administrateur.",
+    "name": "Nom",
+    "email": "Email",
+    "password": "Mot de passe",
+    "submit": "Créer mon compte",
+    "failed": "La création du compte a échoué.",
+    "toLogin": "J’ai déjà un compte"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": {
+      "title": "Utilisateurs",
+      "empty": "Aucun utilisateur.",
+      "createdAt": "Créé le {date}",
+      "status": {
+        "active": "Actif",
+        "disabled": "Désactivé"
+      },
+      "disable": "Désactiver",
+      "enable": "Réactiver",
+      "revokeSessions": "Révoquer les sessions",
+      "resetPassword": "Réinitialiser le mot de passe",
+      "delete": "Supprimer",
+      "temporaryPasswordPrompt": "Mot de passe temporaire pour {email} (10 caractères minimum) :",
+      "temporaryPasswordTooShort": "Le mot de passe temporaire doit faire au moins 10 caractères.",
+      "confirmDisable": "Désactiver {email} ? Ses sessions seront révoquées.",
+      "confirmDelete": "Supprimer {email} et toutes ses données (mesures, campagnes, réglages) ? Cette action est définitive.",
+      "done": {
+        "disable": "Utilisateur désactivé.",
+        "enable": "Utilisateur réactivé.",
+        "revokeSessions": "Sessions révoquées.",
+        "resetPassword": "Mot de passe réinitialisé. Communiquez-le à l’utilisateur.",
+        "delete": "Utilisateur supprimé."
+      },
+      "failed": "L’action a échoué."
+    },
+    "signUp": {
+      "title": "Inscription libre",
+      "label": "Autoriser l’inscription libre",
+      "help": "Fermée, seul l’admin crée les comptes.",
+      "failed": "L’enregistrement du réglage a échoué."
+    },
+    "createUser": {
+      "title": "Créer un utilisateur",
+      "email": "Email",
+      "name": "Nom",
+      "password": "Mot de passe initial",
+      "submit": "Créer",
+      "created": "Utilisateur {email} créé.",
+      "emailTaken": "Cet email est déjà utilisé.",
+      "failed": "La création de l’utilisateur a échoué."
+    }
+  },
+  "settings": {
+    "title": "Réglages",
+    "profile": {
+      "title": "Profil",
+      "name": "Nom affiché",
+      "language": "Langue",
+      "theme": "Thème",
+      "submit": "Enregistrer",
+      "saved": "Réglages enregistrés.",
+      "failed": "L’enregistrement des réglages a échoué."
+    },
+    "password": {
+      "title": "Mot de passe",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "submit": "Changer le mot de passe",
+      "changed": "Mot de passe changé.",
+      "wrongCurrent": "Le mot de passe actuel est incorrect.",
+      "tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
+      "failed": "Le changement de mot de passe a échoué."
+    },
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "themes": {
+      "system": "Système",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "install": "Installer l’application",
+    "data": {
+      "title": "Mes données",
+      "exportTitle": "Exporter mes données",
+      "exportHelp": "Toutes vos mesures dans un fichier CSV, lisible par un tableur.",
+      "exportButton": "Télécharger le CSV",
+      "exportFailed": "L’export a échoué.",
+      "deleteTitle": "Supprimer mon compte",
+      "deleteHelp": "Supprime définitivement votre compte et toutes vos données (mesures, campagnes, réglages), puis vous déconnecte. Pensez à exporter vos données avant.",
+      "deletePassword": "Mot de passe",
+      "deleteButton": "Supprimer mon compte",
+      "deleteConfirm": "Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.",
+      "deleteWrongPassword": "Le mot de passe est incorrect.",
+      "deleteTooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
+      "deleteFailed": "La suppression du compte a échoué.",
+      "csv": {
+        "columns": {
+          "date": "Date",
+          "time": "Heure",
+          "timeZone": "Fuseau horaire",
+          "systolic": "Systolique (mmHg)",
+          "diastolic": "Diastolique (mmHg)",
+          "pulse": "Pouls (bpm)",
+          "comment": "Commentaire",
+          "free": "Mesure libre",
+          "campaign": "Campagne",
+          "campaignDay": "Jour de campagne",
+          "moment": "Moment",
+          "campaignStatus": "Statut de la campagne"
+        },
+        "yes": "oui",
+        "no": "non"
+      }
+    },
+    "campaigns": {
+      "title": "Campagnes",
+      "hint": "Les jours des campagnes et les heures affichées suivent ce fuseau horaire.",
+      "frequency": "Fréquence des campagnes",
+      "months": "{count, plural, one {Tous les mois} other {Tous les # mois}}",
+      "timeZone": "Fuseau horaire",
+      "submit": "Enregistrer la fréquence et le fuseau",
+      "saved": "Réglages enregistrés.",
+      "failed": "L’enregistrement des réglages a échoué."
+    },
+    "guideline": {
+      "title": "Référentiel",
+      "hint": "La recommandation dont le seuil d’automesure est tracé sur les graphiques.",
+      "label": "Référentiel",
+      "submit": "Enregistrer le référentiel",
+      "saved": "Référentiel enregistré.",
+      "failed": "L’enregistrement du référentiel a échoué."
+    },
+    "reminders": {
+      "title": "Rappels",
+      "hint": "Heures des rappels de mesure, dans votre fuseau horaire.",
+      "morning": "Heure du matin",
+      "evening": "Heure du soir",
+      "dayBefore": "Rappel la veille d’une campagne",
+      "followUp": "Relance si le créneau n’est toujours pas rempli",
+      "followUpDelay": "Délai de la relance",
+      "delay": "{count, plural, =60 {1 heure} =90 {1 h 30} =120 {2 heures} =180 {3 heures} =240 {4 heures} other {# minutes}}",
+      "submit": "Enregistrer les rappels",
+      "saved": "Rappels enregistrés.",
+      "failed": "L’enregistrement des rappels a échoué."
+    },
+    "welcomeAgain": "Revoir le premier lancement"
+  },
+  "measurements": {
+    "form": {
+      "title": "Saisir un créneau",
+      "hint": "Jusqu’à 3 mesures. Une ligne vide est ignorée.",
+      "takenAt": "Date et heure",
+      "moment": "Moment",
+      "row": "Mesure {number}",
+      "fieldLabel": "{field}, mesure {number}",
+      "comment": "Commentaire (facultatif)",
+      "free": "Hors campagne, les mesures sont enregistrées comme mesures libres.",
+      "submit": "Enregistrer",
+      "saved": "{count, plural, one {# mesure enregistrée} other {# mesures enregistrées}}.",
+      "failed": "L’enregistrement a échoué.",
+      "campaign": "Pendant une campagne, les mesures sont rattachées au créneau de leur jour et du moment choisi.",
+      "savedSlot": "{count, plural, one {# mesure enregistrée} other {# mesures enregistrées}} ({slot})."
+    },
+    "fields": {
+      "systolic": "Systolique",
+      "diastolic": "Diastolique",
+      "pulse": "Pouls"
+    },
+    "moments": {
+      "morning": "Matin",
+      "evening": "Soir"
+    },
+    "alert": "Valeur d’alerte : 180/110 ou plus. Refaites la mesure au calme ; si elle se confirme, demandez un avis médical. Vous pouvez tout de même l’enregistrer.",
+    "errors": {
+      "empty": "Saisissez au moins une mesure.",
+      "takenAt": "Indiquez la date et l’heure.",
+      "incomplete": "Remplissez la systolique, la diastolique et le pouls, ou laissez la ligne vide.",
+      "systolicOutOfRange": "Systolique : de {min} à {max} mmHg.",
+      "diastolicOutOfRange": "Diastolique : de {min} à {max} mmHg.",
+      "pulseOutOfRange": "Pouls : de {min} à {max} battements par minute.",
+      "systolicNotAboveDiastolic": "La systolique doit être supérieure à la diastolique."
+    },
+    "list": {
+      "title": "Mes mesures",
+      "empty": "Aucune mesure pour l’instant.",
+      "free": "Mesure libre",
+      "pressure": "{systolic}/{diastolic} mmHg",
+      "pulse": "Pouls {pulse}",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "confirmDelete": "Confirmer la suppression",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "failed": "L’opération a échoué."
+    }
+  },
+  "health": {
+    "title": "Santé de l’application",
+    "ok": "OK",
+    "error": "Erreur"
+  },
+  "offline": {
+    "banner": "Pas de réseau. L’enregistrement est désactivé, mais ce que vous tapez est conservé.",
+    "title": "Pas de réseau",
+    "description": "Cette page demande une connexion. Ce que vous aviez tapé dans un formulaire est conservé : il réapparaîtra au retour du réseau.",
+    "retry": "Réessayer"
+  },
+  "install": {
+    "title": "Installer l’application",
+    "intro": "Installée sur l’écran d’accueil, l’application s’ouvre comme une app et peut vous envoyer les rappels de mesure.",
+    "installed": "L’application est déjà installée sur cet appareil.",
+    "button": "Installer",
+    "otherPlatforms": "Autres appareils",
+    "platforms": {
+      "ios": "iPhone et iPad",
+      "android": "Android",
+      "desktop": "Ordinateur"
+    },
+    "ios": {
+      "safari": "Ouvrez cette page dans Safari.",
+      "share": "Touchez le bouton Partager (le carré avec une flèche vers le haut).",
+      "addToHome": "Choisissez « Sur l’écran d’accueil », puis « Ajouter ».",
+      "notifications": "Sur iPhone et iPad, les rappels ne fonctionnent qu’une fois l’application installée (iOS 16.4 ou plus)."
+    },
+    "android": {
+      "menu": "Dans Chrome, ouvrez le menu (les trois points en haut à droite).",
+      "add": "Choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil »."
+    },
+    "desktop": {
+      "addressBar": "Dans Chrome ou Edge, cliquez sur l’icône d’installation à droite de la barre d’adresse.",
+      "menu": "Sinon, ouvrez le menu du navigateur et choisissez « Installer Tension »."
+    }
+  },
+  "campaigns": {
+    "slot": "J{day} {moment, select, morning {matin} other {soir}}",
+    "status": {
+      "planned": "Planifiée",
+      "inProgress": "En cours",
+      "finished": "Terminée",
+      "incomplete": "Incomplète",
+      "missed": "Manquée",
+      "skipped": "Sautée"
+    },
+    "completeness": "{count}/{total} mesures",
+    "missingSlots": "Créneaux manquants : {slots}",
+    "none": {
+      "title": "Aucune campagne planifiée",
+      "description": "Une campagne dure 3 jours : 3 mesures le matin et 3 le soir. Choisissez la date de votre première campagne."
+    },
+    "schedule": {
+      "start": "Date de début",
+      "first": "Planifier ma première campagne",
+      "move": "Avancer ou reporter",
+      "past": "Choisissez aujourd’hui ou une date à venir.",
+      "overlap": "Choisissez une date après la fin de la campagne en cours.",
+      "failed": "La planification a échoué."
+    },
+    "next": {
+      "title": "Prochaine campagne",
+      "on": "Le {date}",
+      "startsToday": "Votre campagne peut commencer aujourd’hui : votre première saisie en sera le J1.",
+      "catchUpTitle": "Campagne de rattrapage",
+      "catchUp": "La campagne du {date} a été manquée : faites cette campagne de rattrapage dès que possible.",
+      "late": "Prévue le {date}, elle est en retard : votre première mesure d’ici le {startBy} la commencera (ce jour-là sera son J1)."
+    },
+    "current": {
+      "title": "Campagne en cours",
+      "since": "Commencée le {date}"
+    },
+    "today": {
+      "title": "Créneaux du jour",
+      "todo": "À faire",
+      "filled": "Rempli ({count}/3)",
+      "now": "maintenant",
+      "enter": "Saisir mes mesures"
+    },
+    "history": {
+      "title": "Mes campagnes",
+      "from": "Du {start} au {end}",
+      "plannedOn": "Prévue le {date}",
+      "average": "Moyenne {systolic}/{diastolic} mmHg ({count} mesures)",
+      "morning": "Matin {systolic}/{diastolic}",
+      "evening": "Soir {systolic}/{diastolic}",
+      "delete": "Supprimer la campagne",
+      "confirmDelete": "Supprimer la campagne et ses mesures",
+      "cancel": "Annuler",
+      "failed": "La suppression a échoué.",
+      "skippedOn": "Prévue le {date}, sautée le {skippedOn}",
+      "catchUpOf": "Rattrapage de la campagne du {date}"
+    },
+    "catchUp": "Rattrapage",
+    "skip": {
+      "button": "Sauter la campagne",
+      "explain": "En voyage ou sans tensiomètre ? Sautez cette campagne : elle restera visible comme « sautée », et la suivante sera planifiée selon votre fréquence.",
+      "confirm": "Confirmer : sauter la campagne",
+      "cancel": "Annuler",
+      "failed": "Impossible de sauter cette campagne."
+    }
+  },
+  "chart": {
+    "label": "Moyennes des campagnes",
+    "systolic": "Systolique",
+    "diastolic": "Diastolique",
+    "threshold": "Seuil {guideline} ({systolic}/{diastolic})",
+    "incompleteLegend": "Campagne incomplète",
+    "value": "{systolic}/{diastolic} mmHg",
+    "incomplete": "Incomplète : {count}/{total} mesures",
+    "date": "Début",
+    "measurements": "Mesures"
+  },
+  "stats": {
+    "campaigns": "Mes campagnes",
+    "empty": "Aucune campagne terminée pour l’instant. Chaque campagne terminée ajoute un point au graphique.",
+    "disclaimer": "Ne remplace pas un avis médical.",
+    "guideline": "Référentiel : {acronym} ({name}).",
+    "changeGuideline": "Changer de référentiel",
+    "standing": {
+      "latest": "Dernière campagne, commencée le {date} : {systolic}/{diastolic} mmHg",
+      "incomplete": "{count}/{total} mesures",
+      "below": "Sous le seuil {guideline} ({systolic}/{diastolic})",
+      "above": "Atteint ou dépasse le seuil {guideline} ({systolic}/{diastolic})"
+    },
+    "free": {
+      "title": "Mesures libres",
+      "hint": "Saisies en dehors des campagnes : elles n’entrent ni dans les moyennes ni dans le graphique.",
+      "empty": "Aucune mesure libre."
+    }
+  },
+  "protocol": {
+    "title": "Protocole de mesure",
+    "intro": "Pour des mesures fiables, suivez la règle du 3-3-3 : 3 mesures le matin et 3 le soir, 3 jours de suite.",
+    "rest": "Mesurez au repos, assis depuis 5 minutes, le dos appuyé et les pieds à plat.",
+    "noStimulants": "Sans café ni tabac depuis 30 minutes.",
+    "morning": "Le matin : avant le petit-déjeuner et avant les médicaments.",
+    "evening": "Le soir : avant le coucher.",
+    "cuff": "Brassard sur le bras nu, à hauteur du cœur. Ne parlez pas pendant la mesure.",
+    "series": "À chaque fois, 3 mesures à environ 1 minute d’intervalle."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "hint": "Les rappels de mesure arrivent sous forme de notifications sur cet appareil.",
+    "enable": "Activer les notifications",
+    "disable": "Désactiver sur cet appareil",
+    "enabled": "Les notifications sont activées sur cet appareil.",
+    "sendTest": "Envoyer une notification de test",
+    "testSent": "Notification de test envoyée. Elle doit s’afficher dans quelques secondes.",
+    "testNone": "Aucun appareil abonné : activez d’abord les notifications.",
+    "testBody": "Les notifications fonctionnent sur cet appareil.",
+    "failed": "L’activation des notifications a échoué.",
+    "testFailed": "L’envoi de la notification de test a échoué.",
+    "testTooMany": "Trop de notifications de test. Réessayez dans une minute.",
+    "denied": "Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages du navigateur, puis rechargez la page.",
+    "unsupported": "Ce navigateur ne permet pas de recevoir les notifications de l’application.",
+    "iosInstallFirst": "Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application installée sur l’écran d’accueil (iOS 16.4 ou plus). Installez-la d’abord, puis ouvrez-la depuis l’écran d’accueil pour activer les notifications.",
+    "installLink": "Voir comment l’installer"
+  },
+  "welcome": {
+    "title": "Bienvenue",
+    "progress": "Étape {current} sur {total}",
+    "steps": {
+      "protocol": "Protocole de mesure",
+      "install": "Installer l’application",
+      "notifications": "Notifications",
+      "reminders": "Rappels"
+    },
+    "installIntro": "Installée sur l’écran d’accueil, l’application s’ouvre comme une app et peut recevoir les rappels.",
+    "remindersIntro": "Choisissez quand recevoir les rappels de mesure.",
+    "next": "Suivant",
+    "skip": "Passer",
+    "finish": "Enregistrer et terminer",
+    "later": "Chaque étape se retrouve dans les Réglages."
+  },
+  "report": {
+    "period": {
+      "label": "Période",
+      "lastCampaign": "Dernière campagne",
+      "oneYear": "1 an",
+      "fiveYears": "5 ans",
+      "all": "Tout"
+    },
+    "print": "Imprimer / PDF",
+    "range": "Du {from} au {to}",
+    "summary": {
+      "title": "Résumé de la période",
+      "empty": "Aucune campagne terminée sur cette période.",
+      "count": "{count, plural, one {# campagne} other {# campagnes}}, dont {complete, plural, =0 {aucune complète} one {# complète} other {# complètes}} ({share} %)",
+      "global": "Globale",
+      "morning": "Matin",
+      "evening": "Soir",
+      "average": "{systolic}/{diastolic}",
+      "noAverage": "–",
+      "position": "Moyenne de la période :",
+      "absent": "{missed, plural, =0 {Aucune campagne manquée} one {# campagne manquée} other {# campagnes manquées}}, {skipped, plural, =0 {aucune sautée} one {# sautée} other {# sautées}}"
+    },
+    "campaigns": {
+      "title": "Campagnes",
+      "incomplete": "Campagne incomplète : {count}/{total} mesures, créneaux manquants : {slots}",
+      "delta": "Écart avec la campagne précédente : {systolic}/{diastolic} mmHg",
+      "noPrevious": "Première campagne : pas d’écart à calculer.",
+      "showMeasurements": "Voir les mesures ({count})",
+      "table": {
+        "caption": "Mesures de la campagne",
+        "slot": "Créneau",
+        "time": "Date et heure"
+      }
+    },
+    "absent": {
+      "title": "Campagnes manquées ou sautées"
+    }
+  },
+  "reminders": {
+    "morningTitle": "Mesures du matin",
+    "eveningTitle": "Mesures du soir",
+    "slotBody": "C’est l’heure de vos 3 mesures (jour {day} sur 3).",
+    "followUpBody": "Vos mesures ne sont pas encore saisies (jour {day} sur 3).",
+    "dayBeforeTitle": "Campagne demain",
+    "dayBeforeBody": "Votre campagne de mesures commence demain. Rappel du protocole : au repos, assis depuis 5 minutes, avant le petit-déjeuner et les médicaments."
+  }
+}

@@ -1,0 +1,83 @@
+# Instance auto-hébergée (ADR-0001). Le HTTPS est géré hors du compose, par le reverse proxy.
+# Démarrage : `cp .env.template .env`, renseigner les valeurs, puis `docker compose up -d`.
+
+x-app-image: &app-image
+  image: ${IMAGE:-ghcr.io/letoux/blood-pressure:latest}
+  build: .
+  init: true
+  restart: unless-stopped
+  env_file: .env
+  environment:
+    DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
+services:
+  app:
+    <<: *app-image
+    command: app
+    # Joignable seulement par le reverse proxy : 127.0.0.1 par défaut (APP_BIND, voir README).
+    ports:
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # La route `health` interroge la base ; la page `/health` répondrait 200 même base coupée.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "--post-data={}", "--header=content-type: application/json", "http://127.0.0.1:3000/rpc/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    <<: *app-image
+    command: worker
+    depends_on:
+      # Le worker attend que `app` ait appliqué les migrations.
+      app:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Dump quotidien de la base dans un dossier de l'hôte, avec rétention (docker/backup.sh).
+  # Dump immédiat : `docker compose exec backup sh /usr/local/bin/backup.sh once`.
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    entrypoint: ["sh", "/usr/local/bin/backup.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      BACKUP_TIME: ${BACKUP_TIME:-03:00}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      TZ: ${BACKUP_TZ:-Europe/Paris}
+    configs:
+      - source: backup-script
+        target: /usr/local/bin/backup.sh
+    volumes:
+      - ${BACKUP_DIR:-./backups}:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+
+configs:
+  # Le compose des releases embarque ce script en ligne (src/scripts/release-compose.ts).
+  backup-script:
+    file: ./docker/backup.sh

@@ -1,0 +1,462 @@
+{
+  "app": {
+    "name": "Blood pressure",
+    "description": "Home blood pressure monitoring, following the 3-3-3 rule."
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "entry": "Entry",
+    "stats": "Statistics",
+    "report": "Report",
+    "settings": "Settings",
+    "admin": "Admin"
+  },
+  "common": {
+    "signOut": "Sign out"
+  },
+  "home": {
+    "greeting": "Hello {name}",
+    "signedInAs": "Signed in as {email}",
+    "manageUsers": "Manage users"
+  },
+  "passwordBanner": {
+    "label": "Password change recommended",
+    "message": "Your password was reset. We recommend changing it.",
+    "action": "Change my password",
+    "dismiss": "Dismiss"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "tooManyAttempts": "Too many attempts. Try again in a minute.",
+    "invalidCredentials": "Incorrect email or password.",
+    "accountDisabled": "This account is disabled. Contact the administrator.",
+    "signUp": "Create an account"
+  },
+  "signUp": {
+    "title": "Create an account",
+    "closed": "Sign-up is closed. Ask the administrator for an account.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Create my account",
+    "failed": "Creating the account failed.",
+    "toLogin": "I already have an account"
+  },
+  "admin": {
+    "title": "Admin",
+    "users": {
+      "title": "Users",
+      "empty": "No users.",
+      "createdAt": "Created on {date}",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "disable": "Disable",
+      "enable": "Enable",
+      "revokeSessions": "Revoke sessions",
+      "resetPassword": "Reset password",
+      "delete": "Delete",
+      "temporaryPasswordPrompt": "Temporary password for {email} (at least 10 characters):",
+      "temporaryPasswordTooShort": "The temporary password must be at least 10 characters long.",
+      "confirmDisable": "Disable {email}? Their sessions will be revoked.",
+      "confirmDelete": "Delete {email} and all their data (measurements, campaigns, settings)? This cannot be undone.",
+      "done": {
+        "disable": "User disabled.",
+        "enable": "User enabled.",
+        "revokeSessions": "Sessions revoked.",
+        "resetPassword": "Password reset. Give it to the user.",
+        "delete": "User deleted."
+      },
+      "failed": "The action failed."
+    },
+    "signUp": {
+      "title": "Open sign-up",
+      "label": "Allow open sign-up",
+      "help": "When closed, only the admin creates accounts.",
+      "failed": "Saving the setting failed."
+    },
+    "createUser": {
+      "title": "Create a user",
+      "email": "Email",
+      "name": "Name",
+      "password": "Initial password",
+      "submit": "Create",
+      "created": "User {email} created.",
+      "emailTaken": "This email is already in use.",
+      "failed": "Creating the user failed."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "name": "Display name",
+      "language": "Language",
+      "theme": "Theme",
+      "submit": "Save",
+      "saved": "Settings saved.",
+      "failed": "Saving the settings failed."
+    },
+    "password": {
+      "title": "Password",
+      "current": "Current password",
+      "new": "New password",
+      "submit": "Change password",
+      "changed": "Password changed.",
+      "wrongCurrent": "The current password is incorrect.",
+      "tooManyAttempts": "Too many attempts. Try again in a minute.",
+      "failed": "Changing the password failed."
+    },
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "install": "Install the app",
+    "data": {
+      "title": "My data",
+      "exportTitle": "Export my data",
+      "exportHelp": "All your measurements in a CSV file, readable by a spreadsheet.",
+      "exportButton": "Download the CSV",
+      "exportFailed": "The export failed.",
+      "deleteTitle": "Delete my account",
+      "deleteHelp": "Permanently deletes your account and all your data (measurements, campaigns, settings), then signs you out. Consider exporting your data first.",
+      "deletePassword": "Password",
+      "deleteButton": "Delete my account",
+      "deleteConfirm": "Permanently delete your account and all your data? This cannot be undone.",
+      "deleteWrongPassword": "The password is incorrect.",
+      "deleteTooManyAttempts": "Too many attempts. Try again in a minute.",
+      "deleteFailed": "Deleting the account failed.",
+      "csv": {
+        "columns": {
+          "date": "Date",
+          "time": "Time",
+          "timeZone": "Time zone",
+          "systolic": "Systolic (mmHg)",
+          "diastolic": "Diastolic (mmHg)",
+          "pulse": "Pulse (bpm)",
+          "comment": "Comment",
+          "free": "Free measurement",
+          "campaign": "Campaign",
+          "campaignDay": "Campaign day",
+          "moment": "Moment",
+          "campaignStatus": "Campaign status"
+        },
+        "yes": "yes",
+        "no": "no"
+      }
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "hint": "Campaign days and displayed times follow this time zone.",
+      "frequency": "Campaign frequency",
+      "months": "{count, plural, one {Every month} other {Every # months}}",
+      "timeZone": "Time zone",
+      "submit": "Save frequency and time zone",
+      "saved": "Settings saved.",
+      "failed": "Saving the settings failed."
+    },
+    "guideline": {
+      "title": "Guideline",
+      "hint": "The recommendation whose home monitoring threshold is drawn on the charts.",
+      "label": "Guideline",
+      "submit": "Save guideline",
+      "saved": "Guideline saved.",
+      "failed": "Saving the guideline failed."
+    },
+    "reminders": {
+      "title": "Reminders",
+      "hint": "Measurement reminder times, in your time zone.",
+      "morning": "Morning time",
+      "evening": "Evening time",
+      "dayBefore": "Reminder the day before a campaign",
+      "followUp": "Follow-up if the slot is still empty",
+      "followUpDelay": "Follow-up delay",
+      "delay": "{count, plural, =60 {1 hour} =90 {1.5 hours} =120 {2 hours} =180 {3 hours} =240 {4 hours} other {# minutes}}",
+      "submit": "Save reminders",
+      "saved": "Reminders saved.",
+      "failed": "Saving the reminders failed."
+    },
+    "welcomeAgain": "See the first launch again"
+  },
+  "measurements": {
+    "form": {
+      "title": "Enter a slot",
+      "hint": "Up to 3 measurements. An empty row is ignored.",
+      "takenAt": "Date and time",
+      "moment": "Time of day",
+      "row": "Measurement {number}",
+      "fieldLabel": "{field}, measurement {number}",
+      "comment": "Comment (optional)",
+      "free": "Outside a campaign, measurements are saved as free measurements.",
+      "submit": "Save",
+      "saved": "{count, plural, one {# measurement saved} other {# measurements saved}}.",
+      "failed": "Saving failed.",
+      "campaign": "During a campaign, measurements are attached to the slot of their day and the chosen moment.",
+      "savedSlot": "{count, plural, one {# measurement saved} other {# measurements saved}} ({slot})."
+    },
+    "fields": {
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "pulse": "Pulse"
+    },
+    "moments": {
+      "morning": "Morning",
+      "evening": "Evening"
+    },
+    "alert": "Alert value: 180/110 or higher. Measure again at rest; if it is confirmed, seek medical advice. You can still save it.",
+    "errors": {
+      "empty": "Enter at least one measurement.",
+      "takenAt": "Enter the date and time.",
+      "incomplete": "Fill in systolic, diastolic and pulse, or leave the row empty.",
+      "systolicOutOfRange": "Systolic: {min} to {max} mmHg.",
+      "diastolicOutOfRange": "Diastolic: {min} to {max} mmHg.",
+      "pulseOutOfRange": "Pulse: {min} to {max} beats per minute.",
+      "systolicNotAboveDiastolic": "Systolic must be higher than diastolic."
+    },
+    "list": {
+      "title": "My measurements",
+      "empty": "No measurements yet.",
+      "free": "Free measurement",
+      "pressure": "{systolic}/{diastolic} mmHg",
+      "pulse": "Pulse {pulse}",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Confirm deletion",
+      "cancel": "Cancel",
+      "save": "Save",
+      "failed": "The operation failed."
+    }
+  },
+  "health": {
+    "title": "App health",
+    "ok": "OK",
+    "error": "Error"
+  },
+  "offline": {
+    "banner": "No network. Saving is disabled, but what you type is kept.",
+    "title": "No network",
+    "description": "This page needs a connection. Anything you typed in a form is kept and will come back once you are online.",
+    "retry": "Try again"
+  },
+  "install": {
+    "title": "Install the app",
+    "intro": "Installed on your home screen, the app opens like an app and can send you measurement reminders.",
+    "installed": "The app is already installed on this device.",
+    "button": "Install",
+    "otherPlatforms": "Other devices",
+    "platforms": {
+      "ios": "iPhone and iPad",
+      "android": "Android",
+      "desktop": "Computer"
+    },
+    "ios": {
+      "safari": "Open this page in Safari.",
+      "share": "Tap the Share button (the square with an arrow pointing up).",
+      "addToHome": "Choose “Add to Home Screen”, then “Add”.",
+      "notifications": "On iPhone and iPad, reminders only work once the app is installed (iOS 16.4 or later)."
+    },
+    "android": {
+      "menu": "In Chrome, open the menu (the three dots at the top right).",
+      "add": "Choose “Install app” or “Add to Home screen”."
+    },
+    "desktop": {
+      "addressBar": "In Chrome or Edge, click the install icon on the right of the address bar.",
+      "menu": "Otherwise, open the browser menu and choose “Install Blood pressure”."
+    }
+  },
+  "campaigns": {
+    "slot": "Day {day} {moment, select, morning {morning} other {evening}}",
+    "status": {
+      "planned": "Planned",
+      "inProgress": "In progress",
+      "finished": "Finished",
+      "incomplete": "Incomplete",
+      "missed": "Missed",
+      "skipped": "Skipped"
+    },
+    "completeness": "{count}/{total} measurements",
+    "missingSlots": "Missing slots: {slots}",
+    "none": {
+      "title": "No campaign planned",
+      "description": "A campaign lasts 3 days: 3 measurements in the morning and 3 in the evening. Choose the date of your first campaign."
+    },
+    "schedule": {
+      "start": "Start date",
+      "first": "Plan my first campaign",
+      "move": "Move earlier or later",
+      "past": "Choose today or a later date.",
+      "overlap": "Choose a date after the end of the current campaign.",
+      "failed": "Planning failed."
+    },
+    "next": {
+      "title": "Next campaign",
+      "on": "On {date}",
+      "startsToday": "Your campaign can start today: your first entry will be its day 1.",
+      "catchUpTitle": "Catch-up campaign",
+      "catchUp": "The campaign of {date} was missed: do this catch-up campaign as soon as you can.",
+      "late": "Planned for {date}, it is late: your first measurement by {startBy} will start it (that day becomes its day 1)."
+    },
+    "current": {
+      "title": "Campaign in progress",
+      "since": "Started on {date}"
+    },
+    "today": {
+      "title": "Today’s slots",
+      "todo": "To do",
+      "filled": "Filled ({count}/3)",
+      "now": "now",
+      "enter": "Enter my measurements"
+    },
+    "history": {
+      "title": "My campaigns",
+      "from": "From {start} to {end}",
+      "plannedOn": "Planned on {date}",
+      "average": "Average {systolic}/{diastolic} mmHg ({count} measurements)",
+      "morning": "Morning {systolic}/{diastolic}",
+      "evening": "Evening {systolic}/{diastolic}",
+      "delete": "Delete campaign",
+      "confirmDelete": "Delete the campaign and its measurements",
+      "cancel": "Cancel",
+      "failed": "Deletion failed.",
+      "skippedOn": "Planned for {date}, skipped on {skippedOn}",
+      "catchUpOf": "Catch-up for the campaign of {date}"
+    },
+    "catchUp": "Catch-up",
+    "skip": {
+      "button": "Skip the campaign",
+      "explain": "Travelling or without your monitor? Skip this campaign: it stays visible as “skipped”, and the next one is planned from your frequency.",
+      "confirm": "Confirm: skip the campaign",
+      "cancel": "Cancel",
+      "failed": "This campaign cannot be skipped."
+    }
+  },
+  "chart": {
+    "label": "Campaign averages",
+    "systolic": "Systolic",
+    "diastolic": "Diastolic",
+    "threshold": "{guideline} threshold ({systolic}/{diastolic})",
+    "incompleteLegend": "Incomplete campaign",
+    "value": "{systolic}/{diastolic} mmHg",
+    "incomplete": "Incomplete: {count}/{total} measurements",
+    "date": "Start",
+    "measurements": "Measurements"
+  },
+  "stats": {
+    "campaigns": "My campaigns",
+    "empty": "No finished campaign yet. Each finished campaign adds a point to the chart.",
+    "disclaimer": "Does not replace medical advice.",
+    "guideline": "Guideline: {acronym} ({name}).",
+    "changeGuideline": "Change guideline",
+    "standing": {
+      "latest": "Latest campaign, started on {date}: {systolic}/{diastolic} mmHg",
+      "incomplete": "{count}/{total} measurements",
+      "below": "Below the {guideline} threshold ({systolic}/{diastolic})",
+      "above": "At or above the {guideline} threshold ({systolic}/{diastolic})"
+    },
+    "free": {
+      "title": "Free measurements",
+      "hint": "Taken outside campaigns: they are not part of the averages or the chart.",
+      "empty": "No free measurements."
+    }
+  },
+  "protocol": {
+    "title": "Measurement protocol",
+    "intro": "For reliable measurements, follow the 3-3-3 rule: 3 measurements in the morning and 3 in the evening, 3 days in a row.",
+    "rest": "Measure at rest, seated for 5 minutes, back supported and feet flat on the floor.",
+    "noStimulants": "No coffee or tobacco in the previous 30 minutes.",
+    "morning": "In the morning: before breakfast and before taking any medication.",
+    "evening": "In the evening: before going to bed.",
+    "cuff": "Cuff on the bare arm, at heart level. Do not talk during the measurement.",
+    "series": "Each time, take 3 measurements about 1 minute apart."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "hint": "Measurement reminders arrive as notifications on this device.",
+    "enable": "Turn on notifications",
+    "disable": "Turn off on this device",
+    "enabled": "Notifications are turned on for this device.",
+    "sendTest": "Send a test notification",
+    "testSent": "Test notification sent. It should appear within a few seconds.",
+    "testNone": "No subscribed device: turn on notifications first.",
+    "testBody": "Notifications are working on this device.",
+    "failed": "Turning on notifications failed.",
+    "testFailed": "Sending the test notification failed.",
+    "testTooMany": "Too many test notifications. Try again in a minute.",
+    "denied": "Notifications are blocked for this site. Allow them in your browser settings, then reload the page.",
+    "unsupported": "This browser cannot receive the app’s notifications.",
+    "iosInstallFirst": "On iPhone and iPad, notifications only work once the app is installed on the Home Screen (iOS 16.4 or later). Install it first, then open it from the Home Screen to turn on notifications.",
+    "installLink": "See how to install it"
+  },
+  "welcome": {
+    "title": "Welcome",
+    "progress": "Step {current} of {total}",
+    "steps": {
+      "protocol": "Measurement protocol",
+      "install": "Install the app",
+      "notifications": "Notifications",
+      "reminders": "Reminders"
+    },
+    "installIntro": "Installed on your Home Screen, the app opens like a regular app and can receive reminders.",
+    "remindersIntro": "Choose when to receive measurement reminders.",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Save and finish",
+    "later": "You can find every step again in Settings."
+  },
+  "report": {
+    "period": {
+      "label": "Period",
+      "lastCampaign": "Last campaign",
+      "oneYear": "1 year",
+      "fiveYears": "5 years",
+      "all": "All"
+    },
+    "print": "Print / PDF",
+    "range": "From {from} to {to}",
+    "summary": {
+      "title": "Period summary",
+      "empty": "No finished campaign in this period.",
+      "count": "{count, plural, one {# campaign} other {# campaigns}}, {complete, plural, =0 {none complete} other {# complete}} ({share}%)",
+      "global": "Overall",
+      "morning": "Morning",
+      "evening": "Evening",
+      "average": "{systolic}/{diastolic}",
+      "noAverage": "–",
+      "position": "Period average:",
+      "absent": "{missed, plural, =0 {No missed campaign} one {# missed campaign} other {# missed campaigns}}, {skipped, plural, =0 {none skipped} one {# skipped} other {# skipped}}"
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "incomplete": "Incomplete campaign: {count}/{total} measurements, missing slots: {slots}",
+      "delta": "Change from previous campaign: {systolic}/{diastolic} mmHg",
+      "noPrevious": "First campaign: no change to compute.",
+      "showMeasurements": "Show measurements ({count})",
+      "table": {
+        "caption": "Campaign measurements",
+        "slot": "Slot",
+        "time": "Date and time"
+      }
+    },
+    "absent": {
+      "title": "Missed or skipped campaigns"
+    }
+  },
+  "reminders": {
+    "morningTitle": "Morning measurements",
+    "eveningTitle": "Evening measurements",
+    "slotBody": "Time for your 3 measurements (day {day} of 3).",
+    "followUpBody": "Your measurements haven’t been entered yet (day {day} of 3).",
+    "dayBeforeTitle": "Campaign tomorrow",
+    "dayBeforeBody": "Your measurement campaign starts tomorrow. Protocol reminder: rested, seated for 5 minutes, before breakfast and medication."
+  }
+}
