@@ -256,6 +256,7 @@ describe("rattachement d'une saisie", () => {
       campaignId: "c1",
       day: 1,
       dropCatchUps: [],
+      renumber: [],
     });
   });
 
@@ -270,15 +271,18 @@ describe("rattachement d'une saisie", () => {
       campaignId: "c1",
       day: 3,
       dropCatchUps: [],
+      renumber: [],
     });
     expect(attachMeasurement(running, paris("2026-02-04T21:00"))).toEqual({
       kind: "campaign",
       campaignId: "c1",
       day: 2,
       dropCatchUps: [],
+      renumber: [],
     });
     expect(attachMeasurement(running, paris("2026-02-06T07:00"))).toEqual({ kind: "free" });
-    expect(attachMeasurement(running, paris("2026-02-02T21:00"))).toEqual({ kind: "free" });
+    // Avant la date prévue (le 2 février, dans la fenêtre de début, avancerait le début réel).
+    expect(attachMeasurement(running, paris("2026-02-01T21:00"))).toEqual({ kind: "free" });
   });
 
   it("pendant la prochaine campagne calculée, la saisie la crée à sa date prévue", () => {

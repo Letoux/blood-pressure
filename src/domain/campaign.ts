@@ -320,8 +320,15 @@ export type Attachment =
   /**
    * Rattachée à une campagne enregistrée (commencée, ou qu'elle commence). `dropCatchUps` : les
    * rattrapages enregistrés, jamais commencés, d'une campagne manquée que la saisie commence.
+   * `renumber` : le nouveau jour des mesures de la campagne quand la saisie avance son début réel.
    */
-  | { kind: "campaign"; campaignId: string; day: CampaignDay; dropCatchUps: string[] }
+  | {
+      kind: "campaign";
+      campaignId: string;
+      day: CampaignDay;
+      dropCatchUps: string[];
+      renumber: { id: string; day: CampaignDay }[];
+    }
   /** Commence une campagne calculée : il faut d'abord l'enregistrer à cette date prévue. */
   | {
       kind: "newCampaign";
@@ -335,8 +342,12 @@ export type Attachment =
  * Le créneau d'une saisie horodatée `takenAt` (son moment vient du formulaire), quelle que soit
  * la date de saisie (saisie a posteriori) :
  * - dans les 3 jours d'une campagne commencée : son jour de campagne ;
- * - dans la fenêtre de début (J+0 à J+6) d'une campagne sans mesure, planifiée ou manquée, et
- *   postérieure à la dernière campagne commencée : elle la commence, ce jour devient J1 ;
+ * - avant le début réel d'une campagne commencée, mais dans sa fenêtre de début (J+0 à J+6) et
+ *   assez près pour que ses 3 jours couvrent encore toutes ses mesures : ce jour devient J1 et
+ *   ses mesures sont renumérotées. Un carnet recopié dans le désordre donne ainsi le même
+ *   résultat que dans l'ordre (au-delà, la saisie est libre, comme elle le serait dans l'ordre) ;
+ * - dans la fenêtre de début d'une campagne sans mesure, planifiée ou manquée, et postérieure à
+ *   la dernière campagne commencée : elle la commence, ce jour devient J1 ;
  * - sinon : mesure libre (ADR-0006). Une campagne sautée ne reçoit jamais de mesure.
  */
 export function attachMeasurement(input: CampaignInput, takenAt: Date): Attachment {
@@ -346,8 +357,22 @@ export function attachMeasurement(input: CampaignInput, takenAt: Date): Attachme
   const views = overview.campaigns;
   for (const view of views) {
     if (view.id && view.actualStart !== null && date >= view.actualStart && date <= view.endDate) {
-      return { kind: "campaign", campaignId: view.id, day: dayFrom(view.actualStart), dropCatchUps: [] };
+      return { kind: "campaign", campaignId: view.id, day: dayFrom(view.actualStart), dropCatchUps: [], renumber: [] };
     }
+  }
+
+  // Avant le début réel d'une campagne commencée, dans sa fenêtre de début : le début recule.
+  for (const view of views) {
+    if (!view.id || view.actualStart === null) continue;
+    if (date >= view.actualStart || date < view.plannedStart || date > startByOf(view.plannedStart)) continue;
+    const own = input.measurements.filter((measurement) => measurement.campaignId === view.id);
+    const lastDay = own
+      .map((measurement) => localDateOf(measurement.takenAt, input.timeZone))
+      .reduce((last, day) => (day > last ? day : last), view.actualStart);
+    if (daysBetween(date, lastDay) >= CAMPAIGN_DAYS.length) continue;
+    const shift = daysBetween(date, view.actualStart);
+    const renumber = own.map((m) => ({ id: m.id, day: ((m.campaignDay ?? 1) + shift) as CampaignDay }));
+    return { kind: "campaign", campaignId: view.id, day: 1, dropCatchUps: [], renumber };
   }
 
   const lastStarted = views.findLastIndex((view) => view.actualStart !== null);
@@ -368,7 +393,7 @@ export function attachMeasurement(input: CampaignInput, takenAt: Date): Attachme
     .slice(target.index + 1)
     .flatMap((view) => (view.id && view.originalStart === origin && unstarted(view) ? [view.id] : []));
   return target.id
-    ? { kind: "campaign", campaignId: target.id, day: 1, dropCatchUps }
+    ? { kind: "campaign", campaignId: target.id, day: 1, dropCatchUps, renumber: [] }
     : { kind: "newCampaign", plannedStart: target.plannedStart, originalStart: target.originalStart, day: 1, dropCatchUps };
 }
 

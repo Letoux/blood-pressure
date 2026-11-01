@@ -280,6 +280,68 @@ describe("campagnes", () => {
       expect(moved.campaigns.map((view) => view.status)).toEqual(["missed", "planned"]);
     });
 
+    it("un carnet recopié dans le désordre donne les mêmes créneaux que dans l'ordre", async () => {
+      const { at, campaignId } = await plannedUser("Shuffled");
+      const copy = (takenAt: string, moment: "morning" | "evening") =>
+        at("2026-02-20T10:00:00+01:00").measurements.create({
+          takenAt: new Date(`${takenAt}:00+01:00`),
+          moment,
+          measurements: [slot(130), slot(128)],
+        });
+      // Le carnet couvre du 2 au 4 février ; recopié en commençant par le 4, puis le 2, puis le 3.
+      await copy("2026-02-04T21:00", "evening");
+      const [first] = await copy("2026-02-02T07:00", "morning");
+      expect(first).toMatchObject({ campaignId, campaignDay: 1 });
+      await copy("2026-02-03T21:00", "evening");
+
+      const days = (await at("2026-02-20T10:00:00+01:00").measurements.list()).map((m) => [
+        m.takenAt.toISOString(),
+        m.campaignId,
+        m.campaignDay,
+      ]);
+      expect(days).toEqual([
+        ["2026-02-04T20:00:00.000Z", campaignId, 3],
+        ["2026-02-04T20:00:00.000Z", campaignId, 3],
+        ["2026-02-03T20:00:00.000Z", campaignId, 2],
+        ["2026-02-03T20:00:00.000Z", campaignId, 2],
+        ["2026-02-02T06:00:00.000Z", campaignId, 1],
+        ["2026-02-02T06:00:00.000Z", campaignId, 1],
+      ]);
+      const overview = await at("2026-02-20T10:00:00+01:00").campaigns.overview();
+      expect(overview.campaigns).toMatchObject([
+        { id: campaignId, actualStart: "2026-02-02", endDate: "2026-02-04", completeness: 6 },
+      ]);
+      expect(overview.next).toMatchObject({ plannedStart: "2026-05-02" });
+    });
+
+    it("modifier une mesure pour l'avancer dans la fenêtre de début avance le début de sa campagne", async () => {
+      const { at, campaignId } = await plannedUser("MovedBack");
+      const now = at("2026-02-20T10:00:00+01:00");
+      await now.measurements.create({
+        takenAt: new Date("2026-02-04T07:00:00+01:00"),
+        moment: "morning",
+        measurements: [slot(130)],
+      });
+      const [moved] = await now.measurements.create({
+        takenAt: new Date("2026-02-05T07:00:00+01:00"),
+        moment: "morning",
+        measurements: [slot(130)],
+      });
+      expect(moved).toMatchObject({ campaignDay: 2 });
+
+      const updated = await now.measurements.update({
+        id: moved!.id,
+        takenAt: new Date("2026-02-03T07:00:00+01:00"),
+        moment: "morning",
+        ...slot(130),
+      });
+      expect(updated).toMatchObject({ campaignId, campaignDay: 1 });
+      expect((await now.measurements.list()).map((m) => m.campaignDay)).toEqual([2, 1]);
+      await expect(now.campaigns.overview()).resolves.toMatchObject({
+        campaigns: [{ id: campaignId, actualStart: "2026-02-03" }],
+      });
+    });
+
     it("un carnet recopié après coup commence la campagne manquée et abandonne ses rattrapages", async () => {
       const { at, campaignId } = await plannedUser("Notebook");
       // Le rattrapage du 9 a été reporté au 12 (enregistré), puis rien.

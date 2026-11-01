@@ -54,6 +54,7 @@ describe("début en retard, campagne manquée et rattrapage", () => {
       campaignId: "c1",
       day: 1,
       dropCatchUps: [],
+      renumber: [],
     });
 
     const started = campaignOverview(
@@ -161,6 +162,7 @@ describe("début en retard, campagne manquée et rattrapage", () => {
       campaignId: "c1",
       day: 1,
       dropCatchUps: ["c2"],
+      renumber: [],
     });
     // Datée de la fenêtre du rattrapage enregistré du 9 : elle le commence.
     expect(attachMeasurement(stored, paris("2026-02-10T07:00"))).toEqual({
@@ -168,6 +170,7 @@ describe("début en retard, campagne manquée et rattrapage", () => {
       campaignId: "c2",
       day: 1,
       dropCatchUps: [],
+      renumber: [],
     });
     // Datée du rattrapage calculé du 16 : il est créé.
     expect(attachMeasurement(stored, paris("2026-02-17T07:00"))).toEqual({
@@ -261,4 +264,119 @@ describe("sauter une campagne", () => {
     const catchUp = input({ campaigns: [{ id: "c1", plannedStart: "2026-02-02" }], now: paris("2026-02-11T10:00") });
     expect(scheduleCampaign(catchUp, "2026-02-20")).toEqual({ kind: "create", originalStart: "2026-02-02" });
   });
+});
+
+describe("carnet recopié dans le désordre (saisie a posteriori)", () => {
+  const campaigns = [{ id: "c1", plannedStart: "2026-02-02" }];
+
+  it("une mesure antérieure au début réel, dans la fenêtre de début, avance le début et renumérote les jours", () => {
+    const morning = measure("c1", 1, "morning", paris("2026-02-04T07:00"));
+    const evening = measure("c1", 1, "evening", paris("2026-02-04T21:00"));
+    const started = input({ campaigns, measurements: [morning, evening], now: paris("2026-02-20T10:00") });
+
+    expect(attachMeasurement(started, paris("2026-02-02T07:00"))).toEqual({
+      kind: "campaign",
+      campaignId: "c1",
+      day: 1,
+      dropCatchUps: [],
+      renumber: [
+        { id: morning.id, day: 3 },
+        { id: evening.id, day: 3 },
+      ],
+    });
+    expect(attachMeasurement(started, paris("2026-02-03T21:00"))).toMatchObject({
+      day: 1,
+      renumber: [
+        { id: morning.id, day: 2 },
+        { id: evening.id, day: 2 },
+      ],
+    });
+  });
+
+  it("si les 3 jours ne couvriraient plus les mesures, ou hors de la fenêtre de début, elle reste libre", () => {
+    const started = input({
+      campaigns,
+      measurements: [
+        measure("c1", 1, "morning", paris("2026-02-04T07:00")),
+        measure("c1", 3, "evening", paris("2026-02-06T21:00")),
+      ],
+      now: paris("2026-02-20T10:00"),
+    });
+    // Le 3 en J1 mettrait le 6 en J4.
+    expect(attachMeasurement(started, paris("2026-02-03T07:00"))).toEqual({ kind: "free" });
+    // La veille de la date prévue n'est pas dans la fenêtre de début.
+    const early = input({
+      campaigns,
+      measurements: [measure("c1", 1, "morning", paris("2026-02-02T07:00"))],
+      now: paris("2026-02-20T10:00"),
+    });
+    expect(attachMeasurement(early, paris("2026-02-01T21:00"))).toEqual({ kind: "free" });
+  });
+
+  /**
+   * Recopie `entries` une à une, comme le serveur : chaque saisie est rattachée selon le domaine,
+   * puis les renumérotations, créations et suppressions qu'il demande sont appliquées.
+   */
+  function copyNotebook(base: CampaignInput, entries: { takenAt: Date; moment: Moment }[]) {
+    let state = base;
+    let free: Date[] = [];
+    for (const [index, { takenAt, moment }] of entries.entries()) {
+      const attachment = attachMeasurement(state, takenAt);
+      if (attachment.kind === "free") {
+        free = [...free, takenAt];
+        continue;
+      }
+      let { campaigns, measurements } = state;
+      let campaignId: string;
+      if (attachment.kind === "newCampaign") {
+        campaignId = `new-${attachment.plannedStart}`;
+        campaigns = [
+          ...campaigns,
+          { id: campaignId, plannedStart: attachment.plannedStart, originalStart: attachment.originalStart },
+        ];
+      } else {
+        campaignId = attachment.campaignId;
+        const renumbered = new Map(attachment.renumber.map(({ id, day }) => [id, day]));
+        measurements = measurements.map((m) => (renumbered.has(m.id) ? { ...m, campaignDay: renumbered.get(m.id)! } : m));
+      }
+      campaigns = campaigns.filter((campaign) => !attachment.dropCatchUps.includes(campaign.id));
+      const entry = { ...measure(campaignId, attachment.day, moment, takenAt), id: `e${index}` };
+      state = { ...state, campaigns, measurements: [...measurements, entry] };
+    }
+    const overview = campaignOverview(state);
+    return {
+      slots: state.measurements.map((m) => `${m.takenAt.toISOString()} ${m.campaignId} J${m.campaignDay}`).sort(),
+      free: free.map((date) => date.toISOString()).sort(),
+      campaigns: overview.campaigns.map((view) => [view.actualStart, view.status, view.completeness]),
+    };
+  }
+
+  function permutations<T>(items: T[]): T[][] {
+    if (items.length <= 1) return [items];
+    return items.flatMap((item, i) =>
+      permutations([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest]),
+    );
+  }
+
+  // Jours du carnet, en décalage de la date prévue (2 février) : tous dans la fenêtre de début
+  // (J+0 à J+6) et sur au plus 3 jours, un créneau du matin et un du soir chacun.
+  it.each([[[0, 1, 2]], [[2, 3, 4]], [[4, 5, 6]], [[1, 3]], [[5, 6]], [[0, 2]], [[3]]])(
+    "le résultat ne dépend pas de l'ordre de saisie (jours %j)",
+    (offsets) => {
+      const entries = offsets.flatMap((offset) => [
+        { takenAt: paris(`2026-02-0${2 + offset}T07:00`), moment: "morning" as const },
+        { takenAt: paris(`2026-02-0${2 + offset}T21:00`), moment: "evening" as const },
+      ]);
+      for (const now of [paris("2026-02-08T22:00"), paris("2026-03-01T10:00")]) {
+        const base = input({ campaigns, now });
+        const inOrder = copyNotebook(base, entries);
+        // Dans l'ordre : le premier jour du carnet est J1 et rien n'est libre.
+        expect(inOrder.free).toEqual([]);
+        expect(inOrder.campaigns[0]?.[0]).toBe(`2026-02-0${2 + offsets[0]!}`);
+        for (const order of permutations(entries)) {
+          expect(copyNotebook(base, order)).toEqual(inOrder);
+        }
+      }
+    },
+  );
 });
