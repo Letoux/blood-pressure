@@ -21,7 +21,7 @@ export function uniqueUser(name: string): E2eUser {
 }
 
 /**
- * Crée l'utilisateur par l'API better-auth, avec une session admin séparée de celle de la page.
+ * Crée l'utilisateur par la procédure `admin.createUser`, avec une session admin séparée de celle de la page.
  * Sauf `{ onboarded: false }`, le premier lancement est marqué comme vu : la connexion mène
  * directement à l'accueil.
  */
@@ -34,11 +34,8 @@ export async function createUserAsAdmin(
     data: { email: e2eAdmin.email, password: e2eAdmin.password },
   });
   if (!signIn.ok()) throw new Error(`connexion admin refusée (${signIn.status()})`);
-  // Avec un cookie de session, better-auth exige l'en-tête Origin (protection CSRF).
-  const created = await request.post("/api/auth/admin/create-user", {
-    data: { ...user, role: "user" },
-    headers: { origin: new URL(signIn.url()).origin },
-  });
+  // Procédure `admin.createUser` (protocole RPC d'oRPC) : les routes `/api/auth/admin/*` sont fermées.
+  const created = await request.post("/rpc/admin/createUser", { data: { json: user } });
   if (!created.ok()) throw new Error(`création refusée (${created.status()}) : ${await created.text()}`);
   if (onboarded) await skipOnboarding(request, user, new URL(signIn.url()).origin);
 }

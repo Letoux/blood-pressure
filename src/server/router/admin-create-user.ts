@@ -17,7 +17,8 @@ export const adminCreateUser = adminOnly
     try {
       const { user } = await context.auth.api.createUser({
         headers: context.headers,
-        body: { ...input, role: "user" },
+        // Sans `role` : better-auth donne le rôle par défaut (`user`) sans exiger le droit `set-role`.
+        body: input,
       });
       return { id: user.id, email: user.email, name: user.name };
     } catch (error) {
