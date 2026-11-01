@@ -72,7 +72,8 @@ export type CampaignInput = {
  *
  * « Campagne terminée » du glossaire : `finished` ou `incomplete` (`isFinished`).
  */
-export type CampaignStatus = "planned" | "inProgress" | "finished" | "incomplete" | "missed" | "skipped";
+export const CAMPAIGN_STATUSES = ["planned", "inProgress", "finished", "incomplete", "missed", "skipped"] as const;
+export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
 export type SlotRef = { day: CampaignDay; moment: Moment };
 
@@ -186,7 +187,13 @@ function slotsOf(start: LocalDate, measurements: CampaignMeasurement[]): SlotVie
 /** Le dernier jour où une première mesure commence encore une campagne prévue à `plannedStart`. */
 const startByOf = (plannedStart: LocalDate) => addDays(plannedStart, LATE_START_DAYS - 1);
 
-function viewOf(campaign: StoredCampaign, all: CampaignMeasurement[], timeZone: string, today: LocalDate): CampaignView {
+/** `id: null` : une campagne manquée seulement calculée (pas en base). */
+function viewOf(
+  campaign: Omit<StoredCampaign, "id"> & { id: string | null },
+  all: CampaignMeasurement[],
+  timeZone: string,
+  today: LocalDate,
+): CampaignView {
   const measurements = campaign.id ? all.filter((measurement) => measurement.campaignId === campaign.id) : [];
   const actualStart = actualStartOf(measurements, timeZone);
   const start = actualStart ?? campaign.plannedStart;
@@ -208,7 +215,7 @@ function viewOf(campaign: StoredCampaign, all: CampaignMeasurement[], timeZone: 
           : "planned";
   const originalStart = campaign.originalStart ?? null;
   return {
-    id: campaign.id || null,
+    id: campaign.id,
     status,
     plannedStart: campaign.plannedStart,
     actualStart,
@@ -276,7 +283,7 @@ function followingOf(
   const missed: CampaignView[] = [];
   let candidate = successorOf(last, input.frequencyMonths);
   while (today > startByOf(candidate.plannedStart)) {
-    const view = viewOf({ id: "", ...candidate }, [], input.timeZone, today);
+    const view = viewOf({ id: null, ...candidate }, [], input.timeZone, today);
     missed.push(view);
     candidate = successorOf(view, input.frequencyMonths);
   }

@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { createUserAsAdmin, hasHorizontalOverflow, signIn, test, uniqueUser } from "./helpers";
-import { daysAgo, seedCampaign, seedFreeMeasurement } from "./seed";
+import { daysAgo, seedCampaign, seedFreeMeasurement, seedPlannedCampaign } from "./seed";
 
 test.use({ timezoneId: "Europe/Paris", viewport: { width: 360, height: 780 } });
 
@@ -58,4 +58,18 @@ test("compte rendu sur « tout » : carte de campagne incomplète, à l'écran e
     await expect(card.getByRole("table", { name: "Mesures de la campagne" })).toBeVisible();
   }
   await expect(page.getByText("Ne remplace pas un avis médical.")).toBeVisible();
+});
+
+test("sans campagne terminée, le résumé compte quand même les campagnes manquées", async ({ page, request }) => {
+  const user = uniqueUser("RapportManque");
+  await createUserAsAdmin(request, user);
+  // Prévue il y a 20 jours, sans mesure : manquée, puis son rattrapage aussi ; le suivant est en cours.
+  await seedPlannedCampaign(user.email, daysAgo(20));
+  await signIn(page, user);
+
+  await page.getByRole("navigation").getByRole("link", { name: "Compte rendu" }).click();
+  await page.getByLabel("Période", { exact: true }).selectOption({ label: "Tout" });
+  const summary = page.getByRole("region", { name: "Résumé de la période" });
+  await expect(summary.getByText("Aucune campagne terminée sur cette période.")).toBeVisible();
+  await expect(summary.getByText("2 campagnes manquées, aucune sautée")).toBeVisible();
 });

@@ -1,38 +1,22 @@
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { campaignOverview, type CampaignStatus } from "@/domain/campaign";
+import { CAMPAIGN_STATUSES, campaignOverview } from "@/domain/campaign";
 import { localDateOf } from "@/domain/local-date";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/locale";
 import { translator } from "@/i18n/translator";
 import { loadCampaignInput } from "@/server/campaigns/campaign-input";
 import { measurement } from "@/server/db/schema";
-import { measurementsCsv, type CsvColumn, type CsvLabels, type ExportedAbsence } from "@/server/export/measurements-csv";
+import { CSV_COLUMNS, measurementsCsv, type CsvLabels, type ExportedAbsence } from "@/server/export/measurements-csv";
 import { userOnly } from "./authed";
 import { currentTime } from "./base";
-
-const COLUMNS: CsvColumn[] = [
-  "date",
-  "time",
-  "timeZone",
-  "systolic",
-  "diastolic",
-  "pulse",
-  "comment",
-  "free",
-  "campaign",
-  "campaignDay",
-  "moment",
-  "campaignStatus",
-];
-const STATUSES: CampaignStatus[] = ["planned", "inProgress", "finished", "incomplete", "missed", "skipped"];
 
 /** Les libellés du CSV, depuis le catalogue partagé (`translator`). */
 function csvLabels(locale: Locale): CsvLabels {
   const t = translator(locale);
   return {
-    columns: Object.fromEntries(COLUMNS.map((c) => [c, t(`settings.data.csv.columns.${c}`)])) as CsvLabels["columns"],
+    columns: Object.fromEntries(CSV_COLUMNS.map((c) => [c, t(`settings.data.csv.columns.${c}`)])) as CsvLabels["columns"],
     moments: { morning: t("measurements.moments.morning"), evening: t("measurements.moments.evening") },
-    statuses: Object.fromEntries(STATUSES.map((s) => [s, t(`campaigns.status.${s}`)])) as CsvLabels["statuses"],
+    statuses: Object.fromEntries(CAMPAIGN_STATUSES.map((s) => [s, t(`campaigns.status.${s}`)])) as CsvLabels["statuses"],
     yes: t("settings.data.csv.yes"),
     no: t("settings.data.csv.no"),
   };

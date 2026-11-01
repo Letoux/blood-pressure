@@ -5,19 +5,22 @@ import type { CampaignStatus } from "@/domain/campaign";
 import { localDateOf, type LocalDate } from "@/domain/local-date";
 import type { Moment } from "@/domain/slot";
 
-export type CsvColumn =
-  | "date"
-  | "time"
-  | "timeZone"
-  | "systolic"
-  | "diastolic"
-  | "pulse"
-  | "comment"
-  | "free"
-  | "campaign"
-  | "campaignDay"
-  | "moment"
-  | "campaignStatus";
+/** Les colonnes du CSV, dans l'ordre ; leurs libellés viennent de `settings.data.csv.columns`. */
+export const CSV_COLUMNS = [
+  "date",
+  "time",
+  "timeZone",
+  "systolic",
+  "diastolic",
+  "pulse",
+  "comment",
+  "free",
+  "campaign",
+  "campaignDay",
+  "moment",
+  "campaignStatus",
+] as const;
+export type CsvColumn = (typeof CSV_COLUMNS)[number];
 
 export type CsvLabels = {
   columns: Record<CsvColumn, string>;
@@ -42,21 +45,6 @@ export type ExportedMeasurement = {
 
 /** Une campagne sans mesure, manquée ou sautée (ADR-0011) : une ligne sans valeurs, à sa date prévue. */
 export type ExportedAbsence = { plannedStart: LocalDate; status: "missed" | "skipped" };
-
-const COLUMNS: CsvColumn[] = [
-  "date",
-  "time",
-  "timeZone",
-  "systolic",
-  "diastolic",
-  "pulse",
-  "comment",
-  "free",
-  "campaign",
-  "campaignDay",
-  "moment",
-  "campaignStatus",
-];
 
 const BOM = "﻿";
 const CRLF = "\r\n";
@@ -93,7 +81,7 @@ export function measurementsCsv(
   absences: ExportedAbsence[],
   { timeZone, labels }: { timeZone: string; labels: CsvLabels },
 ): string {
-  const header = COLUMNS.map((column) => field(labels.columns[column]));
+  const header = CSV_COLUMNS.map((column) => field(labels.columns[column]));
   const absenceRow = (absence: ExportedAbsence) => {
     const cells: Partial<Record<CsvColumn, string>> = {
       date: absence.plannedStart,
@@ -102,7 +90,7 @@ export function measurementsCsv(
       campaign: absence.plannedStart,
       campaignStatus: labels.statuses[absence.status],
     };
-    return COLUMNS.map((column) => field(cells[column] ?? null));
+    return CSV_COLUMNS.map((column) => field(cells[column] ?? null));
   };
   const pending = [...absences].sort((a, b) => (a.plannedStart < b.plannedStart ? -1 : 1));
   const rows: string[][] = [];
@@ -123,7 +111,7 @@ export function measurementsCsv(
       moment: labels.moments[m.moment],
       campaignStatus: m.campaignStatus === null ? null : labels.statuses[m.campaignStatus],
     };
-    rows.push(COLUMNS.map((column) => field(cells[column])));
+    rows.push(CSV_COLUMNS.map((column) => field(cells[column])));
   }
   rows.push(...pending.map(absenceRow));
   return BOM + [header, ...rows].map((cells) => cells.join(",") + CRLF).join("");

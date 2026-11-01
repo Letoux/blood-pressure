@@ -165,17 +165,20 @@ function Summary({ report, guideline }: { report: Report; guideline: Guideline }
         {summary.campaignCount === 0 ? (
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         ) : (
+          <p className="text-sm">
+            {t("count", {
+              count: summary.campaignCount,
+              complete: summary.completeCount,
+              share: Math.round((summary.completeShare ?? 0) * 100),
+            })}
+          </p>
+        )}
+        {/* Même sans campagne terminée dans la période, les manquées et sautées sont comptées. */}
+        {(summary.missedCount > 0 || summary.skippedCount > 0) && (
+          <p className="text-sm">{t("absent", { missed: summary.missedCount, skipped: summary.skippedCount })}</p>
+        )}
+        {summary.campaignCount > 0 && (
           <>
-            <p className="text-sm">
-              {t("count", {
-                count: summary.campaignCount,
-                complete: summary.completeCount,
-                share: Math.round((summary.completeShare ?? 0) * 100),
-              })}
-            </p>
-            {(summary.missedCount > 0 || summary.skippedCount > 0) && (
-              <p className="text-sm">{t("absent", { missed: summary.missedCount, skipped: summary.skippedCount })}</p>
-            )}
             <dl className="grid grid-cols-3 gap-2">
               <AverageValue label={t("global")} average={global} />
               <AverageValue label={t("morning")} average={summary.averages.morning} />
