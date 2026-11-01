@@ -76,18 +76,18 @@ describe("planification", () => {
       input({ campaigns: [{ id: "c1", plannedStart: "2026-02-10" }] }),
     );
     expect(overview.campaigns).toMatchObject([{ id: "c1", status: "planned", plannedStart: "2026-02-10" }]);
-    expect(overview.next).toEqual({ campaignId: "c1", plannedStart: "2026-02-10" });
+    expect(overview.next).toMatchObject({ campaignId: "c1", plannedStart: "2026-02-10" });
   });
 
   it("la suivante est planifiée au début de la précédente plus la fréquence", () => {
     const campaigns = [{ id: "c1", plannedStart: "2026-02-02" }];
     const measurements = fullCampaign("c1");
     const now = paris("2026-02-10T10:00");
-    expect(campaignOverview(input({ campaigns, measurements, now })).next).toEqual({
+    expect(campaignOverview(input({ campaigns, measurements, now })).next).toMatchObject({
       campaignId: null,
       plannedStart: "2026-05-02",
     });
-    expect(campaignOverview(input({ campaigns, measurements, now, frequencyMonths: 1 })).next).toEqual({
+    expect(campaignOverview(input({ campaigns, measurements, now, frequencyMonths: 1 })).next).toMatchObject({
       campaignId: null,
       plannedStart: "2026-03-02",
     });
@@ -104,7 +104,7 @@ describe("planification", () => {
       endDate: "2026-02-04",
       status: "inProgress",
     });
-    expect(overview.next).toEqual({ campaignId: null, plannedStart: "2026-05-02" });
+    expect(overview.next).toMatchObject({ campaignId: null, plannedStart: "2026-05-02" });
   });
 
   it("avance ou reporte une campagne planifiée, à partir d'aujourd'hui", () => {
@@ -115,13 +115,13 @@ describe("planification", () => {
   });
 
   it("planifier sans campagne crée la première ; après une campagne, crée la suivante calculée", () => {
-    expect(scheduleCampaign(input({}), "2026-02-03")).toEqual({ kind: "create" });
+    expect(scheduleCampaign(input({}), "2026-02-03")).toEqual({ kind: "create", originalStart: null });
     const done = input({
       campaigns: [{ id: "c1", plannedStart: "2026-02-02" }],
       measurements: fullCampaign("c1"),
       now: paris("2026-02-10T10:00"),
     });
-    expect(scheduleCampaign(done, "2026-04-01")).toEqual({ kind: "create" });
+    expect(scheduleCampaign(done, "2026-04-01")).toEqual({ kind: "create", originalStart: null });
   });
 
   it("pendant une campagne en cours, la suivante ne peut pas commencer avant sa fin", () => {
@@ -131,7 +131,7 @@ describe("planification", () => {
       now: paris("2026-02-03T10:00"),
     });
     expect(scheduleCampaign(running, "2026-02-04")).toEqual({ kind: "error", reason: "overlap" });
-    expect(scheduleCampaign(running, "2026-02-05")).toEqual({ kind: "create" });
+    expect(scheduleCampaign(running, "2026-02-05")).toEqual({ kind: "create", originalStart: null });
   });
 });
 
@@ -198,21 +198,10 @@ describe("statuts et complétude", () => {
     expect(view?.averages.global?.count).toBe(4);
   });
 
-  it("manquée quand sa période passe sans mesure, et la suivante est replanifiée à partir de ce jour", () => {
-    const overview = campaignOverview(input({ campaigns, now: paris("2026-02-05T08:00") }));
-    expect(overview.campaigns[0]).toMatchObject({ status: "missed", completeness: 0 });
-    // Manquée le 5 février (lendemain de J3 prévu) : la suivante 3 mois plus tard.
-    expect(overview.next).toEqual({ campaignId: null, plannedStart: "2026-05-05" });
-  });
-
-  it("une prochaine campagne calculée manquée à son tour est replanifiée de la même façon", () => {
-    const overview = campaignOverview(input({ campaigns, now: paris("2026-05-08T08:00", "+02:00") }));
-    expect(overview.next).toEqual({ campaignId: null, plannedStart: "2026-08-08" });
-    // Pendant sa période, la prochaine calculée reste planifiée.
-    expect(campaignOverview(input({ campaigns, now: paris("2026-05-07T08:00", "+02:00") })).next).toEqual({
-      campaignId: null,
-      plannedStart: "2026-05-05",
-    });
+  it("manquée quand sa fenêtre de début en retard (7 jours) passe sans mesure", () => {
+    expect(campaignOverview(input({ campaigns, now: paris("2026-02-08T23:30") })).campaigns[0]?.status).toBe("planned");
+    const overview = campaignOverview(input({ campaigns, now: paris("2026-02-09T00:30") }));
+    expect(overview.campaigns[0]).toMatchObject({ id: "c1", status: "missed", completeness: 0 });
   });
 });
 
@@ -266,6 +255,7 @@ describe("rattachement d'une saisie", () => {
       kind: "campaign",
       campaignId: "c1",
       day: 1,
+      dropCatchUps: [],
     });
   });
 
@@ -275,8 +265,18 @@ describe("rattachement d'une saisie", () => {
       measurements: [measure("c1", 1, "evening", paris("2026-02-03T21:00"))],
       now: paris("2026-02-05T07:00"),
     });
-    expect(attachMeasurement(running, paris("2026-02-05T07:00"))).toEqual({ kind: "campaign", campaignId: "c1", day: 3 });
-    expect(attachMeasurement(running, paris("2026-02-04T21:00"))).toEqual({ kind: "campaign", campaignId: "c1", day: 2 });
+    expect(attachMeasurement(running, paris("2026-02-05T07:00"))).toEqual({
+      kind: "campaign",
+      campaignId: "c1",
+      day: 3,
+      dropCatchUps: [],
+    });
+    expect(attachMeasurement(running, paris("2026-02-04T21:00"))).toEqual({
+      kind: "campaign",
+      campaignId: "c1",
+      day: 2,
+      dropCatchUps: [],
+    });
     expect(attachMeasurement(running, paris("2026-02-06T07:00"))).toEqual({ kind: "free" });
     expect(attachMeasurement(running, paris("2026-02-02T21:00"))).toEqual({ kind: "free" });
   });
@@ -290,7 +290,9 @@ describe("rattachement d'une saisie", () => {
     expect(attachMeasurement(done, paris("2026-05-03T07:00", "+02:00"))).toEqual({
       kind: "newCampaign",
       plannedStart: "2026-05-02",
+      originalStart: null,
       day: 1,
+      dropCatchUps: [],
     });
   });
 });

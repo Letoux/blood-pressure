@@ -12,19 +12,12 @@
 import { and, eq, gte, isNull, not, or } from "drizzle-orm";
 import { campaignOverview } from "@/domain/campaign";
 import { addDays } from "@/domain/local-date";
-import {
-  dueReminders,
-  reminderKey,
-  REMINDER_DEFAULTS,
-  type DueReminder,
-  type ReminderPreferences,
-  type TimeOfDay,
-} from "@/domain/reminder";
+import { dueReminders, reminderKey, reminderPreferencesOf, type DueReminder } from "@/domain/reminder";
 import { resolveLocale, type Locale } from "@/i18n/locale";
 import { translator } from "@/i18n/translator";
 import type { PushMessage } from "@/lib/push-message";
 import { loadCampaignInput } from "@/server/campaigns/campaign-input";
-import type { Db } from "@/server/db/client";
+import type { Db, Queryable } from "@/server/db/client";
 import { notification, pushSubscription, user, userSettings } from "@/server/db/schema";
 import { sendToUser, type PushSender } from "@/server/push/sender";
 
@@ -53,8 +46,38 @@ export function reminderMessage(reminder: DueReminder, locale: Locale): PushMess
   };
 }
 
-/** Un passage : envoie les rappels dus à `now` à tous les utilisateurs qui ont un appareil abonné. */
-export async function runReminders({ db, sender, now }: { db: Db; sender: PushSender; now: Date }) {
+/**
+ * Réserve l'envoi d'un rappel en écrivant sa ligne du journal. Renvoie son identifiant, ou `null`
+ * si un autre passage l'a déjà réservé (contrainte unique utilisateur + canal + type + jour +
+ * moment) : un seul passage envoie le rappel.
+ */
+export async function claimReminder(
+  db: Queryable,
+  { userId, reminder, now }: { userId: string; reminder: DueReminder; now: Date },
+): Promise<string | null> {
+  const [claimed] = await db
+    .insert(notification)
+    .values({ userId, channel: "push", kind: reminder.kind, date: reminder.date, moment: reminder.moment, sentAt: now })
+    .onConflictDoNothing()
+    .returning({ id: notification.id });
+  return claimed?.id ?? null;
+}
+
+/**
+ * Un passage : envoie les rappels dus à `now` à tous les utilisateurs qui ont un appareil abonné.
+ * `claim` : la réservation d'un rappel (`claimReminder` ; un test simule un passage concurrent).
+ */
+export async function runReminders({
+  db,
+  sender,
+  now,
+  claim = claimReminder,
+}: {
+  db: Db;
+  sender: PushSender;
+  now: Date;
+  claim?: typeof claimReminder;
+}) {
   const report: ReminderRunReport = { reminders: 0, sent: 0, removed: 0, failed: 0 };
 
   // Utilisateurs ayant au moins un appareil abonné, hors comptes désactivés (l'admin n'a ni
@@ -76,13 +99,7 @@ export async function runReminders({ db, sender, now }: { db: Db; sender: PushSe
 
   for (const recipient of recipients) {
     try {
-      const preferences: ReminderPreferences = {
-        morningTime: (recipient.morningTime ?? REMINDER_DEFAULTS.morningTime) as TimeOfDay,
-        eveningTime: (recipient.eveningTime ?? REMINDER_DEFAULTS.eveningTime) as TimeOfDay,
-        dayBeforeReminder: recipient.dayBeforeReminder ?? REMINDER_DEFAULTS.dayBeforeReminder,
-        followUpEnabled: recipient.followUpEnabled ?? REMINDER_DEFAULTS.followUpEnabled,
-        followUpDelayMinutes: recipient.followUpDelayMinutes ?? REMINDER_DEFAULTS.followUpDelayMinutes,
-      };
+      const preferences = reminderPreferencesOf(recipient);
       const input = await loadCampaignInput(db, recipient.userId, now);
       const overview = campaignOverview(input);
 
@@ -103,20 +120,9 @@ export async function runReminders({ db, sender, now }: { db: Db; sender: PushSe
       const due = dueReminders({ preferences, timeZone: input.timeZone, overview, sent, now });
       const locale = resolveLocale({ saved: recipient.locale, acceptLanguage: null });
       for (const reminder of due) {
-        const [claimed] = await db
-          .insert(notification)
-          .values({
-            userId: recipient.userId,
-            channel: "push",
-            kind: reminder.kind,
-            date: reminder.date,
-            moment: reminder.moment,
-            sentAt: now,
-          })
-          .onConflictDoNothing()
-          .returning({ id: notification.id });
+        const claimed = await claim(db, { userId: recipient.userId, reminder, now });
         // Déjà pris par un autre passage.
-        if (!claimed) continue;
+        if (claimed === null) continue;
 
         const delivery = await sendToUser(db, sender, recipient.userId, reminderMessage(reminder, locale));
         report.sent += delivery.sent;
@@ -124,7 +130,7 @@ export async function runReminders({ db, sender, now }: { db: Db; sender: PushSe
         report.failed += delivery.failed;
         if (delivery.sent > 0) report.reminders += 1;
         if (delivery.sent === 0 && delivery.failed > 0) {
-          await db.delete(notification).where(eq(notification.id, claimed.id));
+          await db.delete(notification).where(eq(notification.id, claimed));
         }
       }
     } catch (error) {

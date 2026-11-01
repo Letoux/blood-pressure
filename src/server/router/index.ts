@@ -14,6 +14,7 @@ import { adminSetSignUpOpen } from "./admin-set-sign-up-open";
 import { campaignsDelete } from "./campaigns-delete";
 import { campaignsOverview } from "./campaigns-overview";
 import { campaignsSchedule } from "./campaigns-schedule";
+import { campaignsSkip } from "./campaigns-skip";
 import { health } from "./health";
 import { me } from "./me";
 import { measurementsCreate } from "./measurements-create";
@@ -25,7 +26,8 @@ import { pushPublicKey } from "./push-public-key";
 import { pushSendTest } from "./push-send-test";
 import { pushSubscribe } from "./push-subscribe";
 import { pushUnsubscribe } from "./push-unsubscribe";
-import { settingsGet, settingsUpdate } from "./settings";
+import { settingsGet } from "./settings-get";
+import { settingsUpdate } from "./settings-update";
 import { signUpOpen } from "./sign-up-open";
 
 export const router = {
@@ -41,6 +43,7 @@ export const router = {
   campaigns: {
     overview: campaignsOverview,
     schedule: campaignsSchedule,
+    skip: campaignsSkip,
     delete: campaignsDelete,
   },
   report: {

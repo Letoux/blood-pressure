@@ -13,7 +13,7 @@ import { browserStorage, draftStore } from "./draft";
  * `restored` passe alors à `true`.
  *
  * ```tsx
- * const { value, setValue, clear } = useDraft(userId, "measurement", () => newEntryDraft(new Date()));
+ * const { value, setValue, clear } = useDraft(userId, "measurement", () => newEntryDraft(new Date(), timeZone));
  * ```
  */
 export function useDraft<T extends object>(userId: string, form: string, initial: T | (() => T)) {

@@ -10,7 +10,7 @@ import { EXPECTED_MEASUREMENTS } from "@/domain/campaign";
 import { guidelineOf, type Guideline } from "@/domain/guideline";
 import { campaignSeries, latestStanding } from "@/domain/stats";
 import { isLocale } from "@/i18n/locale";
-import { useCampaignFormat } from "@/lib/campaign-format";
+import { mmHg, useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
 import { cn } from "@/lib/utils";
 
@@ -67,8 +67,8 @@ function Standing({
       <p className="text-sm">
         {t("latest", {
           date: format.date(point.date),
-          systolic: Math.round(point.systolic),
-          diastolic: Math.round(point.diastolic),
+          systolic: mmHg(point.systolic),
+          diastolic: mmHg(point.diastolic),
         })}
         {!point.complete && ` (${t("incomplete", { count: point.completeness, total: EXPECTED_MEASUREMENTS })})`}
       </p>

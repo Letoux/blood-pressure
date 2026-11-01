@@ -1,7 +1,7 @@
 // Statistiques : ce que le graphique et la pastille lisent de `campaignOverview` (moyennes et
 // complétude déjà calculées par `campaign.ts`, jamais recalculées ici). Module pur.
 
-import { EXPECTED_MEASUREMENTS, type CampaignOverview } from "./campaign";
+import { isComplete, isFinished, type CampaignOverview } from "./campaign";
 import { positionOf, type Threshold, type ThresholdPosition } from "./guideline";
 import type { LocalDate } from "./local-date";
 
@@ -21,14 +21,13 @@ export type CampaignPoint = {
 /**
  * Un point par campagne terminée (`finished` ou `incomplete`), de la plus ancienne à la plus
  * récente. Une campagne en cours n'y est pas encore (sa moyenne n'est pas définitive), une
- * campagne planifiée ou manquée n'a pas de moyenne, et les mesures libres n'en font jamais partie.
+ * campagne planifiée, manquée ou sautée n'a pas de moyenne, et les mesures libres n'en font jamais partie.
  */
 export function campaignSeries(overview: Pick<CampaignOverview, "campaigns">): CampaignPoint[] {
   return overview.campaigns.flatMap((campaign) => {
     const average = campaign.averages.global;
-    if ((campaign.status !== "finished" && campaign.status !== "incomplete") || !average || !campaign.actualStart) {
-      return [];
-    }
+    // Une campagne terminée a des mesures, donc un identifiant (enregistrée).
+    if (!isFinished(campaign) || !average || !campaign.actualStart || !campaign.id) return [];
     return [
       {
         campaignId: campaign.id,
@@ -36,7 +35,7 @@ export function campaignSeries(overview: Pick<CampaignOverview, "campaigns">): C
         systolic: average.systolic,
         diastolic: average.diastolic,
         completeness: campaign.completeness,
-        complete: campaign.completeness === EXPECTED_MEASUREMENTS,
+        complete: isComplete(campaign),
       },
     ];
   });

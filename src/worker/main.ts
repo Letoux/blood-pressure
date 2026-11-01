@@ -6,9 +6,11 @@ import { PgBoss } from "pg-boss";
 import { closeDb, getDb } from "@/server/db";
 import { serverEnv } from "@/server/env";
 import { getPushSender } from "@/server/push";
+import { runMissedCampaigns } from "./missed-campaigns";
 import { runReminders } from "./reminders";
 
 const REMINDERS_QUEUE = "reminders";
+const MISSED_CAMPAIGNS_QUEUE = "missed-campaigns";
 
 const db = getDb();
 // Lit `APP_URL` tout de suite : une configuration manquante arrête le worker dès le démarrage.
@@ -33,7 +35,15 @@ await boss.work(REMINDERS_QUEUE, async () => {
     );
   }
 });
-console.log("[worker] démarré : tâche des rappels chaque minute");
+// Statut « manquée » enregistré en base (ADR-0011). Le domaine le calcule déjà sans attendre
+// cette tâche : un passage par quart d'heure suffit.
+await boss.createQueue(MISSED_CAMPAIGNS_QUEUE, { policy: "singleton", retryLimit: 0, expireInSeconds: 600 });
+await boss.schedule(MISSED_CAMPAIGNS_QUEUE, "*/15 * * * *", null, { tz: "UTC", missed: "skip" });
+await boss.work(MISSED_CAMPAIGNS_QUEUE, async () => {
+  const recorded = await runMissedCampaigns({ db, now: new Date() });
+  if (recorded > 0) console.log(`[worker] ${recorded} campagne(s) manquée(s) enregistrée(s)`);
+});
+console.log("[worker] démarré : rappels chaque minute, campagnes manquées chaque quart d'heure");
 
 let stopping = false;
 for (const signal of ["SIGTERM", "SIGINT"] as const) {

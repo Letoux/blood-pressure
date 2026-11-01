@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --project unit --passWithNoTests",
-    "test:int": "vitest run --project integration",
+    "test:int": "vitest run --project integration --sequence.shuffle",
     "test:e2e": "playwright test",
     "test:backup": "sh docker/backup.test.sh",
     "test:all": "vitest run",

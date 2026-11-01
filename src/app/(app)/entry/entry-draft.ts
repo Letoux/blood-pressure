@@ -1,4 +1,5 @@
 import type { EntryRow } from "@/domain/measurement";
+import { MEASUREMENTS_PER_SLOT } from "@/domain/campaign";
 import { momentAt, type Moment } from "@/domain/slot";
 
 /**
@@ -13,16 +14,14 @@ export type EntryDraft = {
   comment: string;
 };
 
-export const ROWS_PER_SLOT = 3;
-
 export const emptyRow = (): EntryRow => ({ systolic: "", diastolic: "", pulse: "" });
 
-/** Formulaire neuf : horodaté maintenant, moment pré-sélectionné selon l'heure. */
-export function newEntryDraft(now: Date): EntryDraft {
+/** Formulaire neuf : horodaté maintenant, moment pré-sélectionné selon l'heure dans le fuseau des réglages. */
+export function newEntryDraft(now: Date, timeZone: string): EntryDraft {
   return {
     takenAt: toDateTimeLocal(now),
-    moment: momentAt(now),
-    rows: Array.from({ length: ROWS_PER_SLOT }, emptyRow),
+    moment: momentAt(now, timeZone),
+    rows: Array.from({ length: MEASUREMENTS_PER_SLOT }, emptyRow),
     comment: "",
   };
 }

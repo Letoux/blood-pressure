@@ -3,7 +3,7 @@
 // complétude, créneaux manquants), choisit les campagnes d'une période et les résume.
 // Les mesures libres n'en font jamais partie : `campaignOverview` les ignore déjà.
 
-import { EXPECTED_MEASUREMENTS, type Average, type CampaignAverages, type CampaignOverview, type CampaignView } from "./campaign";
+import { isComplete, isFinished, type Average, type CampaignAverages, type CampaignOverview, type CampaignView } from "./campaign";
 import { addMonths, type LocalDate } from "./local-date";
 import { campaignSeries, type CampaignPoint } from "./stats";
 
@@ -29,6 +29,9 @@ export type PeriodSummary = {
   completeCount: number;
   /** Part des campagnes complètes (0 à 1) ; `null` sans campagne. */
   completeShare: number | null;
+  /** Campagnes manquées et sautées de la période (`Report.absent`). */
+  missedCount: number;
+  skippedCount: number;
 };
 
 export type Report = {
@@ -39,12 +42,15 @@ export type Report = {
   to: LocalDate;
   /** Les campagnes terminées de la période, de la plus ancienne à la plus récente. */
   campaigns: ReportCampaign[];
+  /**
+   * Les campagnes manquées ou sautées de la période (selon leur début prévu), de la plus ancienne
+   * à la plus récente ; pour « dernière campagne », celles qui suivent la dernière terminée.
+   */
+  absent: CampaignView[];
   summary: PeriodSummary;
   /** Les points du graphique de la période (`campaignSeries`). */
   points: CampaignPoint[];
 };
-
-const isOver = (view: CampaignView) => view.status === "finished" || view.status === "incomplete";
 
 /** Le jour à partir duquel une période commence ; `null` : sans limite de date. */
 function limitOf(period: ReportPeriod, today: LocalDate): LocalDate | null {
@@ -75,7 +81,7 @@ function deltaOf(view: CampaignView, previous: CampaignView | undefined): Delta 
 
 /** Le compte rendu d'une période : ses campagnes terminées, leur résumé et leurs écarts. */
 export function reportOf(overview: Pick<CampaignOverview, "today" | "campaigns">, period: ReportPeriod): Report {
-  const over = overview.campaigns.filter(isOver);
+  const over = overview.campaigns.filter(isFinished);
   const limit = limitOf(period, overview.today);
   const selected =
     period === "lastCampaign"
@@ -83,17 +89,24 @@ export function reportOf(overview: Pick<CampaignOverview, "today" | "campaigns">
       : over.filter((view) => limit === null || (view.actualStart ?? view.plannedStart) >= limit);
   const campaigns = selected.map((view) => ({
     campaign: view,
-    complete: view.completeness === EXPECTED_MEASUREMENTS,
+    complete: isComplete(view),
     delta: deltaOf(view, over[over.indexOf(view) - 1]),
   }));
   const completeCount = campaigns.filter((entry) => entry.complete).length;
   const ids = new Set(selected.map((view) => view.id));
+  const lastStart = over.at(-1)?.actualStart ?? null;
+  const absent = overview.campaigns.filter(
+    (view) =>
+      (view.status === "missed" || view.status === "skipped") &&
+      (period === "lastCampaign" ? lastStart === null || view.plannedStart > lastStart : limit === null || view.plannedStart >= limit),
+  );
 
   return {
     period,
     from: limit ?? selected[0]?.actualStart ?? null,
     to: overview.today,
     campaigns,
+    absent,
     summary: {
       averages: {
         global: combine(selected.map((view) => view.averages.global)),
@@ -103,6 +116,8 @@ export function reportOf(overview: Pick<CampaignOverview, "today" | "campaigns">
       campaignCount: campaigns.length,
       completeCount,
       completeShare: campaigns.length === 0 ? null : completeCount / campaigns.length,
+      missedCount: absent.filter((view) => view.status === "missed").length,
+      skippedCount: absent.filter((view) => view.status === "skipped").length,
     },
     points: campaignSeries(overview).filter((point) => ids.has(point.campaignId)),
   };

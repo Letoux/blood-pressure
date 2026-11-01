@@ -116,8 +116,33 @@ describe("période du compte rendu", () => {
       campaignCount: 0,
       completeCount: 0,
       completeShare: null,
+      missedCount: 0,
+      skippedCount: 0,
     });
     expect(reportOf(overviewOf({}, [], "2026-06-15T10:00:00Z"), "lastCampaign").from).toBeNull();
+  });
+
+  it("les campagnes manquées et sautées de la période sont listées à part et comptées", () => {
+    const report = reportOf(history(), "oneYear");
+    expect(report.absent.map((view) => [view.id, view.status])).toEqual([["missed", "missed"]]);
+    expect(report.summary).toMatchObject({ campaignCount: 3, missedCount: 1, skippedCount: 0 });
+    // Hors période (avant la dernière campagne terminée).
+    expect(reportOf(history(), "lastCampaign").absent).toEqual([]);
+
+    const skipped = campaignOverview({
+      campaigns: [
+        { id: "c1", plannedStart: "2026-01-05", status: "missed" },
+        { id: "c2", plannedStart: "2026-01-12", originalStart: "2026-01-05", status: "skipped", skippedOn: "2026-01-13" },
+      ],
+      measurements: [],
+      frequencyMonths: 3,
+      timeZone: TZ,
+      now: new Date("2026-02-01T10:00:00Z"),
+    });
+    const all = reportOf(skipped, "all");
+    expect(all.absent.map((view) => view.status)).toEqual(["missed", "skipped"]);
+    expect(all.summary).toMatchObject({ campaignCount: 0, missedCount: 1, skippedCount: 1 });
+    expect(reportOf(skipped, "lastCampaign").absent.map((view) => view.status)).toEqual(["missed", "skipped"]);
   });
 });
 

@@ -31,7 +31,13 @@ export async function loadCampaignInput(
   // Requêtes successives : `db` peut être une transaction (une seule connexion).
   const settings = await campaignSettings(db, userId);
   const campaigns = await db
-    .select({ id: campaign.id, plannedStart: campaign.plannedStart })
+    .select({
+      id: campaign.id,
+      plannedStart: campaign.plannedStart,
+      originalStart: campaign.originalStart,
+      status: campaign.status,
+      skippedOn: campaign.skippedOn,
+    })
     .from(campaign)
     .where(eq(campaign.userId, userId))
     .orderBy(asc(campaign.plannedStart));

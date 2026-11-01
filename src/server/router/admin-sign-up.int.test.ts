@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ensureAdmin } from "@/server/auth/ensure-admin";
 import { cookieHeaders, createTestApi, type TestApi } from "@/server/testing/test-api";
 
 describe("inscription libre réglée par l'admin", () => {
@@ -11,8 +10,7 @@ describe("inscription libre réglée par l'admin", () => {
 
   beforeAll(async () => {
     api = await createTestApi();
-    await ensureAdmin(api.auth, { email: "admin@example.org", password: "admin-password" });
-    adminHeaders = await api.signIn("admin@example.org", "admin-password");
+    adminHeaders = await api.admin();
   });
 
   afterAll(async () => {
@@ -20,12 +18,19 @@ describe("inscription libre réglée par l'admin", () => {
   });
 
   it("est fermée par défaut", async () => {
-    await expect(api.client.signUpOpen()).resolves.toBe(false);
-    await expect(api.as(adminHeaders).admin.getSettings()).resolves.toEqual({ signUpOpen: false });
-
-    const response = await signUp("mallory@example.org");
-    expect(response.ok).toBe(false);
-    await expect(api.signIn("mallory@example.org", "un-mot-de-passe")).rejects.toThrow();
+    // Réglage de l'instance : une base neuve, que les autres tests n'ont pas modifiée.
+    const fresh = await createTestApi();
+    try {
+      await expect(fresh.client.signUpOpen()).resolves.toBe(false);
+      await expect(fresh.as(await fresh.admin()).admin.getSettings()).resolves.toEqual({ signUpOpen: false });
+      const response = await fresh.authRequest("/sign-up/email", {
+        body: { email: "mallory@example.org", name: "Test", password: "un-mot-de-passe" },
+      });
+      expect(response.ok).toBe(false);
+      await expect(fresh.signIn("mallory@example.org", "un-mot-de-passe")).rejects.toThrow();
+    } finally {
+      await fresh.close();
+    }
   });
 
   it("une fois ouverte par l'admin, l'inscription publique crée un utilisateur connecté", async () => {

@@ -29,19 +29,19 @@ const isAlertRow = (row: EntryRow) => {
  * Formulaire d'un créneau : jusqu'à 3 mesures, un horodatage et un moment communs, un
  * commentaire facultatif. Tout son état tient dans un `EntryDraft`.
  */
-export function MeasurementForm({ userId }: { userId: string }) {
+export function MeasurementForm({ userId, timeZone }: { userId: string; timeZone: string }) {
   // Rendu côté client seulement : l'heure et le moment par défaut sont ceux du navigateur.
   const isClient = useSyncExternalStore(
     noSubscription,
     () => true,
     () => false,
   );
-  return isClient ? <SlotForm userId={userId} /> : null;
+  return isClient ? <SlotForm userId={userId} timeZone={timeZone} /> : null;
 }
 
 const noSubscription = () => () => {};
 
-function SlotForm({ userId }: { userId: string }) {
+function SlotForm({ userId, timeZone }: { userId: string; timeZone: string }) {
   const t = useTranslations("measurements");
   const queryClient = useQueryClient();
   // Brouillon gardé dans le navigateur jusqu'à l'enregistrement, même sans réseau (ADR-0010).
@@ -49,13 +49,13 @@ function SlotForm({ userId }: { userId: string }) {
     value: draft,
     setValue: setDraft,
     clear: clearDraft,
-  } = useDraft<EntryDraft>(userId, "measurement", () => newEntryDraft(new Date()));
+  } = useDraft<EntryDraft>(userId, "measurement", () => newEntryDraft(new Date(), timeZone));
   const online = useOnline();
   const [submitted, setSubmitted] = useState<EntryRowsResult | null>(null);
   const create = useMutation(
     orpc.measurements.create.mutationOptions({
       onSuccess: () => {
-        clearDraft(newEntryDraft(new Date()));
+        clearDraft(newEntryDraft(new Date(), timeZone));
         setSubmitted(null);
         void queryClient.invalidateQueries({ queryKey: orpc.measurements.key() });
         void queryClient.invalidateQueries({ queryKey: orpc.campaigns.key() });

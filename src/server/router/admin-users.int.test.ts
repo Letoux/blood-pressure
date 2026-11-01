@@ -21,15 +21,17 @@ describe("gestion des utilisateurs par l'admin", () => {
   });
 
   it("l'admin liste les utilisateurs avec leur email, nom, statut et date de création", async () => {
-    await createUser("alice@example.org", "Alice", "alice-password");
-    await createUser("bob@example.org", "Bob", "bob-password");
+    const alice = await api.newUser("Alice");
+    const bob = await api.newUser("Bob");
 
     const users = await api.as(adminHeaders).admin.listUsers();
 
-    expect(users).toEqual([
-      { id: expect.any(String), email: "alice@example.org", name: "Alice", status: "active", createdAt: expect.any(Date) },
-      { id: expect.any(String), email: "bob@example.org", name: "Bob", status: "active", createdAt: expect.any(Date) },
+    // D'autres tests créent aussi des utilisateurs : seuls ceux de ce test sont vérifiés.
+    expect(users.filter((u) => u.id === alice.id || u.id === bob.id)).toEqual([
+      { id: alice.id, email: alice.email, name: "Alice", status: "active", createdAt: expect.any(Date) },
+      { id: bob.id, email: bob.email, name: "Bob", status: "active", createdAt: expect.any(Date) },
     ]);
+    expect(users.map((u) => u.email)).not.toContain("admin@example.org");
   });
 
   it("un utilisateur désactivé perd ses sessions et ne peut plus se connecter", async () => {

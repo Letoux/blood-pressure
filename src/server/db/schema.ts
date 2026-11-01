@@ -15,7 +15,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { FREQUENCY_MONTHS } from "@/domain/campaign";
+import { FREQUENCY_MONTHS, STORED_CAMPAIGN_STATUSES } from "@/domain/campaign";
 import { REMINDER_DEFAULTS, REMINDER_KINDS } from "@/domain/reminder";
 import { DEFAULT_GUIDELINE, GUIDELINE_IDS } from "@/domain/guideline";
 import { MOMENTS } from "@/domain/slot";
@@ -213,11 +213,12 @@ export const notification = pgTable(
   ],
 );
 
-// --- Campagnes (voir `GLOSSARY.md`, ADR-0006) ---
-// Seule la date de début prévue est stockée (jour local dans le fuseau de l'utilisateur). Le
-// début réel, le statut (y compris « manquée »), la complétude et les moyennes sont calculés par
-// le domaine (`src/domain/campaign.ts`) à partir des mesures. Supprimer une campagne supprime
-// ses mesures (clé étrangère de `measurement`).
+// --- Campagnes (voir `GLOSSARY.md`, ADR-0006, ADR-0011) ---
+// La date de début prévue (jour local dans le fuseau de l'utilisateur), le statut d'une campagne
+// sans mesure quand il est enregistré (« manquée » par le worker, « sautée » par l'utilisateur),
+// et le début prévu initial d'une campagne de rattrapage. Le début réel, les autres statuts, la
+// complétude et les moyennes sont calculés par le domaine (`src/domain/campaign.ts`) à partir des
+// mesures. Supprimer une campagne supprime ses mesures (clé étrangère de `measurement`).
 
 export const campaign = pgTable(
   "campaign",
@@ -227,11 +228,23 @@ export const campaign = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     plannedStart: date("planned_start", { mode: "string" }).notNull(),
+    // Campagne de rattrapage : le début prévu de la campagne manquée à l'origine ; `null` sinon.
+    originalStart: date("original_start", { mode: "string" }),
+    // `null` : statut calculé par le domaine.
+    status: text("status", { enum: STORED_CAMPAIGN_STATUSES }),
+    // Le jour où elle a été sautée (statut `skipped`).
+    skippedOn: date("skipped_on", { mode: "string" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  // Deux saisies simultanées qui commencent la même campagne calculée n'en créent qu'une.
-  (table) => [uniqueIndex("campaign_user_id_planned_start_idx").on(table.userId, table.plannedStart)],
+  (table) => [
+    // Deux saisies simultanées qui commencent la même campagne calculée n'en créent qu'une.
+    uniqueIndex("campaign_user_id_planned_start_idx").on(table.userId, table.plannedStart),
+    check(
+      "campaign_skipped_on_check",
+      sql`coalesce(${table.status} = 'skipped', false) = (${table.skippedOn} is not null)`,
+    ),
+  ],
 );
 
 // --- Mesures (voir `GLOSSARY.md`) ---

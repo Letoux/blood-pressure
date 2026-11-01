@@ -5,6 +5,7 @@ import {
   FOLLOW_UP_DELAY_MINUTES,
   isTimeOfDay,
   REMINDER_DEFAULTS,
+  reminderPreferencesOf,
   type ReminderPreferences,
 } from "./reminder";
 import type { CampaignDay, Moment } from "./slot";
@@ -29,6 +30,31 @@ describe("préférences de rappel par défaut", () => {
     expect(isTimeOfDay(REMINDER_DEFAULTS.eveningTime)).toBe(true);
     expect(REMINDER_DEFAULTS.followUpDelayMinutes).toBeGreaterThanOrEqual(FOLLOW_UP_DELAY_MINUTES.min);
     expect(REMINDER_DEFAULTS.followUpDelayMinutes).toBeLessThanOrEqual(FOLLOW_UP_DELAY_MINUTES.max);
+  });
+});
+
+describe("préférences lues en base", () => {
+  it("sans ligne de réglages, ce sont les valeurs par défaut", () => {
+    expect(reminderPreferencesOf(null)).toEqual(REMINDER_DEFAULTS);
+    expect(reminderPreferencesOf({ morningTime: null, followUpEnabled: null })).toEqual(REMINDER_DEFAULTS);
+  });
+
+  it("garde les valeurs enregistrées, et remplace une heure illisible par celle par défaut", () => {
+    expect(
+      reminderPreferencesOf({
+        morningTime: "06:45",
+        eveningTime: "25:00",
+        dayBeforeReminder: false,
+        followUpEnabled: true,
+        followUpDelayMinutes: 60,
+      }),
+    ).toEqual({
+      morningTime: "06:45",
+      eveningTime: REMINDER_DEFAULTS.eveningTime,
+      dayBeforeReminder: false,
+      followUpEnabled: true,
+      followUpDelayMinutes: 60,
+    });
   });
 });
 
@@ -118,7 +144,9 @@ describe("rappel d'un créneau", () => {
 
   it("hors campagne, rien ne part", () => {
     expect(due(paris("2026-02-01T07:30"))).toEqual([]);
-    expect(due(paris("2026-02-05T07:30"))).toEqual([]);
+    // Après une campagne commencée le 2, terminée le 4.
+    const measurements = [measure("c1", 1, "morning", paris("2026-02-02T07:00"))];
+    expect(due(paris("2026-02-05T07:30"), { measurements })).toEqual([]);
   });
 
   it("garde l'heure locale au changement d'heure, dans le fuseau de l'utilisateur", () => {
@@ -226,17 +254,25 @@ describe("rappel de la veille", () => {
   });
 });
 
-describe("campagne manquée", () => {
-  // La campagne prévue du 2 au 4 février passe sans mesure : manquée le 5, la suivante est
-  // replanifiée au 5 mai (5 février + 3 mois).
-  it("plus aucun rappel pour ses jours une fois passée", () => {
-    expect(due(paris("2026-02-05T07:30"))).toEqual([]);
-    expect(due(paris("2026-02-05T21:00"))).toEqual([]);
+describe("début en retard, rattrapage et campagne sautée (ADR-0011)", () => {
+  // La campagne prévue le 2 février peut commencer jusqu'au 8 ; sans mesure, elle est manquée le
+  // 9 et un rattrapage commence le jour même, puis le 16 s'il est manqué à son tour.
+  it("en retard, le rappel de J1 part chaque jour de la fenêtre de début", () => {
+    expect(due(paris("2026-02-05T07:30")).map((r) => r.key)).toEqual(["slot:2026-02-05:morning"]);
+    expect(due(paris("2026-02-08T21:00")).map((r) => r.key)).toEqual(["slot:2026-02-08:evening"]);
   });
 
-  it("les rappels suivent la campagne replanifiée", () => {
-    expect(due(paris("2026-05-04T21:00", "+02:00")).map((r) => r.key)).toEqual(["dayBefore:2026-05-05:-"]);
-    expect(due(paris("2026-05-05T07:30", "+02:00")).map((r) => r.key)).toEqual(["slot:2026-05-05:morning"]);
+  it("les rappels suivent les campagnes de rattrapage, tant qu'elles sont manquées", () => {
+    expect(due(paris("2026-02-09T07:30"))).toEqual([
+      { kind: "slot", date: "2026-02-09", moment: "morning", day: 1, key: "slot:2026-02-09:morning" },
+    ]);
+    expect(due(paris("2026-02-16T21:00")).map((r) => r.key)).toEqual(["slot:2026-02-16:evening"]);
+  });
+
+  it("une campagne sautée n'a plus de rappel ; la veille de la suivante, si", () => {
+    const campaigns: StoredCampaign[] = [{ id: "c1", plannedStart: "2026-02-02", status: "skipped", skippedOn: "2026-02-04" }];
+    expect(due(paris("2026-02-05T07:30"), { campaigns })).toEqual([]);
+    expect(due(paris("2026-05-01T21:00", "+02:00"), { campaigns }).map((r) => r.key)).toEqual(["dayBefore:2026-05-02:-"]);
   });
 });
 

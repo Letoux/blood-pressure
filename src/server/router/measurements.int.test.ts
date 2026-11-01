@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ensureAdmin } from "@/server/auth/ensure-admin";
 import { createTestApi, type TestApi } from "@/server/testing/test-api";
 
 type Measurement = Awaited<ReturnType<TestApi["client"]["measurements"]["list"]>>[number];
@@ -22,26 +21,26 @@ const editable = ({ id, takenAt, moment, systolic, diastolic, pulse }: Measureme
 
 describe("mesures", () => {
   let api: TestApi;
-  let admin: Headers;
-  let alice: Headers;
-  let bob: Headers;
 
   const morning = new Date("2026-10-30T06:30:00Z");
   const evening = new Date("2026-10-30T20:15:00Z");
 
+  /** Les en-têtes de session d'un utilisateur neuf, propre au test. */
+  const newUser = async (name: string) => (await api.newUser(name)).headers;
+
+  /** Un utilisateur neuf avec une mesure libre. */
+  async function aliceWithMeasurement() {
+    const alice = await newUser("Alice");
+    await api.as(alice).measurements.create({
+      takenAt: morning,
+      moment: "morning",
+      measurements: [{ systolic: 131, diastolic: 84, pulse: 72 }],
+    });
+    return alice;
+  }
+
   beforeAll(async () => {
     api = await createTestApi();
-    await ensureAdmin(api.auth, { email: "admin@example.org", password: "admin-password" });
-    admin = await api.signIn("admin@example.org", "admin-password");
-    for (const name of ["Alice", "Bob"]) {
-      await api.as(admin).admin.createUser({
-        email: `${name.toLowerCase()}@example.org`,
-        name,
-        password: `${name.toLowerCase()}-password`,
-      });
-    }
-    alice = await api.signIn("alice@example.org", "alice-password");
-    bob = await api.signIn("bob@example.org", "bob-password");
   });
 
   afterAll(async () => {
@@ -49,6 +48,7 @@ describe("mesures", () => {
   });
 
   it("enregistre 1 à 3 mesures d'un créneau comme mesures libres, et les liste de la plus récente à la plus ancienne", async () => {
+    const alice = await newUser("Alice");
     await api.as(alice).measurements.create({
       takenAt: morning,
       moment: "morning",
@@ -77,6 +77,7 @@ describe("mesures", () => {
   });
 
   it("enregistre une valeur d'alerte (180/110) : l'avertissement ne bloque pas", async () => {
+    const bob = await newUser("Bob");
     const saved = first(
       await api.as(bob).measurements.create({
         takenAt: morning,
@@ -89,6 +90,7 @@ describe("mesures", () => {
   });
 
   it("refuse une mesure invalide selon le domaine, ou un nombre de mesures hors de 1 à 3", async () => {
+    const bob = await newUser("Bob");
     const valid = { systolic: 120, diastolic: 80, pulse: 70 };
     const invalid = [
       [{ ...valid, systolic: 261 }],
@@ -108,6 +110,7 @@ describe("mesures", () => {
   });
 
   it("modifie puis supprime sa propre mesure", async () => {
+    const bob = await newUser("Bob");
     const created = first(
       await api.as(bob).measurements.create({
         takenAt: morning,
@@ -149,6 +152,8 @@ describe("mesures", () => {
   });
 
   it("un utilisateur ne peut ni lire, ni modifier, ni supprimer les mesures d'un autre", async () => {
+    const alice = await aliceWithMeasurement();
+    const bob = await newUser("Bob");
     const aliceBefore = await api.as(alice).measurements.list();
     const target = first(aliceBefore);
 
@@ -164,6 +169,8 @@ describe("mesures", () => {
   });
 
   it("refuse l'admin (aucun accès aux mesures, ADR-0004) et l'appelant non authentifié", async () => {
+    const alice = await aliceWithMeasurement();
+    const admin = await api.admin();
     const aliceBefore = await api.as(alice).measurements.list();
     const target = first(aliceBefore);
     const calls = (client: TestApi["client"]) => [

@@ -38,6 +38,28 @@ export const REMINDER_DEFAULTS: ReminderPreferences = {
   followUpDelayMinutes: FOLLOW_UP_DELAY_MINUTES.default,
 };
 
+/** Les colonnes de rappel d'une ligne `user_settings` ; `null` (pas de ligne) : rien d'enregistré. */
+export type StoredReminderPreferences = {
+  morningTime?: string | null;
+  eveningTime?: string | null;
+  dayBeforeReminder?: boolean | null;
+  followUpEnabled?: boolean | null;
+  followUpDelayMinutes?: number | null;
+} | null;
+
+/** Les préférences d'un utilisateur à partir de ses réglages enregistrés, valeurs par défaut sinon. */
+export function reminderPreferencesOf(row: StoredReminderPreferences): ReminderPreferences {
+  const time = (value: string | null | undefined, fallback: TimeOfDay) =>
+    value && isTimeOfDay(value) ? value : fallback;
+  return {
+    morningTime: time(row?.morningTime, REMINDER_DEFAULTS.morningTime),
+    eveningTime: time(row?.eveningTime, REMINDER_DEFAULTS.eveningTime),
+    dayBeforeReminder: row?.dayBeforeReminder ?? REMINDER_DEFAULTS.dayBeforeReminder,
+    followUpEnabled: row?.followUpEnabled ?? REMINDER_DEFAULTS.followUpEnabled,
+    followUpDelayMinutes: row?.followUpDelayMinutes ?? REMINDER_DEFAULTS.followUpDelayMinutes,
+  };
+}
+
 // --- Rappels à envoyer ---
 
 /**
@@ -113,7 +135,8 @@ export function dueReminders(input: ReminderInput): DueReminder[] {
   }
 
   // La veille du début prévu de la prochaine campagne (enregistrée ou calculée), à l'heure du
-  // soir. Une campagne manquée n'est jamais `next` : le rappel suit la campagne replanifiée.
+  // soir. Une campagne manquée n'est jamais `next` : les rappels suivent son rattrapage, dont les
+  // créneaux de J1 sont dans `todaySlots` chaque jour de sa fenêtre de début (ADR-0011).
   const next = overview.next;
   if (preferences.dayBeforeReminder && next && addDays(overview.today, 1) === next.plannedStart) {
     const at = instantAt(overview.today, preferences.eveningTime, timeZone);

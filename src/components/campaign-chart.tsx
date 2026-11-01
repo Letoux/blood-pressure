@@ -5,7 +5,7 @@ import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Too
 import { EXPECTED_MEASUREMENTS } from "@/domain/campaign";
 import type { Threshold } from "@/domain/guideline";
 import type { CampaignPoint } from "@/domain/stats";
-import { useCampaignFormat } from "@/lib/campaign-format";
+import { mmHg, useCampaignFormat } from "@/lib/campaign-format";
 
 const SERIES = [
   { key: "systolic", color: "var(--chart-systolic)" },
@@ -42,7 +42,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: readonl
   return (
     <div className="rounded-md border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
       <p className="font-medium">{format.date(point.date, "medium")}</p>
-      <p>{t("value", { systolic: Math.round(point.systolic), diastolic: Math.round(point.diastolic) })}</p>
+      <p>{t("value", { systolic: mmHg(point.systolic), diastolic: mmHg(point.diastolic) })}</p>
       {!point.complete && (
         <p className="text-muted-foreground">
           {t("incomplete", { count: point.completeness, total: EXPECTED_MEASUREMENTS })}
@@ -101,7 +101,14 @@ export function CampaignChart({
       </ul>
       <div aria-hidden style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={points} margin={{ top: 8, right: 28, bottom: 0, left: -16 }}>
+          {/* Pas de calque clavier Recharts : le graphique est masqué aux lecteurs d'écran (le
+              tableau ci-dessous le remplace), il ne doit pas recevoir le focus. */}
+          <LineChart
+            data={points}
+            margin={{ top: 8, right: 28, bottom: 0, left: -16 }}
+            accessibilityLayer={false}
+            tabIndex={-1}
+          >
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="date"
@@ -149,27 +156,31 @@ export function CampaignChart({
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <table className="sr-only">
-        <caption>{t("label")}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{t("date")}</th>
-            <th scope="col">{t("systolic")}</th>
-            <th scope="col">{t("diastolic")}</th>
-            <th scope="col">{t("measurements")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {points.map((point) => (
-            <tr key={point.campaignId}>
-              <td>{format.date(point.date)}</td>
-              <td>{Math.round(point.systolic)}</td>
-              <td>{Math.round(point.diastolic)}</td>
-              <td>{`${point.completeness}/${EXPECTED_MEASUREMENTS}`}</td>
+      {/* `sr-only` sur un conteneur : un tableau ne rétrécit pas sous la largeur de son contenu, et
+          ferait déborder la page à 360 px. */}
+      <div className="sr-only">
+        <table>
+          <caption>{t("label")}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t("date")}</th>
+              <th scope="col">{t("systolic")}</th>
+              <th scope="col">{t("diastolic")}</th>
+              <th scope="col">{t("measurements")}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {points.map((point) => (
+              <tr key={point.campaignId}>
+                <td>{format.date(point.date)}</td>
+                <td>{mmHg(point.systolic)}</td>
+                <td>{mmHg(point.diastolic)}</td>
+                <td>{`${point.completeness}/${EXPECTED_MEASUREMENTS}`}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }
