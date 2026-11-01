@@ -65,7 +65,11 @@ export function PasswordForm() {
           {change.isError && (
             <p role="alert" className="text-sm text-destructive">
               {/* Le nouveau mot de passe est déjà validé par le formulaire (`minLength`). */}
-              {"code" in change.error && change.error.code === "BAD_REQUEST" ? t("wrongCurrent") : t("failed")}
+              {"code" in change.error && change.error.code === "BAD_REQUEST"
+                ? t("wrongCurrent")
+                : "code" in change.error && change.error.code === "TOO_MANY_REQUESTS"
+                  ? t("tooManyAttempts")
+                  : t("failed")}
             </p>
           )}
           {change.isSuccess && (

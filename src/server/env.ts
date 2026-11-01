@@ -28,19 +28,50 @@ export function pushEnv(): z.infer<typeof pushSchema> {
   return cachedPush;
 }
 
+/**
+ * Les valeurs d'exemple du `.env.template` commencent toutes par `remplacer-` : un `.env` copié
+ * sans les changer donnerait un mot de passe admin et une clé de signature publics (repo public).
+ */
+const notPlaceholder = (name: string) =>
+  z
+    .string()
+    .refine((value) => !value.startsWith("remplacer-"), {
+      message: `${name} vaut encore l'exemple du .env.template : choisissez votre propre valeur.`,
+    });
+
 const authSchema = z.object({
   APP_URL: z.url(),
-  BETTER_AUTH_SECRET: z.string().min(32),
+  BETTER_AUTH_SECRET: notPlaceholder("BETTER_AUTH_SECRET").pipe(z.string().min(32)),
   ADMIN_EMAIL: z.email(),
-  ADMIN_PASSWORD: z.string().min(MIN_PASSWORD_LENGTH),
+  ADMIN_PASSWORD: notPlaceholder("ADMIN_PASSWORD").pipe(z.string().min(MIN_PASSWORD_LENGTH)),
+  // Liste séparée par des virgules (IP ou CIDR), vide par défaut : voir `.env.template`.
+  TRUSTED_PROXIES: z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
 });
 
 export type AuthEnv = z.infer<typeof authSchema>;
+
+/** Valide les variables de l'authentification ; échoue avec le nom de la variable fautive. */
+export function parseAuthEnv(source: Record<string, string | undefined>): AuthEnv {
+  const result = authSchema.safeParse(source);
+  if (!result.success) {
+    const problems = result.error.issues.map((issue) => `${issue.path.join(".")} : ${issue.message}`);
+    throw new Error(`Configuration invalide (.env) :\n- ${problems.join("\n- ")}`);
+  }
+  return result.data;
+}
 
 let cachedAuth: AuthEnv | undefined;
 
 /** Variables de l'authentification, nécessaires au seul service `app`. */
 export function authEnv(): AuthEnv {
-  cachedAuth ??= authSchema.parse(process.env);
+  cachedAuth ??= parseAuthEnv(process.env);
   return cachedAuth;
 }

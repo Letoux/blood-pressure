@@ -1,18 +1,10 @@
-import { RPCHandler } from "@orpc/server/fetch";
 import { getAuth } from "@/server/auth";
 import { getDb } from "@/server/db";
 import { getPushSender } from "@/server/push";
-import { router } from "@/server/router";
+import { handleRpc } from "@/server/router/rpc-handler";
 
-const handler = new RPCHandler(router);
-
-async function handle(request: Request): Promise<Response> {
-  const { response } = await handler.handle(request, {
-    prefix: "/rpc",
-    context: { db: getDb(), auth: getAuth(), push: getPushSender(), headers: request.headers },
-  });
-  return response ?? new Response("Not found", { status: 404 });
-}
+const handle = (request: Request): Promise<Response> =>
+  handleRpc(request, { db: getDb(), auth: getAuth(), push: getPushSender(), headers: request.headers });
 
 export const GET = handle;
 export const POST = handle;

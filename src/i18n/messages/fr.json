@@ -113,6 +113,7 @@
       "submit": "Changer le mot de passe",
       "changed": "Mot de passe changé.",
       "wrongCurrent": "Le mot de passe actuel est incorrect.",
+      "tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
       "failed": "Le changement de mot de passe a échoué."
     },
     "languages": {
@@ -137,6 +138,7 @@
       "deleteButton": "Supprimer mon compte",
       "deleteConfirm": "Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.",
       "deleteWrongPassword": "Le mot de passe est incorrect.",
+      "deleteTooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
       "deleteFailed": "La suppression du compte a échoué.",
       "csv": {
         "columns": {

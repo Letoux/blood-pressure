@@ -3,6 +3,8 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin } from "better-auth/plugins";
+import { createAccessControl } from "better-auth/plugins/access";
+import { defaultStatements } from "better-auth/plugins/admin/access";
 import type { Db } from "@/server/db/client";
 import * as schema from "@/server/db/schema";
 import { getAppSettings } from "@/server/settings/app-settings";
@@ -22,17 +24,60 @@ export const SIGN_IN_RATE_LIMIT = { window: 60, max: 5 } as const;
 const ARGON2ID = 2; // `Algorithm.Argon2id` (enum `const` non importable avec isolatedModules).
 const argon2Options = { algorithm: ARGON2ID, memoryCost: 19_456, timeCost: 2, parallelism: 1 };
 
+/**
+ * Droits du rôle admin dans better-auth : seulement ce que les procédures `admin.*` appellent
+ * côté serveur (créer, désactiver, supprimer, réinitialiser, révoquer). Ni `impersonate`, qui
+ * donnerait à l'admin la session d'un utilisateur et donc ses mesures (ADR-0004), ni `set-role`,
+ * `update`, `set-email` ou `get`.
+ */
+const accessControl = createAccessControl(defaultStatements);
+const roles = {
+  admin: accessControl.newRole({
+    user: ["create", "list", "ban", "delete", "set-password"],
+    session: ["revoke"],
+  }),
+  user: accessControl.newRole({ user: [], session: [] }),
+};
+
+const adminPlugin = () => admin({ ac: accessControl, roles });
+
+/**
+ * Routes HTTP du plugin admin (`/api/auth/admin/*`), toutes fermées : l'interface passe par les
+ * procédures `admin.*` du routeur oRPC, qui appellent `auth.api.*` côté serveur. `disabledPaths`
+ * ne ferme que le gestionnaire HTTP, pas ces appels (vérifié par `admin-routes.int.test.ts`).
+ */
+const ADMIN_HTTP_PATHS = Object.values(adminPlugin().endpoints).map((endpoint) => endpoint.path);
+
 export type AuthOptions = {
   db: Db;
   /** Secret de signature des cookies (`BETTER_AUTH_SECRET`). */
   secret: string;
   /** URL publique de l'application (`APP_URL`). */
   baseURL: string;
+  /**
+   * Proxys placés **devant** le reverse proxy et qui ajoutent eux aussi leur hop à
+   * `X-Forwarded-For` (`TRUSTED_PROXIES`, IP ou CIDR ; par exemple un CDN). Vide le plus souvent.
+   */
+  trustedProxies?: string[];
 };
 
-export function createAuth({ db, secret, baseURL }: AuthOptions) {
+/**
+ * IP du client pour la limite de connexions : le reverse proxy ajoute l'IP de son client à droite
+ * de `X-Forwarded-For`, après ce que ce client a pu y écrire. Avec une liste `trustedProxies` non
+ * vide, better-auth lit la chaîne de droite à gauche et garde le premier hop non fiable : la valeur
+ * ajoutée par le reverse proxy. La boucle locale y figure toujours pour activer cette lecture (sans
+ * liste, une chaîne de plusieurs valeurs tomberait dans un compteur partagé par tous les clients).
+ * Ce n'est sûr que si l'app n'est joignable que par le reverse proxy (`APP_BIND`, README).
+ */
+const LOOPBACK_PROXIES = ["127.0.0.1", "::1"];
+
+export function createAuth({ db, secret, baseURL, trustedProxies = [] }: AuthOptions) {
   return betterAuth({
+    advanced: {
+      ipAddress: { trustedProxies: [...LOOPBACK_PROXIES, ...trustedProxies] },
+    },
     secret,
+    disabledPaths: ADMIN_HTTP_PATHS,
     baseURL,
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: {
@@ -71,7 +116,7 @@ export function createAuth({ db, secret, baseURL }: AuthOptions) {
       storage: "memory",
       customRules: { "/sign-in/email": { ...SIGN_IN_RATE_LIMIT } },
     },
-    plugins: [admin()],
+    plugins: [adminPlugin()],
   });
 }
 

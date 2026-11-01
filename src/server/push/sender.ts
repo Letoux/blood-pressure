@@ -7,6 +7,7 @@ import webpush from "web-push";
 import type { PushMessage } from "@/lib/push-message";
 import type { Db } from "@/server/db/client";
 import { pushSubscription } from "@/server/db/schema";
+import { isAllowedPushEndpoint, pushAgent } from "./endpoint";
 import { ensureVapidKeys } from "./vapid";
 
 /** Un appareil abonné, tel que stocké dans `push_subscription`. */
@@ -30,6 +31,9 @@ export type WebPushTransport = (
 /** Durée de vie d'un message chez le service push s'il ne peut pas encore le remettre. */
 const TTL_SECONDS = 60 * 60;
 
+/** Délai maximal d'une requête vers un service push. */
+export const PUSH_SEND_TIMEOUT_MS = 10_000;
+
 /**
  * Le vrai envoi, signé avec les clés VAPID de la base (créées au besoin, ADR-0003).
  * `subject` : URL de l'instance (`APP_URL`) ou `mailto:`, communiqué aux services push.
@@ -46,13 +50,22 @@ export function createWebPushSender({
   let keys: Promise<webpush.VapidKeys> | undefined;
   return {
     async send(target, message) {
+      // Abonnement enregistré avant la vérification de `push.subscribe` : traité comme expiré.
+      if (!isAllowedPushEndpoint(target.endpoint)) return "gone";
       keys ??= ensureVapidKeys(db);
       const { publicKey, privateKey } = await keys;
       try {
         await transport(
           { endpoint: target.endpoint, keys: { p256dh: target.p256dh, auth: target.auth } },
           JSON.stringify(message),
-          { vapidDetails: { subject, publicKey, privateKey }, TTL: TTL_SECONDS },
+          {
+            vapidDetails: { subject, publicKey, privateKey },
+            TTL: TTL_SECONDS,
+            // Connexion aux seules adresses publiques (SSRF), et pas d'attente sans fin : un service
+            // push muet bloquerait la tâche du worker et donc tous les rappels suivants.
+            agent: pushAgent,
+            timeout: PUSH_SEND_TIMEOUT_MS,
+          },
         );
         return "sent";
       } catch (error) {

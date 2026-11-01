@@ -113,6 +113,7 @@
       "submit": "Change password",
       "changed": "Password changed.",
       "wrongCurrent": "The current password is incorrect.",
+      "tooManyAttempts": "Too many attempts. Try again in a minute.",
       "failed": "Changing the password failed."
     },
     "languages": {
@@ -137,6 +138,7 @@
       "deleteButton": "Delete my account",
       "deleteConfirm": "Permanently delete your account and all your data? This cannot be undone.",
       "deleteWrongPassword": "The password is incorrect.",
+      "deleteTooManyAttempts": "Too many attempts. Try again in a minute.",
       "deleteFailed": "Deleting the account failed.",
       "csv": {
         "columns": {
