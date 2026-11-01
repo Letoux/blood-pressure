@@ -35,13 +35,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # Tags : `vX.Y.Z`, `X.Y` et `latest`. Pour une préversion (`v0.0.1-test`),
       # seul `vX.Y.Z-…` est publié : `X.Y` et `latest` restent sur la dernière version stable.
+      # `{{raw}}` et non `v{{version}}` : une préversion ignore tout autre format et perdrait son
+      # `v`, alors que le compose de la release est épinglé sur le tag exact.
       - id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE }}
           flavor: latest=auto
           tags: |
-            type=semver,pattern=v{{version}}
+            type=semver,pattern={{raw}}
             type=semver,pattern={{major}}.{{minor}}
       - uses: docker/build-push-action@v6
         with:
