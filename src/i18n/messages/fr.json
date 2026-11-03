@@ -83,7 +83,7 @@
     "createUser": {
       "title": "Créer un utilisateur",
       "email": "Email",
-      "name": "Nom",
+      "name": "Nom affiché",
       "password": "Mot de passe initial",
       "submit": "Créer",
       "created": "Utilisateur {email} créé.",
@@ -374,8 +374,8 @@
     "intro": "Pour des mesures fiables, suivez la règle du 3-3-3 : 3 mesures le matin et 3 le soir, 3 jours de suite.",
     "rest": "Mesurez au repos, assis depuis 5 minutes, le dos appuyé et les pieds à plat.",
     "noStimulants": "Sans café ni tabac depuis 30 minutes.",
-    "morning": "Le matin : avant le petit-déjeuner et avant les médicaments.",
-    "evening": "Le soir : avant le coucher.",
+    "morning": "Le matin : avant le petit-déjeuner et avant les médicaments. Par exemple, sur une chaise à côté du lit en vous levant, ou à la table de la cuisine pendant que le café coule, avant d’en boire.",
+    "evening": "Le soir : avant le coucher. Par exemple, dans un fauteuil une fois la journée finie, ou sur une chaise dans la chambre, juste avant de vous mettre au lit.",
     "cuff": "Brassard sur le bras nu, à hauteur du cœur. Ne parlez pas pendant la mesure.",
     "series": "À chaque fois, 3 mesures à environ 1 minute d’intervalle."
   },
