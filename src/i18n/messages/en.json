@@ -235,6 +235,29 @@
       "cancel": "Cancel",
       "save": "Save",
       "failed": "The operation failed."
+    },
+    "timer": {
+      "hint": "Before the first measurement, stay seated for 5 minutes. Then, as soon as you enter a measurement, 1 minute is counted down before the next one.",
+      "hintManual": "Start the rest or the interval whenever you like.",
+      "start": "Start resting (5 min)",
+      "startRest": "Rest (5 min)",
+      "startInterval": "Interval (1 min)",
+      "rest": "Seated rest before measurement 1",
+      "interval": "Before measurement {number}",
+      "intervalNext": "Before the next measurement",
+      "ready": "Time for measurement {number}.",
+      "readyNext": "Time for the next measurement.",
+      "stop": "Stop",
+      "pause": "Pause",
+      "resume": "Resume",
+      "restart": "Restart",
+      "paused": "Paused · {label}"
+    },
+    "modes": {
+      "title": "Entry mode",
+      "autoAdvance": "Move to the next field automatically",
+      "autoTimer": "Automatic timer (restarted with each measurement)",
+      "failed": "The entry mode could not be saved."
     }
   },
   "health": {

@@ -55,6 +55,15 @@ export type EntryRowsResult =
 
 const FIELDS = ["systolic", "diastolic", "pulse"] as const;
 
+/**
+ * Vrai si la saisie d'un champ est terminée : des chiffres seulement, et aucun chiffre de plus
+ * ne donnerait une valeur dans les bornes (`132` ou `95` en systolique, `84` en diastolique,
+ * mais pas `10`, qui peut devenir `100`). Le formulaire passe alors au champ suivant.
+ */
+export function isEntryValueComplete(field: keyof MeasurementValues, text: string): boolean {
+  return /^\d+$/.test(text) && Number(text) * 10 > MEASUREMENT_BOUNDS[field].max;
+}
+
 /** Entier positif écrit en chiffres, sinon `NaN` (rejeté ensuite comme hors bornes). */
 const parseValue = (text: string) => (/^\d+$/.test(text) ? Number(text) : Number.NaN);
 
