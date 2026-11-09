@@ -14,6 +14,8 @@ const defaults = {
   followUpDelayMinutes: 30,
   onboarded: false,
   guideline: "sfhta",
+  entryAutoAdvance: true,
+  entryAutoTimer: true,
 };
 
 describe("settings", () => {
@@ -70,6 +72,18 @@ describe("settings", () => {
       guideline: "accAha2017",
     });
     await expect(api.as(alice.headers).settings.get()).resolves.toMatchObject({ guideline: "accAha2017" });
+  });
+
+  it("enregistre les modes du formulaire de saisie : champ suivant et minuteur automatiques ou manuels", async () => {
+    const alice = await api.newUser("Alice");
+    await expect(
+      api.as(alice.headers).settings.update({ entryAutoAdvance: false, entryAutoTimer: false }),
+    ).resolves.toMatchObject({ entryAutoAdvance: false, entryAutoTimer: false });
+    await api.as(alice.headers).settings.update({ entryAutoTimer: true });
+    await expect(api.as(alice.headers).settings.get()).resolves.toMatchObject({
+      entryAutoAdvance: false,
+      entryAutoTimer: true,
+    });
   });
 
   it("les réglages d'un utilisateur n'affectent pas ceux d'un autre", async () => {

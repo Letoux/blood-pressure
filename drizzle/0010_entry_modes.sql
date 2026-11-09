@@ -1,0 +1,2 @@
+ALTER TABLE "user_settings" ADD COLUMN "entry_auto_advance" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "user_settings" ADD COLUMN "entry_auto_timer" boolean DEFAULT true NOT NULL;

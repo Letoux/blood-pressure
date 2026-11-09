@@ -10,7 +10,7 @@ import { authed } from "./authed";
 /**
  * Réglages d'un utilisateur : nom affiché, langue (`null` : celle du navigateur), thème, fuseau
  * (`null` : pas encore détecté depuis le navigateur), fréquence des campagnes, référentiel,
- * préférences de rappel et premier lancement vu. Sans ligne `user_settings`, les valeurs par
+ * préférences de rappel, premier lancement vu et modes du formulaire de saisie. Sans ligne `user_settings`, les valeurs par
  * défaut. Aucun n'est une donnée de santé : l'admin règle aussi les siens (`ADMIN_ALLOWED` de
  * `access.int.test.ts`).
  */
@@ -29,6 +29,8 @@ export async function readSettings(db: Db, userId: string) {
       followUpDelayMinutes: userSettings.followUpDelayMinutes,
       onboarded: userSettings.onboarded,
       guideline: userSettings.guideline,
+      entryAutoAdvance: userSettings.entryAutoAdvance,
+      entryAutoTimer: userSettings.entryAutoTimer,
     })
     .from(user)
     .leftJoin(userSettings, eq(userSettings.userId, user.id))
@@ -43,6 +45,8 @@ export async function readSettings(db: Db, userId: string) {
     ...reminderPreferencesOf(row),
     onboarded: row.onboarded ?? false,
     guideline: row.guideline ?? DEFAULT_GUIDELINE,
+    entryAutoAdvance: row.entryAutoAdvance ?? true,
+    entryAutoTimer: row.entryAutoTimer ?? true,
   };
 }
 

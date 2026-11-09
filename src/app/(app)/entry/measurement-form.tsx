@@ -2,20 +2,30 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { isAlertValue, readEntryRows, type EntryRow, type EntryRowsResult } from "@/domain/measurement";
+import {
+  isAlertValue,
+  isEntryValueComplete,
+  readEntryRows,
+  type EntryRow,
+  type EntryRowsResult,
+} from "@/domain/measurement";
+import { afterMeasurementStarted, type ProtocolTimer } from "@/domain/protocol-timer";
 import { MOMENTS, type Moment } from "@/domain/slot";
+import { prepareAlarm } from "@/lib/alarm";
 import { useCampaignFormat } from "@/lib/campaign-format";
 import { orpc } from "@/lib/orpc";
 import { useDraft } from "@/lib/use-draft";
 import { useOnline } from "@/lib/use-online";
 import { fromDateTimeLocal, newEntryDraft, type EntryDraft } from "./entry-draft";
+import { EntryModesFields, useEntryModes } from "./entry-modes";
 import { AlertValueWarning, EntryErrors } from "./measurement-messages";
+import { clockNow, MeasurementTimer } from "./measurement-timer";
 
 const FIELDS = ["systolic", "diastolic", "pulse"] as const;
 
@@ -52,11 +62,15 @@ function SlotForm({ userId, timeZone }: { userId: string; timeZone: string }) {
   } = useDraft<EntryDraft>(userId, "measurement", () => newEntryDraft(new Date(), timeZone));
   const online = useOnline();
   const [submitted, setSubmitted] = useState<EntryRowsResult | null>(null);
+  const [timer, setTimer] = useState<ProtocolTimer | null>(null);
+  const entryModes = useEntryModes();
+  const { entryAutoAdvance, entryAutoTimer } = entryModes.modes;
   const create = useMutation(
     orpc.measurements.create.mutationOptions({
       onSuccess: () => {
         clearDraft(newEntryDraft(new Date(), timeZone));
         setSubmitted(null);
+        setTimer(null);
         void queryClient.invalidateQueries({ queryKey: orpc.measurements.key() });
         void queryClient.invalidateQueries({ queryKey: orpc.campaigns.key() });
       },
@@ -72,6 +86,23 @@ function SlotForm({ userId, timeZone }: { userId: string; timeZone: string }) {
   const update = (changes: Partial<EntryDraft>) => setDraft({ ...draft, ...changes });
   const updateRow = (index: number, changes: Partial<EntryRow>) =>
     update({ rows: draft.rows.map((row, i) => (i === index ? { ...row, ...changes } : row)) });
+
+  // Les champs des mesures, ligne par ligne : en mode automatique, une valeur complète passe au
+  // champ suivant, et le premier chiffre d'une mesure relance le minuteur.
+  const valueInputs = useRef<(HTMLInputElement | null)[]>([]);
+  function onValueChange(index: number, field: (typeof FIELDS)[number], text: string) {
+    const row = draft.rows[index]!;
+    const typed = text.length > row[field].length;
+    updateRow(index, { [field]: text });
+    if (entryAutoTimer && typed && FIELDS.every((name) => row[name] === "")) {
+      prepareAlarm();
+      setTimer(afterMeasurementStarted(index, clockNow()));
+    }
+    if (!entryAutoAdvance || !typed || !isEntryValueComplete(field, text)) return;
+    const next = valueInputs.current[index * FIELDS.length + FIELDS.indexOf(field) + 1];
+    next?.focus();
+    next?.select();
+  }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -126,6 +157,10 @@ function SlotForm({ userId, timeZone }: { userId: string; timeZone: string }) {
             </div>
           </div>
 
+          <EntryModesFields {...entryModes} />
+
+          <MeasurementTimer timer={timer} auto={entryAutoTimer} onChange={setTimer} />
+
           <fieldset className="flex flex-col gap-3">
             <div className="grid grid-cols-[auto_1fr_1fr_1fr] items-end gap-2 text-sm font-medium">
               <span aria-hidden className="w-6" />
@@ -144,16 +179,20 @@ function SlotForm({ userId, timeZone }: { userId: string; timeZone: string }) {
                     <span className="w-6 text-sm text-muted-foreground" aria-hidden>
                       {number}
                     </span>
-                    {FIELDS.map((field) => (
+                    {FIELDS.map((field, fieldIndex) => (
                       <Input
                         key={field}
+                        ref={(input) => {
+                          valueInputs.current[index * FIELDS.length + fieldIndex] = input;
+                        }}
+                        autoFocus={index === 0 && fieldIndex === 0}
                         inputMode="numeric"
                         pattern="[0-9]*"
                         autoComplete="off"
                         aria-label={t("form.fieldLabel", { field: t(`fields.${field}`), number })}
                         aria-invalid={errors.length > 0 || undefined}
                         value={row[field]}
-                        onChange={(event) => updateRow(index, { [field]: event.target.value })}
+                        onChange={(event) => onValueChange(index, field, event.target.value)}
                       />
                     ))}
                   </div>

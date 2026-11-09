@@ -33,6 +33,8 @@ export const settingsUpdate = authed
         .optional(),
       onboarded: z.boolean().optional(),
       guideline: z.enum(GUIDELINE_IDS).optional(),
+      entryAutoAdvance: z.boolean().optional(),
+      entryAutoTimer: z.boolean().optional(),
     }),
   )
   .handler(async ({ context, input }) => {

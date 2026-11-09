@@ -235,6 +235,29 @@
       "cancel": "Annuler",
       "save": "Enregistrer",
       "failed": "L’opération a échoué."
+    },
+    "timer": {
+      "hint": "Avant la première mesure, restez assis 5 minutes. Ensuite, dès que vous saisissez une mesure, 1 minute est décomptée avant la suivante.",
+      "hintManual": "Lancez le repos ou l’intervalle quand vous le souhaitez.",
+      "start": "Démarrer le repos (5 min)",
+      "startRest": "Repos (5 min)",
+      "startInterval": "Intervalle (1 min)",
+      "rest": "Repos assis avant la mesure 1",
+      "interval": "Avant la mesure {number}",
+      "intervalNext": "Avant la mesure suivante",
+      "ready": "C’est le moment de la mesure {number}.",
+      "readyNext": "C’est le moment de la mesure suivante.",
+      "stop": "Arrêter",
+      "pause": "Pause",
+      "resume": "Reprendre",
+      "restart": "Recommencer",
+      "paused": "En pause · {label}"
+    },
+    "modes": {
+      "title": "Mode de saisie",
+      "autoAdvance": "Passer seul au champ suivant",
+      "autoTimer": "Minuteur automatique (relancé à chaque mesure)",
+      "failed": "Le mode de saisie n’a pas pu être enregistré."
     }
   },
   "health": {

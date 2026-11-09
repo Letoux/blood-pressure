@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAlertValue, readEntryRows, validateMeasurement } from "./measurement";
+import { isAlertValue, isEntryValueComplete, readEntryRows, validateMeasurement } from "./measurement";
 
 const valid = { systolic: 120, diastolic: 80, pulse: 70 };
 
@@ -105,5 +105,29 @@ describe("valeur d'alerte (180/110 ou plus)", () => {
     [200, 120, true],
   ])("%i/%i : %s", (systolic, diastolic, alert) => {
     expect(isAlertValue({ systolic, diastolic })).toBe(alert);
+  });
+});
+
+describe("saisie d'un champ terminée (passage au champ suivant)", () => {
+  it("systolique : au 3e chiffre, ou dès 2 si un 3e la mettrait hors bornes", () => {
+    expect(isEntryValueComplete("systolic", "1")).toBe(false);
+    expect(isEntryValueComplete("systolic", "13")).toBe(false);
+    expect(isEntryValueComplete("systolic", "132")).toBe(true);
+    expect(isEntryValueComplete("systolic", "26")).toBe(false);
+    expect(isEntryValueComplete("systolic", "95")).toBe(true);
+  });
+
+  it("diastolique et pouls : au 2e chiffre, sauf s'ils peuvent encore dépasser 100", () => {
+    expect(isEntryValueComplete("diastolic", "84")).toBe(true);
+    expect(isEntryValueComplete("diastolic", "10")).toBe(false);
+    expect(isEntryValueComplete("diastolic", "100")).toBe(true);
+    expect(isEntryValueComplete("pulse", "72")).toBe(true);
+    expect(isEntryValueComplete("pulse", "12")).toBe(false);
+    expect(isEntryValueComplete("pulse", "120")).toBe(true);
+  });
+
+  it("jamais pour un champ vide ou qui n'est pas fait de chiffres", () => {
+    expect(isEntryValueComplete("systolic", "")).toBe(false);
+    expect(isEntryValueComplete("systolic", "13a")).toBe(false);
   });
 });

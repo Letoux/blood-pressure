@@ -140,6 +140,10 @@ export const userSettings = pgTable("user_settings", {
   onboarded: boolean("onboarded").notNull().default(false),
   // Référentiel choisi (`GLOSSARY.md`), dont le seuil est tracé sur les graphiques.
   guideline: text("guideline", { enum: GUIDELINE_IDS }).notNull().default(DEFAULT_GUIDELINE),
+  // Formulaire de saisie : passer seul au champ suivant (sinon à la main), et minuteur relancé par
+  // la saisie (sinon démarré à la main). Modifiables depuis la page de saisie.
+  entryAutoAdvance: boolean("entry_auto_advance").notNull().default(true),
+  entryAutoTimer: boolean("entry_auto_timer").notNull().default(true),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   check(
